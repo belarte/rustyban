@@ -66,7 +66,7 @@ impl Widget for &App {
 
         let instructions = Title::from(Line::from(vec![
             " Quit ".into(),
-            "<Q> ".blue().bold(),
+            "<q> ".blue().bold(),
         ]));
 
         let block = Block::bordered()
