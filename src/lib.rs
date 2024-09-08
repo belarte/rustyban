@@ -9,12 +9,13 @@ mod event_handler;
 
 #[derive(Debug)]
 pub struct App {
+    board: Board,
     exit: bool,
 }
 
 impl App {
     pub fn new() -> Self {
-        App { exit: false }
+        App { board: Board::new(), exit: false }
     }
 
     pub fn run(&mut self, terminal: &mut DefaultTerminal) -> io::Result<()> {
@@ -33,6 +34,15 @@ impl App {
 
     fn exit(&mut self) {
         self.exit = true;
+    }
+}
+
+#[derive(Debug)]
+struct Board;
+
+impl Board {
+    fn new() -> Self {
+        Board
     }
 }
 

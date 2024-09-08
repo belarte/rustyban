@@ -3,14 +3,22 @@ use ratatui::{
     layout::{Alignment, Rect},
     style::Stylize,
     symbols::border,
-    text::{Line, Text},
+    text::Line,
     widgets::{
         block::{Position, Title},
         Block, Paragraph, Widget,
     },
 };
 
-use crate::App;
+use crate::{App, Board};
+
+impl Widget for &Board {
+    fn render(self, area: Rect, buf: &mut Buffer) {
+        Paragraph::new("Rendering the board...")
+            .centered()
+            .render(area, buf);
+    }
+}
 
 impl Widget for &App {
     fn render(self, area: Rect, buf: &mut Buffer) {
@@ -30,14 +38,10 @@ impl Widget for &App {
             )
             .border_set(border::THICK);
 
-        let counter_text = Text::from(vec![Line::from(vec![
-                "This is a start.".into(),
-        ])]);
+        let inner_area = block.inner(area);
 
-        Paragraph::new(counter_text)
-            .centered()
-            .block(block)
-            .render(area, buf);
+        block.render(area, buf);
+        self.board.render(inner_area, buf);
     }
 }
 
