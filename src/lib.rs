@@ -38,11 +38,24 @@ impl App {
 }
 
 #[derive(Debug)]
-struct Board;
+struct Board {
+    columns: Vec<Column>,
+}
 
 impl Board {
     fn new() -> Self {
-        Board
+        Board { columns: vec![Column::new("TODO"), Column::new("Doing"), Column::new("Done!")] }
+    }
+}
+
+#[derive(Debug)]
+struct Column {
+    header: String,
+}
+
+impl Column {
+    fn new(header: &str) -> Self {
+        Column { header: header.into() }
     }
 }
 
