@@ -3,14 +3,29 @@ use ratatui::{
     layout::{Alignment, Constraint, Layout, Rect},
     style::Stylize,
     symbols::border,
-    text::Line,
+    text::{Line, Text},
     widgets::{
-        block::{Position, Title},
-        Block, Widget,
+        block::{Position, Title}, Block, Paragraph, Widget
     },
 };
 
-use crate::{App, Board, Column};
+use crate::{domain::{Board, Card, Column}, App };
+
+impl Widget for &Card {
+    fn render(self, area: Rect, buf: &mut Buffer) {
+        let block = Block::bordered()
+            .border_set(border::ROUNDED);
+
+        let text = Text::from(vec![
+            Line::from(self.short_description.clone()),
+            Line::from(self.creation_date.format("%Y-%m-%d").to_string())
+        ]);
+
+        Paragraph::new(text)
+            .block(block)
+            .render(area, buf);
+    }
+}
 
 impl Widget for &Column {
     fn render(self, area: Rect, buf: &mut Buffer) {
@@ -18,10 +33,17 @@ impl Widget for &Column {
         let title = Title::from(header.bold())
             .alignment(Alignment::Center);
         
-        Block::bordered()
+        let block = Block::bordered()
             .title(title)
-            .border_set(border::THICK)
-            .render(area, buf);
+            .border_set(border::THICK);
+
+        let inner_area = block.inner(area);
+        let areas = Layout::vertical([Constraint::Max(4); 4]).split(inner_area);
+        self.cards.iter().enumerate().for_each(|(i, card)| {
+            card.render(areas[i], buf);
+        });
+
+        block.render(area, buf);
     }
 }
 

@@ -4,18 +4,19 @@ use ratatui::{
     DefaultTerminal, Frame,
 };
 
+mod domain;
 mod render;
 mod event_handler;
 
 #[derive(Debug)]
 pub struct App {
-    board: Board,
+    board: domain::Board,
     exit: bool,
 }
 
 impl App {
     pub fn new() -> Self {
-        App { board: Board::new(), exit: false }
+        App { board: domain::Board::new(), exit: false }
     }
 
     pub fn run(&mut self, terminal: &mut DefaultTerminal) -> io::Result<()> {
@@ -34,28 +35,6 @@ impl App {
 
     fn exit(&mut self) {
         self.exit = true;
-    }
-}
-
-#[derive(Debug)]
-struct Board {
-    columns: Vec<Column>,
-}
-
-impl Board {
-    fn new() -> Self {
-        Board { columns: vec![Column::new("TODO"), Column::new("Doing"), Column::new("Done!")] }
-    }
-}
-
-#[derive(Debug)]
-struct Column {
-    header: String,
-}
-
-impl Column {
-    fn new(header: &str) -> Self {
-        Column { header: header.into() }
     }
 }
 
