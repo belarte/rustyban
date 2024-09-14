@@ -18,7 +18,7 @@ impl Widget for &Card {
 
         let text = Text::from(vec![
             Line::from(self.short_description.clone()),
-            Line::from(self.creation_date.format("%Y-%m-%d").to_string())
+            Line::from(self.creation_date.format("%Y-%m-%d %H:%M").to_string())
         ]);
 
         Paragraph::new(text)
