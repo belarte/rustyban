@@ -18,6 +18,7 @@ pub fn handle_events(app: &mut App) -> io::Result<()> {
 fn handle_key_event(app: &mut App, key_event: KeyEvent) {
     match key_event.code {
         KeyCode::Char('q') => app.exit(),
+        KeyCode::Char('?') => app.toggle_help(),
         _ => {}
     }
 }
