@@ -45,13 +45,11 @@ impl App {
         self.exit = true;
     }
 
-    fn to_file(&self, path: &str) -> io::Result<()> {
-        let mut file = std::fs::File::create(path)?;
+    fn to_file(&self, path: &str) {
+        let mut file = std::fs::File::create(path).unwrap();
 
         let content = self.board.to_json_string().expect("Cannot write file");
-        file.write_all(content.as_bytes())?;
-
-        Ok(())
+        file.write_all(content.as_bytes()).unwrap();
     }
 }
 
@@ -67,9 +65,8 @@ mod tests {
         let _ = fs::remove_file(path);
 
         let app = App::new();
-        let res = app.to_file(path);
+        app.to_file(path);
 
-        assert!(res.is_ok());
         assert!(fs::metadata(path).is_ok());
 
         let _ = fs::remove_file(path);
