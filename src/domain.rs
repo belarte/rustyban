@@ -23,6 +23,10 @@ impl Board {
 
         Board { columns: vec![todo, doing, done] }
     }
+
+    pub fn to_json_string(&self) -> String {
+        return "{}".into();
+    }
 }
 
 #[derive(Debug)]

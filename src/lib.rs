@@ -1,4 +1,4 @@
-use std::io;
+use std::io::{self, Write};
 
 use ratatui::{
     DefaultTerminal, Frame,
@@ -44,5 +44,37 @@ impl App {
     fn exit(&mut self) {
         self.exit = true;
     }
+
+    fn to_file(&self, path: &str) -> io::Result<()> {
+        let mut file = std::fs::File::create(path)?;
+
+        let content = self.board.to_json_string();
+        file.write_all(content.as_bytes())?;
+
+        Ok(())
+    }
 }
 
+#[cfg(test)]
+mod tests {
+    use std::fs;
+
+    use super::*;
+
+
+    #[test]
+    fn write_board_to_file() -> io::Result<()> {
+        let path = "board.txt";
+        let _ = fs::remove_file(path);
+
+        let app = App::new();
+        let res = app.to_file(path);
+
+        assert!(res.is_ok());
+        assert!(fs::metadata(path).is_ok());
+
+        let _ = fs::remove_file(path);
+
+        Ok(())
+    }
+}
