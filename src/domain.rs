@@ -1,6 +1,9 @@
-use chrono::{DateTime, Local};
+use std::error::Error;
 
-#[derive(Debug)]
+use chrono::{DateTime, Local};
+use serde::Serialize;
+
+#[derive(Debug, Serialize)]
 pub struct Board {
     pub columns: Vec<Column>,
 }
@@ -24,12 +27,40 @@ impl Board {
         Board { columns: vec![todo, doing, done] }
     }
 
-    pub fn to_json_string(&self) -> String {
-        return "{}".into();
+    pub fn to_json_string(&self) -> Result<String, Box<dyn Error>> {
+        return match serde_json::to_string_pretty(&self) {
+            Ok(res) => Ok(res),
+            Err(_) => Err("Failed to serialize board".into()),
+        }
     }
 }
 
-#[derive(Debug)]
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn board_to_json_string() -> Result<(), Box<dyn Error>> {
+        let board = Board::new();
+        let result = board.to_json_string()?;
+
+        assert!(result.contains("TODO"));
+        assert!(result.contains("Buy milk"));
+        assert!(result.contains("Buy eggs"));
+        assert!(result.contains("Buy bread"));
+
+        assert!(result.contains("Doing"));
+        assert!(result.contains("Cook dinner"));
+
+        assert!(result.contains("Done!"));
+        assert!(result.contains("Eat dinner"));
+        assert!(result.contains("Wash dishes"));
+
+        Ok(())
+    }
+}
+
+#[derive(Debug, Serialize)]
 pub struct Column {
     pub header: String,
     pub cards: Vec<Card>,
@@ -45,7 +76,7 @@ impl Column {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 pub struct Card {
     pub short_description: String,
     pub creation_date: DateTime<Local>,

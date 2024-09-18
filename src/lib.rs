@@ -48,7 +48,7 @@ impl App {
     fn to_file(&self, path: &str) -> io::Result<()> {
         let mut file = std::fs::File::create(path)?;
 
-        let content = self.board.to_json_string();
+        let content = self.board.to_json_string().expect("Cannot write file");
         file.write_all(content.as_bytes())?;
 
         Ok(())
@@ -60,7 +60,6 @@ mod tests {
     use std::fs;
 
     use super::*;
-
 
     #[test]
     fn write_board_to_file() -> io::Result<()> {
