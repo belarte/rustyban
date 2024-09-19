@@ -5,7 +5,7 @@ use ratatui::{
     symbols::border,
     text::{Line, Text},
     widgets::{
-        block::{Position, Title}, Block, Clear, Paragraph, Widget
+        block::Title, Block, Clear, Paragraph, Widget
     },
 };
 
@@ -61,28 +61,26 @@ impl Widget for &Board {
 
 impl Widget for &App {
     fn render(self, area: Rect, buf: &mut Buffer) {
-        let title = Title::from(" Welcome ".bold());
+        let [title_area, board_area, instructions_area] = Layout::vertical([
+            Constraint::Length(1),
+            Constraint::Min(0),
+            Constraint::Length(1),
+        ]).areas(area);
 
-        let instructions = Title::from(Line::from(vec![
+        let title = Line::from(" Welcome ".bold())
+            .centered();
+        title.render(title_area, buf);
+
+        let instructions = Line::from(vec![
                 " Help ".into(),
                 "<?> ".blue().bold(),
                 "Quit ".into(),
                 "<q> ".blue().bold(),
-        ]));
+        ])
+            .centered();
+        instructions.render(instructions_area, buf);
 
-        let block = Block::new()
-            .title(title.alignment(Alignment::Center))
-            .title(
-                instructions
-                .alignment(Alignment::Center)
-                .position(Position::Bottom),
-            )
-            .border_set(border::THICK);
-
-        let inner_area = block.inner(area);
-
-        block.render(area, buf);
-        self.board.render(inner_area, buf);
+        self.board.render(board_area, buf);
 
         if self.show_help {
             Help.render(area, buf);
