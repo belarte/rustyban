@@ -9,7 +9,7 @@ use ratatui::{
     },
 };
 
-use crate::{domain::{Board, Card, Column}, App };
+use crate::{domain::{Board, Card, Column}, App, Logger };
 
 impl Widget for &Card {
     fn render(self, area: Rect, buf: &mut Buffer) {
@@ -59,11 +59,27 @@ impl Widget for &Board {
     }
 }
 
+impl Widget for &Logger {
+    fn render(self, area: Rect, buf: &mut Buffer) {
+        let title = Title::from(" Logs ".bold());
+        let block = Block::bordered()
+            .title(title.alignment(Alignment::Left))
+            .border_set(border::THICK);
+
+        let message = Line::from(vec![" ".into(), self.show().into()]);
+
+        Paragraph::new(message)
+            .block(block)
+            .render(area, buf);
+    }
+}
+
 impl Widget for &App {
     fn render(self, area: Rect, buf: &mut Buffer) {
-        let [title_area, board_area, instructions_area] = Layout::vertical([
+        let [title_area, board_area, logger_area, instructions_area] = Layout::vertical([
             Constraint::Length(1),
             Constraint::Min(0),
+            Constraint::Length(3),
             Constraint::Length(1),
         ]).areas(area);
 
@@ -81,6 +97,7 @@ impl Widget for &App {
         instructions.render(instructions_area, buf);
 
         self.board.render(board_area, buf);
+        self.logger.render(logger_area, buf);
 
         if self.show_help {
             Help.render(area, buf);
