@@ -31,6 +31,7 @@ impl Logger {
 
 #[derive(Debug)]
 pub struct App {
+    file_name: String,
     logger: Logger,
     board: domain::Board,
     show_help: bool,
@@ -38,8 +39,9 @@ pub struct App {
 }
 
 impl App {
-    pub fn new() -> Self {
+    pub fn new(file_name: String) -> Self {
         App {
+            file_name,
             logger: Logger::new(),
             board: domain::Board::new(),
             show_help: false,
@@ -68,13 +70,13 @@ impl App {
         self.exit = true;
     }
 
-    fn to_file(&mut self, path: &str) {
-        let mut file = std::fs::File::create(path).unwrap();
+    fn to_file(&mut self) {
+        let mut file = std::fs::File::create(&self.file_name).unwrap();
 
         let content = self.board.to_json_string().expect("Cannot write file");
         file.write_all(content.as_bytes()).unwrap();
         
-        self.log(format!("Board written to {}", path));
+        self.log(format!("Board written to {}", self.file_name));
     }
 
     fn log(&mut self, msg: String) {
@@ -93,8 +95,8 @@ mod tests {
         let path = "board.txt";
         let _ = fs::remove_file(path);
 
-        let mut app = App::new();
-        app.to_file(path);
+        let mut app = App::new(path.into());
+        app.to_file();
 
         assert!(fs::metadata(path).is_ok());
 

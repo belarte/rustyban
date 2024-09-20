@@ -17,7 +17,7 @@ pub fn handle_events(app: &mut App) -> io::Result<()> {
 
 fn handle_key_event(app: &mut App, key_event: KeyEvent) {
     match key_event.code {
-        KeyCode::Char('w') => app.to_file("board.json"),
+        KeyCode::Char('w') => app.to_file(),
         KeyCode::Char('q') => app.exit(),
         KeyCode::Char('?') => app.toggle_help(),
         _ => {}
@@ -30,7 +30,7 @@ mod tests {
 
     #[test]
     fn handle_key_events() -> io::Result<()> {
-        let mut app = App::new();
+        let mut app = App::new("".into());
         handle_key_event(&mut app, KeyCode::Char('q').into());
         assert!(app.exit);
 
