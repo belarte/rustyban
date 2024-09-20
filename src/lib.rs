@@ -71,12 +71,21 @@ impl App {
     }
 
     fn to_file(&mut self) {
-        let mut file = std::fs::File::create(&self.file_name).unwrap();
-
         let content = self.board.to_json_string().expect("Cannot write file");
-        file.write_all(content.as_bytes()).unwrap();
-        
-        self.log(format!("Board written to {}", self.file_name));
+
+        let file = std::fs::File::create(&self.file_name);
+        match file {
+            Ok(mut file) => {
+                match file.write_all(content.as_bytes()) {
+                    Ok(_) => self.log(format!("Board written to {}", self.file_name)),
+                    Err(e) => self.log(format!("Error writing to file: {}", e)),
+                }
+            }
+            Err(e) => {
+                self.log(format!("Error creating file {}: {}", self.file_name, e));
+                return;
+            }
+        }
     }
 
     fn log(&mut self, msg: String) {
