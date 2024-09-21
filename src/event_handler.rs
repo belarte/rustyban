@@ -2,7 +2,7 @@ use std::io;
 
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind};
 
-use crate::App;
+use crate::app::app::App;
 
 pub fn handle_events(app: &mut App) -> io::Result<()> {
     match event::read()? {
