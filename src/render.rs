@@ -9,19 +9,7 @@ use ratatui::{
     },
 };
 
-use crate::{domain::Board, App, Logger};
-
-impl Widget for &Board {
-    fn render(self, area: Rect, buf: &mut Buffer) {
-        let [left, center, right] = Layout::horizontal(
-            [Constraint::Percentage(33), Constraint::Percentage(34), Constraint::Percentage(33)]
-        ).areas(area);
-
-        for (column, area) in self.columns.iter().zip([left, center, right].iter()) {
-            column.render(*area, buf);
-        }
-    }
-}
+use crate::{App, Logger};
 
 impl Widget for &Logger {
     fn render(self, area: Rect, buf: &mut Buffer) {

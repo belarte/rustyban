@@ -7,7 +7,7 @@ use ratatui::{
 };
 use serde::Serialize;
 
-use super::card::Card;
+use crate::board::card::Card;
 
 #[derive(Debug, Serialize)]
 pub struct Column {

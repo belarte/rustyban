@@ -1,11 +1,11 @@
 use std::io::{self, Write};
 
+use board::board::Board;
 use ratatui::{
     DefaultTerminal, Frame,
 };
 
 mod board;
-mod domain;
 mod render;
 mod event_handler;
 
@@ -34,7 +34,7 @@ impl Logger {
 pub struct App {
     file_name: String,
     logger: Logger,
-    board: domain::Board,
+    board: Board,
     show_help: bool,
     exit: bool,
 }
@@ -44,7 +44,7 @@ impl App {
         App {
             file_name,
             logger: Logger::new(),
-            board: domain::Board::new(),
+            board: Board::new(),
             show_help: false,
             exit: false,
         }

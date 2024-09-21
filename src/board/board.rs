@@ -1,6 +1,11 @@
 use std::error::Error;
 
 use chrono::Local;
+use ratatui::{
+    buffer::Buffer,
+    layout::{Constraint, Layout, Rect},
+    widgets::Widget
+};
 use serde::Serialize;
 
 use crate::board::{card::Card, column::Column};
@@ -33,6 +38,18 @@ impl Board {
         return match serde_json::to_string_pretty(&self) {
             Ok(res) => Ok(res),
             Err(_) => Err("Failed to serialize board".into()),
+        }
+    }
+}
+
+impl Widget for &Board {
+    fn render(self, area: Rect, buf: &mut Buffer) {
+        let [left, center, right] = Layout::horizontal(
+            [Constraint::Percentage(33), Constraint::Percentage(34), Constraint::Percentage(33)]
+        ).areas(area);
+
+        for (column, area) in self.columns.iter().zip([left, center, right].iter()) {
+            column.render(*area, buf);
         }
     }
 }
