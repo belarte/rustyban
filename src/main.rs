@@ -1,6 +1,6 @@
 use std::error::Error;
 
-use rustyban::app::app::App;
+use rustyban::App;
 
 fn main() -> Result<(), Box<dyn Error>> {
     let args: Vec<String> = std::env::args().collect();

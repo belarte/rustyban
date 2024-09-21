@@ -1,4 +1,8 @@
-pub mod app;
-pub mod event_handler;
-pub mod help;
-pub mod logger;
+mod app;
+mod event_handler;
+mod help;
+mod logger;
+
+pub use app::App;
+use help::Help;
+use logger::Logger;

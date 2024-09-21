@@ -1,2 +1,4 @@
-pub mod app;
-pub mod board;
+mod app;
+mod board;
+
+pub use app::App;

@@ -10,10 +10,10 @@ use ratatui::{
     Frame,
 };
 
-use crate::app::logger::Logger;
+use crate::app::Logger;
 use crate::app::event_handler;
-use crate::app::help::Help;
-use crate::board::board::Board;
+use crate::app::Help;
+use crate::board::Board;
 
 #[derive(Debug)]
 pub struct App {
