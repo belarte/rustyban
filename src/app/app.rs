@@ -11,9 +11,9 @@ use ratatui::{
 };
 
 use crate::app::logger::Logger;
-use crate::board::board::Board;
-use crate::event_handler;
+use crate::app::event_handler;
 use crate::app::help::Help;
+use crate::board::board::Board;
 
 #[derive(Debug)]
 pub struct App {
