@@ -1,30 +1,15 @@
 use ratatui::{
     buffer::Buffer,
-    layout::{Alignment, Constraint, Flex, Layout, Rect},
+    layout::{Constraint, Flex, Layout, Rect},
     style::Stylize,
     symbols::border,
     text::{Line, Text},
     widgets::{
-        block::Title, Block, Clear, Paragraph, Widget
+        Block, Clear, Paragraph, Widget
     },
 };
 
-use crate::{App, Logger};
-
-impl Widget for &Logger {
-    fn render(self, area: Rect, buf: &mut Buffer) {
-        let title = Title::from(" Logs ".bold());
-        let block = Block::bordered()
-            .title(title.alignment(Alignment::Left))
-            .border_set(border::THICK);
-
-        let message = Line::from(vec![" ".into(), self.show().into()]);
-
-        Paragraph::new(message)
-            .block(block)
-            .render(area, buf);
-    }
-}
+use crate::App;
 
 impl Widget for &App {
     fn render(self, area: Rect, buf: &mut Buffer) {

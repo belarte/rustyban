@@ -1,34 +1,15 @@
 use std::io::{self, Write};
 
+use app::logger::Logger;
 use board::board::Board;
 use ratatui::{
     DefaultTerminal, Frame,
 };
 
+mod app;
 mod board;
 mod render;
 mod event_handler;
-
-#[derive(Debug)]
-pub struct Logger {
-    counter: u32,
-    message: String,
-}
-
-impl Logger {
-    fn new() -> Self {
-        Self { counter: 0, message: String::new() }
-    }
-
-    pub fn log(&mut self, msg: String) {
-        self.counter += 1;
-        self.message = format!("[{}] {}", self.counter, msg)
-    }
-
-    pub fn show(&self) -> &str {
-        &self.message
-    }
-}
 
 #[derive(Debug)]
 pub struct App {
@@ -111,22 +92,6 @@ mod tests {
         assert!(fs::metadata(path).is_ok());
 
         let _ = fs::remove_file(path);
-
-        Ok(())
-    }
-
-    #[test]
-    fn logger() -> Result<(), Box<dyn std::error::Error>> {
-        let mut logger = Logger::new();
-
-        logger.log("Hello".into());
-        assert_eq!("[1] Hello", logger.show());
-
-        logger.log("Hello again".into());
-        assert_eq!("[2] Hello again", logger.show());
-
-        logger.log("One more time for the road".into());
-        assert_eq!("[3] One more time for the road", logger.show());
 
         Ok(())
     }
