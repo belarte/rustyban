@@ -9,43 +9,7 @@ use ratatui::{
     },
 };
 
-use crate::{domain::{Board, Card, Column}, App, Logger };
-
-impl Widget for &Card {
-    fn render(self, area: Rect, buf: &mut Buffer) {
-        let block = Block::bordered()
-            .border_set(border::ROUNDED);
-
-        let text = Text::from(vec![
-            Line::from(self.short_description.clone()),
-            Line::from(self.creation_date.format("%Y-%m-%d %H:%M").to_string())
-        ]);
-
-        Paragraph::new(text)
-            .block(block)
-            .render(area, buf);
-    }
-}
-
-impl Widget for &Column {
-    fn render(self, area: Rect, buf: &mut Buffer) {
-        let header = format!(" {} ", self.header.clone());
-        let title = Title::from(header.bold())
-            .alignment(Alignment::Center);
-        
-        let block = Block::bordered()
-            .title(title)
-            .border_set(border::THICK);
-
-        let inner_area = block.inner(area);
-        let areas = Layout::vertical([Constraint::Max(4); 4]).split(inner_area);
-        self.cards.iter().enumerate().for_each(|(i, card)| {
-            card.render(areas[i], buf);
-        });
-
-        block.render(area, buf);
-    }
-}
+use crate::{domain::Board, App, Logger};
 
 impl Widget for &Board {
     fn render(self, area: Rect, buf: &mut Buffer) {

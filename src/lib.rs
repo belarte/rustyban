@@ -4,6 +4,7 @@ use ratatui::{
     DefaultTerminal, Frame,
 };
 
+mod board;
 mod domain;
 mod render;
 mod event_handler;

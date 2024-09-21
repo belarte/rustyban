@@ -1,7 +1,9 @@
 use std::error::Error;
 
-use chrono::{DateTime, Local};
+use chrono::Local;
 use serde::Serialize;
+
+use crate::board::{card::Card, column::Column};
 
 #[derive(Debug, Serialize)]
 pub struct Board {
@@ -59,35 +61,3 @@ mod tests {
         Ok(())
     }
 }
-
-#[derive(Debug, Serialize)]
-pub struct Column {
-    pub header: String,
-    pub cards: Vec<Card>,
-}
-
-impl Column {
-    fn new(header: &str) -> Self {
-        Column { header: header.into(), cards: vec![] }
-    }
-
-    fn add_card(&mut self, card: Card) {
-        self.cards.push(card);
-    }
-}
-
-#[derive(Debug, Serialize)]
-pub struct Card {
-    pub short_description: String,
-    pub creation_date: DateTime<Local>,
-}
-
-impl Card {
-    fn new(short_description: &str, creation_date: DateTime<Local>) -> Self {
-        Card {
-            short_description: short_description.into(),
-            creation_date,
-        }
-    }
-}
-
