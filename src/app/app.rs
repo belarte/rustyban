@@ -13,7 +13,7 @@ use ratatui::{
 use crate::app::logger::Logger;
 use crate::board::board::Board;
 use crate::event_handler;
-use crate::render::Help;
+use crate::app::help::Help;
 
 #[derive(Debug)]
 pub struct App {
