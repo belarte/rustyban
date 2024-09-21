@@ -1,4 +1,4 @@
-use std::error::Error;
+use std::io::{Result, Write};
 
 use chrono::Local;
 use ratatui::{
@@ -34,10 +34,20 @@ impl Board {
         Board { columns: vec![todo, doing, done] }
     }
 
-    pub fn to_json_string(&self) -> Result<String, Box<dyn Error>> {
+    pub fn to_file(&mut self, file_name: &str) -> Result<()>  {
+        let content = self.to_json_string().expect("Cannot write file");
+
+        let file = std::fs::File::create(file_name);
+        match file {
+            Ok(mut file) => file.write_all(content.as_bytes()),
+            Err(e) => Err(e),
+        }
+    }
+
+    fn to_json_string(&self) -> Result<String> {
         return match serde_json::to_string_pretty(&self) {
             Ok(res) => Ok(res),
-            Err(_) => Err("Failed to serialize board".into()),
+            Err(e) => Err(e.into()),
         }
     }
 }
@@ -56,10 +66,28 @@ impl Widget for &Board {
 
 #[cfg(test)]
 mod tests {
+    use std::fs;
+
     use super::*;
 
     #[test]
-    fn board_to_json_string() -> Result<(), Box<dyn Error>> {
+    fn write_board_to_file() -> Result<()> {
+        let path = "board.txt";
+        let _ = fs::remove_file(path);
+
+        let mut board = Board::new();
+        let res = board.to_file(path.into());
+
+        assert!(res.is_ok());
+        assert!(fs::metadata(path).is_ok());
+
+        let _ = fs::remove_file(path);
+
+        Ok(())
+    }
+
+    #[test]
+    fn board_to_json_string() -> Result<()> {
         let board = Board::new();
         let result = board.to_json_string()?;
 
