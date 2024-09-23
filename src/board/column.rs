@@ -5,11 +5,11 @@ use ratatui::{
     symbols::border,
     widgets::{block::Title, Block, Widget},
 };
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 use crate::board::Card;
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Column {
     pub header: String,
     pub cards: Vec<Card>,

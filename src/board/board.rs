@@ -1,43 +1,43 @@
-use std::io::{Result, Write};
+use std::{fs::File, io::{Read, Result, Write}};
 
-use chrono::Local;
 use ratatui::{
     buffer::Buffer,
     layout::{Constraint, Layout, Rect},
     widgets::Widget
 };
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
-use crate::board::{Card, Column};
+use crate::board::Column;
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Board {
     pub columns: Vec<Column>,
 }
 
 impl Board {
     pub fn new() -> Self {
-        let now = Local::now();
-
-        let mut todo = Column::new("TODO");
-        todo.add_card(Card::new("Buy milk", now));
-        todo.add_card(Card::new("Buy eggs", now));
-        todo.add_card(Card::new("Buy bread", now));
-
-        let mut doing = Column::new("Doing");
-        doing.add_card(Card::new("Cook dinner", now));
-
-        let mut done = Column::new("Done!");
-        done.add_card(Card::new("Eat dinner", now));
-        done.add_card(Card::new("Wash dishes", now));
+        let todo = Column::new("TODO");
+        let doing = Column::new("Doing");
+        let done = Column::new("Done!");
 
         Board { columns: vec![todo, doing, done] }
+    }
+
+    pub fn open(file_name: &str) -> Result<Self> {
+        let mut content = String::new();
+        let mut file = File::open(file_name)?;
+        file.read_to_string(&mut content)?;
+
+        return match serde_json::from_str(&content) {
+            Ok(board) => Ok(board),
+            Err(e) => Err(e.into()),
+        }
     }
 
     pub fn to_file(&mut self, file_name: &str) -> Result<()>  {
         let content = self.to_json_string().expect("Cannot write file");
 
-        let file = std::fs::File::create(file_name);
+        let file = File::create(file_name);
         match file {
             Ok(mut file) => file.write_all(content.as_bytes()),
             Err(e) => Err(e),
@@ -71,6 +71,24 @@ mod tests {
     use super::*;
 
     #[test]
+    fn open_board() -> Result<()> {
+        let path = "res/test_board.json";
+        let board = Board::open(path).expect("Cannot open board");
+
+        assert_eq!("TODO", board.columns[0].header);
+        assert_eq!("Buy milk", board.columns[0].cards[0].short_description);
+        assert_eq!("Buy eggs", board.columns[0].cards[1].short_description);
+        assert_eq!("Buy bread", board.columns[0].cards[2].short_description);
+        assert_eq!("Doing", board.columns[1].header);
+        assert_eq!("Cook dinner", board.columns[1].cards[0].short_description);
+        assert_eq!("Done!", board.columns[2].header);
+        assert_eq!("Eat dinner", board.columns[2].cards[0].short_description);
+        assert_eq!("Wash dishes", board.columns[2].cards[1].short_description);
+
+        Ok(())
+    }
+
+    #[test]
     fn write_board_to_file() -> Result<()> {
         let path = "board.txt";
         let _ = fs::remove_file(path);
@@ -88,7 +106,7 @@ mod tests {
 
     #[test]
     fn board_to_json_string() -> Result<()> {
-        let board = Board::new();
+        let board = Board::open("res/test_board.json")?;
         let result = board.to_json_string()?;
 
         assert!(result.contains("TODO"));

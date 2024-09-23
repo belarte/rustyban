@@ -26,10 +26,23 @@ pub struct App {
 
 impl App {
     pub fn new(file_name: String) -> Self {
+        let mut logger = Logger::new();
+        let board = if !file_name.is_empty() {
+            match Board::open(&file_name) {
+                Ok(board) => board,
+                Err(e) => {
+                    logger.log(format!("Cannot read file {} because {}, creating a new board", file_name, e));
+                    Board::new()
+                }
+            }
+        } else {
+            Board::new()
+        };
+
         App {
             file_name,
-            logger: Logger::new(),
-            board: Board::new(),
+            logger,
+            board,
             show_help: false,
             exit: false,
         }

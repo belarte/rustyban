@@ -1,0 +1,43 @@
+{
+  "columns": [
+    {
+      "header": "TODO",
+      "cards": [
+        {
+          "short_description": "Buy milk",
+          "creation_date": "2024-09-21T21:21:08.933562+02:00"
+        },
+        {
+          "short_description": "Buy eggs",
+          "creation_date": "2024-09-21T21:21:08.933562+02:00"
+        },
+        {
+          "short_description": "Buy bread",
+          "creation_date": "2024-09-21T21:21:08.933562+02:00"
+        }
+      ]
+    },
+    {
+      "header": "Doing",
+      "cards": [
+        {
+          "short_description": "Cook dinner",
+          "creation_date": "2024-09-21T21:21:08.933562+02:00"
+        }
+      ]
+    },
+    {
+      "header": "Done!",
+      "cards": [
+        {
+          "short_description": "Eat dinner",
+          "creation_date": "2024-09-21T21:21:08.933562+02:00"
+        },
+        {
+          "short_description": "Wash dishes",
+          "creation_date": "2024-09-21T21:21:08.933562+02:00"
+        }
+      ]
+    }
+  ]
+}

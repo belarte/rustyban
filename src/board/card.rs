@@ -5,9 +5,9 @@ use ratatui::{
     symbols::border,
     text::{Line, Text},
     widgets::{Block, Paragraph, Widget}};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Deserialize, Serialize)]
 pub struct Card {
     pub short_description: String,
     pub creation_date: DateTime<Local>,
