@@ -19,12 +19,16 @@ impl Widget for Help {
         let title = Line::from(" Help ".bold());
         let text = Text::from(vec![
             Line::from(vec![
-                " Quit: ".bold(),
-                "Press <q> to quit the application".into()
+                " <w> ".bold(),
+                "Write the board to file".into()
             ]),
             Line::from(vec![
-                " Help: ".bold(),
-                "Press <?> to toggle this help message".into()
+                " <q> ".bold(),
+                "Quit the application".into()
+            ]),
+            Line::from(vec![
+                " <?> ".bold(),
+                "Toggle this help message".into()
             ]),
         ]);
 
