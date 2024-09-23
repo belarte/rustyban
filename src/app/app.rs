@@ -36,6 +36,7 @@ impl App {
                 }
             }
         } else {
+            logger.log(format!("No file to open, creating a new board"));
             Board::new()
         };
 
