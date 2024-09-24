@@ -15,12 +15,18 @@ use crate::app::event_handler;
 use crate::app::Help;
 use crate::board::Board;
 
+#[derive(Debug, PartialEq, Eq)]
+pub enum State {
+    Normal,
+    Help,
+}
+
 #[derive(Debug)]
 pub struct App {
+    pub state: State,
     file_name: String,
     logger: Logger,
     board: Board,
-    show_help: bool,
     pub exit: bool,
 }
 
@@ -44,7 +50,7 @@ impl App {
             file_name,
             logger,
             board,
-            show_help: false,
+            state: State::Normal,
             exit: false,
         }
     }
@@ -60,10 +66,6 @@ impl App {
 
     fn draw(&self, frame: &mut Frame) {
         frame.render_widget(self, frame.area());
-    }
-
-    pub fn toggle_help(&mut self) {
-        self.show_help = !self.show_help;
     }
 
     pub fn exit(&mut self) {
@@ -107,7 +109,7 @@ impl Widget for &App {
         self.board.render(board_area, buf);
         self.logger.render(logger_area, buf);
 
-        if self.show_help {
+        if self.state == State::Help {
             Help.render(area, buf);
         }
     }

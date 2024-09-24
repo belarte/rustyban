@@ -2,7 +2,7 @@ use std::io;
 
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind};
 
-use crate::app::app::App;
+use crate::app::{App, app::State};
 
 pub fn handle_events(app: &mut App) -> io::Result<()> {
     match event::read()? {
@@ -16,23 +16,46 @@ pub fn handle_events(app: &mut App) -> io::Result<()> {
 }
 
 fn handle_key_event(app: &mut App, key_event: KeyEvent) {
+    match app.state {
+        State::Normal => normal_mode(app, key_event),
+        State::Help   => app.state = State::Normal,
+    }
+}
+
+fn normal_mode(app: &mut App, key_event: KeyEvent) {
     match key_event.code {
         KeyCode::Char('w') => app.write(),
         KeyCode::Char('q') => app.exit(),
-        KeyCode::Char('?') => app.toggle_help(),
+        KeyCode::Char('?') => app.state = State::Help,
         _ => {}
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use crate::app::app::State;
+
     use super::*;
 
     #[test]
-    fn handle_key_events() -> io::Result<()> {
+    fn handle_exit() -> io::Result<()> {
         let mut app = App::new("".into());
         handle_key_event(&mut app, KeyCode::Char('q').into());
         assert!(app.exit);
+
+        Ok(())
+    }
+
+    #[test]
+    fn toggle_help_popup() -> io::Result<()> {
+        let mut app = App::new("".into());
+        assert_eq!(State::Normal, app.state);
+
+        handle_key_event(&mut app, KeyCode::Char('?').into());
+        assert_eq!(State::Help, app.state);
+
+        handle_key_event(&mut app, KeyCode::Char('q').into());
+        assert_eq!(State::Normal, app.state);
 
         Ok(())
     }
