@@ -1,11 +1,11 @@
 use ratatui::{
     buffer::Buffer,
-    layout::{Constraint, Flex, Layout, Rect},
+    layout::{Alignment, Constraint, Flex, Layout, Rect},
     style::Stylize,
     symbols::border,
     text::{Line, Text},
     widgets::{
-        Block, Clear, Paragraph, Widget
+        block::{Position, Title}, Block, Clear, Paragraph, Widget
     },
 };
 
@@ -16,7 +16,8 @@ impl Widget for Help {
         let area = help_area(area, 60, 20);
         Clear.render(area, buf);
 
-        let title = Line::from(" Help ".bold());
+        let title = Title::from(" Help ".bold());
+        let status = Title::from(" Press any key to dismiss ");
         let text = Text::from(vec![
             Line::from(vec![
                 " <w> ".bold(),
@@ -33,7 +34,11 @@ impl Widget for Help {
         ]);
 
         let block = Block::bordered()
-            .title(title.centered())
+            .title(title
+                .alignment(Alignment::Center))
+            .title(status
+                .alignment(Alignment::Center)
+                .position(Position::Bottom))
             .on_dark_gray()
             .border_set(border::ROUNDED);
         Paragraph::new(text)
