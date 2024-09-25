@@ -24,6 +24,10 @@ impl Widget for Help {
                 "Write the board to file".into()
             ]),
             Line::from(vec![
+                " <W> ".bold(),
+                "Write the board to a new file (opens pop up)".into()
+            ]),
+            Line::from(vec![
                 " <q> ".bold(),
                 "Quit the application".into()
             ]),
