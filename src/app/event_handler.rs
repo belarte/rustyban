@@ -1,6 +1,7 @@
 use std::io;
 
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind};
+use tui_textarea::{Input, Key};
 
 use crate::app::{App, app::State};
 
@@ -19,15 +20,29 @@ fn handle_key_event(app: &mut App, key_event: KeyEvent) {
     match app.state {
         State::Normal => normal_mode(app, key_event),
         State::Help   => app.state = State::Normal,
+        State::Save   => save_mode(app, key_event),
     }
 }
 
 fn normal_mode(app: &mut App, key_event: KeyEvent) {
     match key_event.code {
         KeyCode::Char('w') => app.write(),
+        KeyCode::Char('W') => app.state = State::Save,
         KeyCode::Char('q') => app.exit(),
         KeyCode::Char('?') => app.state = State::Help,
         _ => {}
+    }
+}
+
+fn save_mode(app: &mut App, key_event: KeyEvent) {
+    match key_event.into() {
+        Input { key: Key::Esc, .. } => app.state = State::Normal,
+        Input { key: Key::Enter, .. } => {
+            app.write_to_file(app.save_to_file.get());
+            app.save_to_file.clear();
+            app.state = State::Normal;
+        }
+        input => app.save_to_file.push(input),
     }
 }
 

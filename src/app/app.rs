@@ -13,24 +13,27 @@ use ratatui::{
 use crate::app::Logger;
 use crate::app::event_handler;
 use crate::app::Help;
+use crate::app::Save;
 use crate::board::Board;
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum State {
     Normal,
+    Save,
     Help,
 }
 
 #[derive(Debug)]
-pub struct App {
+pub struct App<'a> {
     pub state: State,
     file_name: String,
+    pub save_to_file: Save<'a>,
     logger: Logger,
     board: Board,
     pub exit: bool,
 }
 
-impl App {
+impl App<'_> {
     pub fn new(file_name: String) -> Self {
         let mut logger = Logger::new();
         let board = if !file_name.is_empty() {
@@ -50,6 +53,7 @@ impl App {
             file_name,
             logger,
             board,
+            save_to_file: Save::new(),
             state: State::Normal,
             exit: false,
         }
@@ -79,12 +83,17 @@ impl App {
         }
     }
 
+    pub fn write_to_file(&mut self, file_name: String) {
+        self.file_name = file_name.clone();
+        self.write();
+    }
+
     fn log(&mut self, msg: String) {
         self.logger.log(msg);
     }
 }
 
-impl Widget for &App {
+impl Widget for &App<'_> {
     fn render(self, area: Rect, buf: &mut Buffer) {
         let [title_area, board_area, logger_area, instructions_area] = Layout::vertical([
             Constraint::Length(1),
@@ -111,6 +120,10 @@ impl Widget for &App {
 
         if self.state == State::Help {
             Help.render(area, buf);
+        }
+
+        if self.state == State::Save {
+            self.save_to_file.render(area, buf);
         }
     }
 }
