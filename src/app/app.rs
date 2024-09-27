@@ -84,7 +84,7 @@ impl App<'_> {
     }
 
     pub fn write_to_file(&mut self, file_name: String) {
-        self.file_name = file_name.clone();
+        self.file_name = file_name;
         self.write();
     }
 

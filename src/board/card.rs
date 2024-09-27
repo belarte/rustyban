@@ -1,3 +1,5 @@
+use std::borrow::Borrow;
+
 use chrono::{DateTime, Local};
 use ratatui::{
     buffer::Buffer,
@@ -28,7 +30,7 @@ impl Widget for &Card {
             .border_set(border::ROUNDED);
 
         let text = Text::from(vec![
-            Line::from(self.short_description.clone()),
+            Line::from(self.short_description.borrow()),
             Line::from(self.creation_date.format("%Y-%m-%d %H:%M").to_string())
         ]);
 

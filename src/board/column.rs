@@ -27,7 +27,7 @@ impl Column {
 
 impl Widget for &Column {
     fn render(self, area: Rect, buf: &mut Buffer) {
-        let header = format!(" {} ", self.header.clone());
+        let header = format!(" {} ", self.header);
         let title = Title::from(header.bold())
             .alignment(Alignment::Center);
         
