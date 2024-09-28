@@ -1,22 +1,9 @@
-use std::io;
-
-use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind};
+use crossterm::event::{KeyCode, KeyEvent};
 use tui_textarea::{Input, Key};
 
 use crate::app::{App, app::State};
 
-pub fn handle_events(app: &mut App) -> io::Result<()> {
-    match event::read()? {
-        Event::Key(key_event) if key_event.kind == KeyEventKind::Press => {
-            app.state = handle_key_event(app, key_event);
-        }
-        _ => {}
-    };
-
-    Ok(())
-}
-
-fn handle_key_event(app: &mut App, key_event: KeyEvent) -> State {
+pub fn handle_key_event(app: &mut App, key_event: KeyEvent) -> State {
     match app.state {
         State::Normal => normal_mode(app, key_event),
         State::Help   => State::Normal,
@@ -57,12 +44,14 @@ fn save_mode(app: &mut App, key_event: KeyEvent) -> State {
 
 #[cfg(test)]
 mod tests {
+    use std::io::Result;
+
     use crate::app::app::State;
 
     use super::*;
 
     #[test]
-    fn handle_exit() -> io::Result<()> {
+    fn handle_exit() -> Result<()> {
         let mut app = App::new("".into());
         handle_key_event(&mut app, KeyCode::Char('q').into());
         assert!(app.exit);
@@ -71,7 +60,7 @@ mod tests {
     }
 
     #[test]
-    fn toggle_help_popup() -> io::Result<()> {
+    fn toggle_help_popup() -> Result<()> {
         let mut app = App::new("".into());
         assert_eq!(State::Normal, app.state);
 
