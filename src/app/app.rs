@@ -7,20 +7,11 @@ use ratatui::{
 };
 
 use crate::app::Logger;
-use crate::app::Help;
 use crate::app::Save;
 use crate::board::Board;
 
-#[derive(Debug, PartialEq, Eq)]
-pub enum State {
-    Normal,
-    Save,
-    Help,
-}
-
 #[derive(Debug)]
 pub struct App<'a> {
-    pub state: State,
     file_name: String,
     pub save_to_file: Save<'a>,
     logger: Logger,
@@ -49,7 +40,6 @@ impl App<'_> {
             logger,
             board,
             save_to_file: Save::new(),
-            state: State::Normal,
             exit: false,
         }
     }
@@ -99,13 +89,5 @@ impl Widget for &App<'_> {
 
         self.board.render(board_area, buf);
         self.logger.render(logger_area, buf);
-
-        if self.state == State::Help {
-            Help.render(area, buf);
-        }
-
-        if self.state == State::Save {
-            self.save_to_file.render(area, buf);
-        }
     }
 }
