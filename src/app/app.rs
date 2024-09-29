@@ -1,17 +1,11 @@
-use std::io::Result;
-
-use crossterm::event::{self, Event, KeyEventKind};
 use ratatui::{
     buffer::Buffer,
     layout::{Constraint, Layout, Rect},
     style::Stylize,
     text::Line,
     widgets::Widget,
-    DefaultTerminal,
-    Frame,
 };
 
-use crate::app::event_handler::handle_key_event;
 use crate::app::Logger;
 use crate::app::Help;
 use crate::app::Save;
@@ -58,24 +52,6 @@ impl App<'_> {
             state: State::Normal,
             exit: false,
         }
-    }
-
-    pub fn run(&mut self, terminal: &mut DefaultTerminal) -> Result<()> {
-        while !self.exit {
-            terminal.draw(|frame| self.draw(frame))?;
-            match event::read()? {
-                Event::Key(key_event) if key_event.kind == KeyEventKind::Press => {
-                    self.state = handle_key_event(self, key_event);
-                }
-                _ => {}
-            };
-        }
-
-        Ok(())
-    }
-
-    fn draw(&self, frame: &mut Frame) {
-        frame.render_widget(self, frame.area());
     }
 
     pub fn exit(&mut self) {

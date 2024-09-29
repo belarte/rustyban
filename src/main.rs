@@ -1,6 +1,6 @@
 use std::error::Error;
 
-use rustyban::App;
+use rustyban::AppRunner;
 
 fn main() -> Result<(), Box<dyn Error>> {
     let args: Vec<String> = std::env::args().collect();
@@ -10,7 +10,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     };
 
     let mut terminal = ratatui::init();
-    let app_result = App::new(file_name).run(&mut terminal);
+    let app_result = AppRunner::new(file_name).run(&mut terminal);
     ratatui::restore();
 
     Ok(app_result?)

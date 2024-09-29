@@ -1,4 +1,4 @@
 mod app;
 mod board;
 
-pub use app::App;
+pub use app::AppRunner;
