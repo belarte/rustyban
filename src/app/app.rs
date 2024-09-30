@@ -7,19 +7,17 @@ use ratatui::{
 };
 
 use crate::app::Logger;
-use crate::app::Save;
 use crate::board::Board;
 
 #[derive(Debug)]
-pub struct App<'a> {
+pub struct App {
     file_name: String,
-    pub save_to_file: Save<'a>,
     logger: Logger,
     board: Board,
     pub exit: bool,
 }
 
-impl App<'_> {
+impl App {
     pub fn new(file_name: String) -> Self {
         let mut logger = Logger::new();
         let board = if !file_name.is_empty() {
@@ -39,7 +37,6 @@ impl App<'_> {
             file_name,
             logger,
             board,
-            save_to_file: Save::new(),
             exit: false,
         }
     }
@@ -65,7 +62,7 @@ impl App<'_> {
     }
 }
 
-impl Widget for &App<'_> {
+impl Widget for &App {
     fn render(self, area: Rect, buf: &mut Buffer) {
         let [title_area, board_area, logger_area, instructions_area] = Layout::vertical([
             Constraint::Length(1),

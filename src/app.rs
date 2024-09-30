@@ -9,5 +9,4 @@ mod logger;
 pub use app_runner::AppRunner;
 use app::App;
 use app_state::AppState;
-use save_to_file::Save;
 use logger::Logger;

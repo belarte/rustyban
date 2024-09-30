@@ -8,8 +8,8 @@ use crate::app::AppState;
 
 #[derive(Debug)]
 pub struct AppRunner<'a> {
-    app: App<'a>,
-    state: AppState,
+    app: App,
+    state: AppState<'a>,
 }
 
 impl<'a> AppRunner<'a> {

@@ -1,30 +1,30 @@
 use crossterm::event::KeyEvent;
 use ratatui::Frame;
 
-use super::{app::App, event_handler::{normal_mode, save_mode}, help::Help};
+use super::{app::App, event_handler::{normal_mode, save_mode}, help::Help, save_to_file::Save};
 
 
 #[derive(Debug, PartialEq, Eq)]
-pub enum State {
+pub enum State<'a> {
     Normal,
-    Save,
+    Save { save: Save<'a> },
     Help,
 }
 
 #[derive(Debug)]
-pub struct AppState {
-    pub state: State,
+pub struct AppState<'a> {
+    pub state: State<'a>,
 }
 
-impl AppState {
+impl<'a> AppState<'a> {
     pub fn new() -> Self {
         Self { state: State::Normal }
     }
 
     pub fn handle_events(&mut self, app: &mut App, event: KeyEvent) {
-        match self.state {
+        match &self.state {
             State::Normal => self.state = normal_mode(app, event),
-            State::Save   => self.state = save_mode(app, event),
+            State::Save{ save } => self.state = save_mode(save, app, event),
             State::Help   => self.state = State::Normal,
         }
     }
@@ -32,9 +32,9 @@ impl AppState {
     pub fn render(&self, app: &App, frame: &mut Frame) {
         frame.render_widget(app, frame.area());
 
-        match self.state {
+        match &self.state {
             State::Help   => frame.render_widget(Help, frame.area()),
-            State::Save => frame.render_widget(&app.save_to_file, frame.area()),
+            State::Save{ save } => frame.render_widget(save, frame.area()),
             _ => {}
         }
     }

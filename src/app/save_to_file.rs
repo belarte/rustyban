@@ -9,10 +9,18 @@ use ratatui::{
 };
 use tui_textarea::{Input, TextArea};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Save<'a> {
     text_area: TextArea<'a>,
 }
+
+impl PartialEq for Save<'_> {
+    fn eq(&self, _other: &Self) -> bool {
+        true
+    }
+}
+
+impl Eq for Save<'_> {}
 
 impl Save<'_> {
     pub fn new() -> Self {
