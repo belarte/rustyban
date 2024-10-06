@@ -11,8 +11,8 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Card {
-    pub short_description: String,
-    pub creation_date: DateTime<Local>,
+    short_description: String,
+    creation_date: DateTime<Local>,
 }
 
 impl Card {
@@ -21,6 +21,10 @@ impl Card {
             short_description: short_description.into(),
             creation_date,
         }
+    }
+
+    pub fn short_description(&self) -> &String {
+        &self.short_description
     }
 }
 
