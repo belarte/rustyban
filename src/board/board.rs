@@ -20,7 +20,7 @@ pub struct Board {
     selected_card: usize,
 
     #[serde(skip)]
-    selection_activated: bool,
+    selection_enabled: bool,
 }
 
 impl Board {
@@ -33,7 +33,7 @@ impl Board {
             columns: vec![todo, doing, done],
             selected_column: 0,
             selected_card: 0,
-            selection_activated: false,
+            selection_enabled: false,
         }
     }
 
@@ -86,12 +86,12 @@ impl Board {
     }
 
     pub fn select_next_column(&mut self) -> (usize, usize) {
-        if self.selection_activated {
+        if self.selection_enabled {
             self.deselect_card(self.selected_column, self.selected_card);
             self.selected_column = self.next_column_index(self.selected_column);
             self.selected_card = self.columns[self.selected_column].get_card_index(self.selected_card);
         } else {
-            self.selection_activated = true;
+            self.selection_enabled = true;
         }
 
         self.select_card(self.selected_column, self.selected_card);
@@ -99,12 +99,12 @@ impl Board {
     }
 
     pub fn select_prev_column(&mut self) -> (usize, usize) {
-        if self.selection_activated {
+        if self.selection_enabled {
             self.deselect_card(self.selected_column, self.selected_card);
             self.selected_column = self.prev_column_index(self.selected_column);
             self.selected_card = self.columns[self.selected_column].get_card_index(self.selected_card);
         } else {
-            self.selection_activated = true;
+            self.selection_enabled = true;
         }
 
         self.select_card(self.selected_column, self.selected_card);
@@ -112,11 +112,11 @@ impl Board {
     }
 
     pub fn select_next_card(&mut self) -> (usize, usize) {
-        if self.selection_activated {
+        if self.selection_enabled {
             self.deselect_card(self.selected_column, self.selected_card);
             self.selected_card = self.columns[self.selected_column].next_card_index(self.selected_card);
         } else {
-            self.selection_activated = true;
+            self.selection_enabled = true;
         }
 
         self.select_card(self.selected_column, self.selected_card);
@@ -124,15 +124,20 @@ impl Board {
     }
 
     pub fn select_prev_card(&mut self) -> (usize, usize) {
-        if self.selection_activated {
+        if self.selection_enabled {
             self.deselect_card(self.selected_column, self.selected_card);
             self.selected_card = self.columns[self.selected_column].prev_card_index(self.selected_card);
         } else {
-            self.selection_activated = true;
+            self.selection_enabled = true;
         }
 
         self.select_card(self.selected_column, self.selected_card);
         (self.selected_column, self.selected_card)
+    }
+
+    pub fn disable_selection(&mut self) {
+        self.selection_enabled = false;
+        self.deselect_card(self.selected_column, self.selected_card);
     }
 }
 

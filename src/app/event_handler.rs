@@ -23,6 +23,10 @@ pub fn normal_mode<'a>(app: &mut App, key_event: KeyEvent) -> State<'a> {
             app.select_next_column();
             State::Normal
         }
+        KeyCode::Esc => {
+            app.disable_selection();
+            State::Normal
+        }
         KeyCode::Char('w') => {
             app.write();
             State::Normal

@@ -65,6 +65,10 @@ impl App {
         self.log(format!("Selecting card {} in column {}", card, column));
     }
 
+    pub fn disable_selection(&mut self) {
+        self.board.disable_selection();
+    }
+
     pub fn write(&mut self) {
         match self.board.to_file(&self.file_name) {
             Ok(_) => self.log(format!("Board written to {}", self.file_name)),
