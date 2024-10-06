@@ -45,6 +45,22 @@ impl App {
         self.exit = true;
     }
 
+    pub fn select_next_column(&mut self) {
+        self.log("Selecting next column".into());
+    }
+
+    pub fn select_prev_column(&mut self) {
+        self.log("Selecting previous column".into());
+    }
+
+    pub fn select_next_card(&mut self) {
+        self.log("Selecting next card".into());
+    }
+
+    pub fn select_prev_card(&mut self) {
+        self.log("Selecting previous card".into());
+    }
+
     pub fn write(&mut self) {
         match self.board.to_file(&self.file_name) {
             Ok(_) => self.log(format!("Board written to {}", self.file_name)),

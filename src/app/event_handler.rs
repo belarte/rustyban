@@ -7,6 +7,22 @@ use super::save_to_file::Save;
 
 pub fn normal_mode<'a>(app: &mut App, key_event: KeyEvent) -> State<'a> {
     match key_event.code {
+        KeyCode::Char('h') => {
+            app.select_prev_column();
+            State::Normal
+        }
+        KeyCode::Char('j') => {
+            app.select_next_card();
+            State::Normal
+        }
+        KeyCode::Char('k') => {
+            app.select_prev_card();
+            State::Normal
+        }
+        KeyCode::Char('l') => {
+            app.select_next_column();
+            State::Normal
+        }
         KeyCode::Char('w') => {
             app.write();
             State::Normal
