@@ -1,3 +1,5 @@
+use std::cmp::min;
+
 use ratatui::{
     buffer::Buffer,
     layout::{Alignment, Constraint, Layout, Rect},
@@ -30,6 +32,48 @@ impl Column {
 
     pub fn add_card(&mut self, card: Card) {
         self.cards.push(card);
+    }
+
+    pub fn next_card_index(&self, current_index: usize) -> usize {
+        min(current_index + 1, self.cards.len() - 1)
+    }
+
+    pub fn prev_card_index(&self, current_index: usize) -> usize {
+        if current_index == 0 {
+            return 0
+        }
+
+        min(current_index - 1, self.cards.len() - 1)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::io::Result;
+
+    use crate::board::card::Card;
+
+    use super::Column;
+
+    #[test]
+    fn selection() -> Result<()> {
+        let mut column = Column::new("test");
+
+        column.add_card(Card::default());
+        column.add_card(Card::default());
+        column.add_card(Card::default());
+
+        assert_eq!(1, column.next_card_index(0));
+        assert_eq!(2, column.next_card_index(1));
+        assert_eq!(2, column.next_card_index(2));
+        assert_eq!(2, column.next_card_index(999));
+
+        assert_eq!(0, column.prev_card_index(0));
+        assert_eq!(0, column.prev_card_index(1));
+        assert_eq!(1, column.prev_card_index(2));
+        assert_eq!(2, column.prev_card_index(999));
+
+        Ok(())
     }
 }
 

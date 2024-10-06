@@ -9,7 +9,7 @@ use ratatui::{
     widgets::{Block, Paragraph, Widget}};
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Default, Deserialize, Serialize)]
 pub struct Card {
     short_description: String,
 
