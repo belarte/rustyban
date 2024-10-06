@@ -1,4 +1,4 @@
-use std::{fs::File, io::{Read, Result, Write}};
+use std::{cmp::min, fs::File, io::{Read, Result, Write}};
 
 use ratatui::{
     buffer::Buffer,
@@ -11,7 +11,7 @@ use crate::board::Column;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Board {
-    pub columns: Vec<Column>,
+    columns: Vec<Column>,
 }
 
 impl Board {
@@ -49,6 +49,18 @@ impl Board {
             Ok(res) => Ok(res),
             Err(e) => Err(e.into()),
         }
+    }
+
+    pub fn next_column_index(&self, current_index: usize) -> usize {
+        min(current_index + 1, self.columns.len() - 1)
+    }
+
+    pub fn prev_column_index(&self, current_index: usize) -> usize {
+        if current_index == 0 {
+            return 0
+        }
+
+        min(current_index - 1, self.columns.len() - 1)
     }
 }
 
@@ -120,6 +132,23 @@ mod tests {
         assert!(result.contains("Done!"));
         assert!(result.contains("Eat dinner"));
         assert!(result.contains("Wash dishes"));
+
+        Ok(())
+    }
+
+    #[test]
+    fn card_selection() -> Result<()> {
+        let board = Board::open("res/test_board.json")?;
+
+        assert_eq!(1, board.next_column_index(0));
+        assert_eq!(2, board.next_column_index(1));
+        assert_eq!(2, board.next_column_index(2));
+        assert_eq!(2, board.next_column_index(999));
+
+        assert_eq!(0, board.prev_column_index(0));
+        assert_eq!(0, board.prev_column_index(1));
+        assert_eq!(1, board.prev_column_index(2));
+        assert_eq!(2, board.prev_column_index(999));
 
         Ok(())
     }
