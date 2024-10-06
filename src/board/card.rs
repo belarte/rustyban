@@ -12,7 +12,11 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Card {
     short_description: String,
+
     creation_date: DateTime<Local>,
+
+    #[serde(skip)]
+    is_selected: bool,
 }
 
 impl Card {
@@ -20,11 +24,49 @@ impl Card {
         Card {
             short_description: short_description.into(),
             creation_date,
+            is_selected: false,
         }
     }
 
     pub fn short_description(&self) -> &String {
         &self.short_description
+    }
+
+    pub fn is_selected(&self) -> bool {
+        self.is_selected
+    }
+
+    pub fn select(&mut self) {
+        self.is_selected = true;
+    }
+
+    pub fn deselect(&mut self) {
+        self.is_selected = false;
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::io::Result;
+
+    use chrono::Local;
+
+    use super::Card;
+
+    #[test]
+    fn selection() -> Result<()> {
+        let mut card = Card::new("test", Local::now());
+        assert_eq!(false, card.is_selected());
+        card.deselect();
+        assert_eq!(false, card.is_selected());
+        card.select();
+        assert_eq!(true, card.is_selected());
+        card.select();
+        assert_eq!(true, card.is_selected());
+        card.deselect();
+        assert_eq!(false, card.is_selected());
+
+        Ok(())
     }
 }
 
