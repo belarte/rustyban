@@ -75,15 +75,15 @@ mod tests {
         let path = "res/test_board.json";
         let board = Board::open(path).expect("Cannot open board");
 
-        assert_eq!("TODO", board.columns[0].header);
-        assert_eq!("Buy milk", board.columns[0].cards[0].short_description());
-        assert_eq!("Buy eggs", board.columns[0].cards[1].short_description());
-        assert_eq!("Buy bread", board.columns[0].cards[2].short_description());
-        assert_eq!("Doing", board.columns[1].header);
-        assert_eq!("Cook dinner", board.columns[1].cards[0].short_description());
-        assert_eq!("Done!", board.columns[2].header);
-        assert_eq!("Eat dinner", board.columns[2].cards[0].short_description());
-        assert_eq!("Wash dishes", board.columns[2].cards[1].short_description());
+        assert_eq!("TODO", board.columns[0].header());
+        assert_eq!("Buy milk", board.columns[0].get_card(0).short_description());
+        assert_eq!("Buy eggs", board.columns[0].get_card(1).short_description());
+        assert_eq!("Buy bread", board.columns[0].get_card(2).short_description());
+        assert_eq!("Doing", board.columns[1].header());
+        assert_eq!("Cook dinner", board.columns[1].get_card(0).short_description());
+        assert_eq!("Done!", board.columns[2].header());
+        assert_eq!("Eat dinner", board.columns[2].get_card(0).short_description());
+        assert_eq!("Wash dishes", board.columns[2].get_card(1).short_description());
 
         Ok(())
     }

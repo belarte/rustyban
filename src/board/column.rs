@@ -11,13 +11,21 @@ use crate::board::Card;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Column {
-    pub header: String,
-    pub cards: Vec<Card>,
+    header: String,
+    cards: Vec<Card>,
 }
 
 impl Column {
     pub fn new(header: &str) -> Self {
         Column { header: header.into(), cards: vec![] }
+    }
+
+    pub fn header(&self) -> &str {
+        &self.header
+    }
+
+    pub fn get_card(&self, i: usize) -> &Card {
+        &self.cards[i]
     }
 
     pub fn add_card(&mut self, card: Card) {
