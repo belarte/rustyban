@@ -72,8 +72,14 @@ mod tests {
 
 impl Widget for &Card {
     fn render(self, area: Rect, buf: &mut Buffer) {
+        let border = if self.is_selected {
+            border::DOUBLE
+        } else {
+            border::ROUNDED
+        };
+
         let block = Block::bordered()
-            .border_set(border::ROUNDED);
+            .border_set(border);
 
         let text = Text::from(vec![
             Line::from(self.short_description.borrow()),

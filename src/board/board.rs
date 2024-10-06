@@ -18,6 +18,9 @@ pub struct Board {
 
     #[serde(skip)]
     selected_card: usize,
+
+    #[serde(skip)]
+    selection_activated: bool,
 }
 
 impl Board {
@@ -30,6 +33,7 @@ impl Board {
             columns: vec![todo, doing, done],
             selected_column: 0,
             selected_card: 0,
+            selection_activated: false,
         }
     }
 
@@ -73,25 +77,61 @@ impl Board {
         min(current_index - 1, self.columns.len() - 1)
     }
 
+    fn select_card(&mut self, column_index: usize, card_index: usize) {
+        self.columns[column_index].select_card(card_index);
+    }
+
+    fn deselect_card(&mut self, column_index: usize, card_index: usize) {
+        self.columns[column_index].deselect_card(card_index);
+    }
+
     pub fn select_next_column(&mut self) -> (usize, usize) {
-        self.selected_column = self.next_column_index(self.selected_column);
-        self.selected_card = self.columns[self.selected_column].get_card_index(self.selected_card);
+        if self.selection_activated {
+            self.deselect_card(self.selected_column, self.selected_card);
+            self.selected_column = self.next_column_index(self.selected_column);
+            self.selected_card = self.columns[self.selected_column].get_card_index(self.selected_card);
+        } else {
+            self.selection_activated = true;
+        }
+
+        self.select_card(self.selected_column, self.selected_card);
         (self.selected_column, self.selected_card)
     }
 
     pub fn select_prev_column(&mut self) -> (usize, usize) {
-        self.selected_column = self.prev_column_index(self.selected_column);
-        self.selected_card = self.columns[self.selected_column].get_card_index(self.selected_card);
+        if self.selection_activated {
+            self.deselect_card(self.selected_column, self.selected_card);
+            self.selected_column = self.prev_column_index(self.selected_column);
+            self.selected_card = self.columns[self.selected_column].get_card_index(self.selected_card);
+        } else {
+            self.selection_activated = true;
+        }
+
+        self.select_card(self.selected_column, self.selected_card);
         (self.selected_column, self.selected_card)
     }
 
     pub fn select_next_card(&mut self) -> (usize, usize) {
-        self.selected_card = self.columns[self.selected_column].next_card_index(self.selected_card);
+        if self.selection_activated {
+            self.deselect_card(self.selected_column, self.selected_card);
+            self.selected_card = self.columns[self.selected_column].next_card_index(self.selected_card);
+        } else {
+            self.selection_activated = true;
+        }
+
+        self.select_card(self.selected_column, self.selected_card);
         (self.selected_column, self.selected_card)
     }
 
     pub fn select_prev_card(&mut self) -> (usize, usize) {
-        self.selected_card = self.columns[self.selected_column].prev_card_index(self.selected_card);
+        if self.selection_activated {
+            self.deselect_card(self.selected_column, self.selected_card);
+            self.selected_card = self.columns[self.selected_column].prev_card_index(self.selected_card);
+        } else {
+            self.selection_activated = true;
+        }
+
+        self.select_card(self.selected_column, self.selected_card);
         (self.selected_column, self.selected_card)
     }
 }
