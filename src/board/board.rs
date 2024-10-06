@@ -12,6 +12,12 @@ use crate::board::Column;
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Board {
     columns: Vec<Column>,
+
+    #[serde(skip)]
+    selected_column: usize,
+
+    #[serde(skip)]
+    selected_card: usize,
 }
 
 impl Board {
@@ -20,7 +26,11 @@ impl Board {
         let doing = Column::new("Doing");
         let done = Column::new("Done!");
 
-        Board { columns: vec![todo, doing, done] }
+        Board {
+            columns: vec![todo, doing, done],
+            selected_column: 0,
+            selected_card: 0,
+        }
     }
 
     pub fn open(file_name: &str) -> Result<Self> {
@@ -61,6 +71,28 @@ impl Board {
         }
 
         min(current_index - 1, self.columns.len() - 1)
+    }
+
+    pub fn select_next_column(&mut self) -> (usize, usize) {
+        self.selected_column = self.next_column_index(self.selected_column);
+        self.selected_card = self.columns[self.selected_column].get_card_index(self.selected_card);
+        (self.selected_column, self.selected_card)
+    }
+
+    pub fn select_prev_column(&mut self) -> (usize, usize) {
+        self.selected_column = self.prev_column_index(self.selected_column);
+        self.selected_card = self.columns[self.selected_column].get_card_index(self.selected_card);
+        (self.selected_column, self.selected_card)
+    }
+
+    pub fn select_next_card(&mut self) -> (usize, usize) {
+        self.selected_card = self.columns[self.selected_column].next_card_index(self.selected_card);
+        (self.selected_column, self.selected_card)
+    }
+
+    pub fn select_prev_card(&mut self) -> (usize, usize) {
+        self.selected_card = self.columns[self.selected_column].prev_card_index(self.selected_card);
+        (self.selected_column, self.selected_card)
     }
 }
 

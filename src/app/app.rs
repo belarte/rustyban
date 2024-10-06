@@ -46,19 +46,23 @@ impl App {
     }
 
     pub fn select_next_column(&mut self) {
-        self.log("Selecting next column".into());
+        let (column, card) = self.board.select_next_column();
+        self.log(format!("Selecting card {} in column {}", card, column));
     }
 
     pub fn select_prev_column(&mut self) {
-        self.log("Selecting previous column".into());
+        let (column, card) = self.board.select_prev_column();
+        self.log(format!("Selecting card {} in column {}", card, column));
     }
 
     pub fn select_next_card(&mut self) {
-        self.log("Selecting next card".into());
+        let (column, card) = self.board.select_next_card();
+        self.log(format!("Selecting card {} in column {}", card, column));
     }
 
     pub fn select_prev_card(&mut self) {
-        self.log("Selecting previous card".into());
+        let (column, card) = self.board.select_prev_card();
+        self.log(format!("Selecting card {} in column {}", card, column));
     }
 
     pub fn write(&mut self) {

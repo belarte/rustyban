@@ -34,8 +34,12 @@ impl Column {
         self.cards.push(card);
     }
 
+    pub fn get_card_index(&self, index: usize) -> usize {
+        min(index, self.cards.len() - 1)
+    }
+
     pub fn next_card_index(&self, current_index: usize) -> usize {
-        min(current_index + 1, self.cards.len() - 1)
+        self.get_card_index(current_index + 1)
     }
 
     pub fn prev_card_index(&self, current_index: usize) -> usize {
@@ -43,7 +47,7 @@ impl Column {
             return 0
         }
 
-        min(current_index - 1, self.cards.len() - 1)
+        self.get_card_index(current_index - 1)
     }
 }
 
