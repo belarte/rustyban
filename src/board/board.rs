@@ -1,4 +1,4 @@
-use std::{cmp::min, fs::File, io::{Read, Result, Write}};
+use std::{fs::File, io::{Read, Result, Write}};
 
 use ratatui::{
     buffer::Buffer,
@@ -12,15 +12,6 @@ use crate::board::Column;
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Board {
     columns: Vec<Column>,
-
-    #[serde(skip)]
-    selected_column: usize,
-
-    #[serde(skip)]
-    selected_card: usize,
-
-    #[serde(skip)]
-    selection_enabled: bool,
 }
 
 impl Board {
@@ -31,9 +22,6 @@ impl Board {
 
         Board {
             columns: vec![todo, doing, done],
-            selected_column: 0,
-            selected_card: 0,
-            selection_enabled: false,
         }
     }
 
@@ -65,79 +53,12 @@ impl Board {
         }
     }
 
-    pub fn next_column_index(&self, current_index: usize) -> usize {
-        min(current_index + 1, self.columns.len() - 1)
+    pub fn columns(&mut self, index: usize) -> &mut Column {
+        &mut self.columns[index]
     }
 
-    pub fn prev_column_index(&self, current_index: usize) -> usize {
-        if current_index == 0 {
-            return 0
-        }
-
-        min(current_index - 1, self.columns.len() - 1)
-    }
-
-    fn select_card(&mut self, column_index: usize, card_index: usize) {
-        self.columns[column_index].select_card(card_index);
-    }
-
-    fn deselect_card(&mut self, column_index: usize, card_index: usize) {
-        self.columns[column_index].deselect_card(card_index);
-    }
-
-    pub fn select_next_column(&mut self) -> (usize, usize) {
-        if self.selection_enabled {
-            self.deselect_card(self.selected_column, self.selected_card);
-            self.selected_column = self.next_column_index(self.selected_column);
-            self.selected_card = self.columns[self.selected_column].get_card_index(self.selected_card);
-        } else {
-            self.selection_enabled = true;
-        }
-
-        self.select_card(self.selected_column, self.selected_card);
-        (self.selected_column, self.selected_card)
-    }
-
-    pub fn select_prev_column(&mut self) -> (usize, usize) {
-        if self.selection_enabled {
-            self.deselect_card(self.selected_column, self.selected_card);
-            self.selected_column = self.prev_column_index(self.selected_column);
-            self.selected_card = self.columns[self.selected_column].get_card_index(self.selected_card);
-        } else {
-            self.selection_enabled = true;
-        }
-
-        self.select_card(self.selected_column, self.selected_card);
-        (self.selected_column, self.selected_card)
-    }
-
-    pub fn select_next_card(&mut self) -> (usize, usize) {
-        if self.selection_enabled {
-            self.deselect_card(self.selected_column, self.selected_card);
-            self.selected_card = self.columns[self.selected_column].next_card_index(self.selected_card);
-        } else {
-            self.selection_enabled = true;
-        }
-
-        self.select_card(self.selected_column, self.selected_card);
-        (self.selected_column, self.selected_card)
-    }
-
-    pub fn select_prev_card(&mut self) -> (usize, usize) {
-        if self.selection_enabled {
-            self.deselect_card(self.selected_column, self.selected_card);
-            self.selected_card = self.columns[self.selected_column].prev_card_index(self.selected_card);
-        } else {
-            self.selection_enabled = true;
-        }
-
-        self.select_card(self.selected_column, self.selected_card);
-        (self.selected_column, self.selected_card)
-    }
-
-    pub fn disable_selection(&mut self) {
-        self.selection_enabled = false;
-        self.deselect_card(self.selected_column, self.selected_card);
+    pub fn columns_count(&self) -> usize {
+        self.columns.len()
     }
 }
 
@@ -209,23 +130,6 @@ mod tests {
         assert!(result.contains("Done!"));
         assert!(result.contains("Eat dinner"));
         assert!(result.contains("Wash dishes"));
-
-        Ok(())
-    }
-
-    #[test]
-    fn card_selection() -> Result<()> {
-        let board = Board::open("res/test_board.json")?;
-
-        assert_eq!(1, board.next_column_index(0));
-        assert_eq!(2, board.next_column_index(1));
-        assert_eq!(2, board.next_column_index(2));
-        assert_eq!(2, board.next_column_index(999));
-
-        assert_eq!(0, board.prev_column_index(0));
-        assert_eq!(0, board.prev_column_index(1));
-        assert_eq!(1, board.prev_column_index(2));
-        assert_eq!(2, board.prev_column_index(999));
 
         Ok(())
     }

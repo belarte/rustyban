@@ -7,13 +7,16 @@ use ratatui::{
 };
 
 use crate::app::Logger;
+use crate::app::CardSelector;
 use crate::board::Board;
+
 
 #[derive(Debug)]
 pub struct App {
     file_name: String,
     logger: Logger,
     board: Board,
+    selector: CardSelector,
     pub exit: bool,
 }
 
@@ -37,6 +40,7 @@ impl App {
             file_name,
             logger,
             board,
+            selector: CardSelector::new(),
             exit: false,
         }
     }
@@ -46,27 +50,27 @@ impl App {
     }
 
     pub fn select_next_column(&mut self) {
-        let (column, card) = self.board.select_next_column();
+        let (column, card) = self.selector.select_next_column(&mut self.board);
         self.log(format!("Selecting card {} in column {}", card, column));
     }
 
     pub fn select_prev_column(&mut self) {
-        let (column, card) = self.board.select_prev_column();
+        let (column, card) = self.selector.select_prev_column(&mut self.board);
         self.log(format!("Selecting card {} in column {}", card, column));
     }
 
     pub fn select_next_card(&mut self) {
-        let (column, card) = self.board.select_next_card();
+        let (column, card) = self.selector.select_next_card(&mut self.board);
         self.log(format!("Selecting card {} in column {}", card, column));
     }
 
     pub fn select_prev_card(&mut self) {
-        let (column, card) = self.board.select_prev_card();
+        let (column, card) = self.selector.select_prev_card(&mut self.board);
         self.log(format!("Selecting card {} in column {}", card, column));
     }
 
     pub fn disable_selection(&mut self) {
-        self.board.disable_selection();
+        self.selector.disable_selection(&mut self.board);
     }
 
     pub fn write(&mut self) {
