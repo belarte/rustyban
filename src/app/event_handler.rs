@@ -7,19 +7,19 @@ use super::save_to_file::Save;
 
 pub fn normal_mode<'a>(app: &mut App, key_event: KeyEvent) -> State<'a> {
     match key_event.code {
-        KeyCode::Char('h') => {
+        KeyCode::Char('h') | KeyCode::Left => {
             app.select_prev_column();
             State::Normal
         }
-        KeyCode::Char('j') => {
+        KeyCode::Char('j') | KeyCode::Down => {
             app.select_next_card();
             State::Normal
         }
-        KeyCode::Char('k') => {
+        KeyCode::Char('k') | KeyCode::Up => {
             app.select_prev_card();
             State::Normal
         }
-        KeyCode::Char('l') => {
+        KeyCode::Char('l') | KeyCode::Right => {
             app.select_next_column();
             State::Normal
         }
