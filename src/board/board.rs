@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::board::Column;
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Board {
     columns: Vec<Column>,
 }
@@ -59,6 +59,18 @@ impl Board {
 
     pub fn columns_count(&self) -> usize {
         self.columns.len()
+    }
+
+    pub fn select_card(mut board: Board, column_index: usize, card_index: usize) -> Board {
+        let column = Column::select_card(board.columns[column_index].clone(), card_index);
+        board.columns[column_index] = column;
+        board
+    }
+
+    pub fn deselect_card(mut board: Board, column_index: usize, card_index: usize) -> Board {
+        let column = Column::deselect_card(board.columns[column_index].clone(), card_index);
+        board.columns[column_index] = column;
+        board
     }
 }
 

@@ -11,7 +11,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::board::Card;
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Column {
     header: String,
     cards: Vec<Card>,
@@ -50,12 +50,16 @@ impl Column {
         self.get_card_index(current_index - 1)
     }
 
-    pub fn select_card(&mut self, card_index: usize) {
-        self.cards[card_index].select();
+    pub fn select_card(mut column: Column, card_index: usize) -> Column {
+        let card = Card::select(column.cards[card_index].clone());
+        column.cards[card_index] = card;
+        column
     }
 
-    pub fn deselect_card(&mut self, card_index: usize) {
-        self.cards[card_index].deselect();
+    pub fn deselect_card(mut column: Column, card_index: usize) -> Column {
+        let card = Card::deselect(column.cards[card_index].clone());
+        column.cards[card_index] = card;
+        column
     }
 }
 

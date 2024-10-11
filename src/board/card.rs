@@ -9,7 +9,7 @@ use ratatui::{
     widgets::{Block, Paragraph, Widget}};
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Default, Deserialize, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, Serialize)]
 pub struct Card {
     short_description: String,
 
@@ -36,12 +36,14 @@ impl Card {
         self.is_selected
     }
 
-    pub fn select(&mut self) {
-        self.is_selected = true;
+    pub fn select(mut card: Card) -> Self {
+        card.is_selected = true;
+        card
     }
 
-    pub fn deselect(&mut self) {
-        self.is_selected = false;
+    pub fn deselect(mut card: Card) -> Self {
+        card.is_selected = false;
+        card
     }
 }
 
@@ -55,15 +57,19 @@ mod tests {
 
     #[test]
     fn selection() -> Result<()> {
-        let mut card = Card::new("test", Local::now());
+        let card = Card::new("test", Local::now());
         assert_eq!(false, card.is_selected());
-        card.deselect();
+
+        let card = Card::deselect(card);
         assert_eq!(false, card.is_selected());
-        card.select();
+
+        let card = Card::select(card);
         assert_eq!(true, card.is_selected());
-        card.select();
+
+        let card = Card::select(card);
         assert_eq!(true, card.is_selected());
-        card.deselect();
+
+        let card = Card::deselect(card);
         assert_eq!(false, card.is_selected());
 
         Ok(())
