@@ -8,6 +8,7 @@ use super::{app::App, event_handler::{normal_mode, save_mode}, help::Help, save_
 pub enum State<'a> {
     Normal,
     Save { save: Save<'a> },
+    Edit,
     Help,
 }
 
@@ -25,6 +26,7 @@ impl<'a> AppState<'a> {
         match &self.state {
             State::Normal => self.state = normal_mode(app, event),
             State::Save{ save } => self.state = save_mode(save, app, event),
+            State::Edit   => self.state = State::Normal,
             State::Help   => self.state = State::Normal,
         }
     }
@@ -33,9 +35,10 @@ impl<'a> AppState<'a> {
         frame.render_widget(app, frame.area());
 
         match &self.state {
-            State::Help   => frame.render_widget(Help, frame.area()),
+            State::Normal => {}
             State::Save{ save } => frame.render_widget(save, frame.area()),
-            _ => {}
+            State::Edit => {}
+            State::Help   => frame.render_widget(Help, frame.area()),
         }
     }
 }

@@ -18,6 +18,14 @@ impl CardSelector {
         }
     }
 
+    pub fn get(&self) -> Option<(usize, usize)> {
+        if self.selection_enabled {
+            Some((self.selected_column, self.selected_card))
+        } else {
+            None
+        }
+    }
+
     pub fn select_next_column(&mut self, mut board: Board) -> Board {
         if self.selection_enabled {
             board = Board::deselect_card(board.clone(), self.selected_column, self.selected_card);
@@ -124,6 +132,30 @@ mod tests {
         let board = selector.select_prev_column(board);
         let mut board = selector.select_prev_column(board);
         assert_eq!(true, board.columns(0).get_card(0).is_selected());
+
+        Ok(())
+    }
+
+    #[test]
+    fn get_the_card_index() -> Result<()> {
+        let board = Board::open("res/test_board.json")?;
+        let mut selector = CardSelector::new();
+
+        assert_eq!(None, selector.get());
+        let board = selector.select_next_card(board);
+        assert_eq!(Some((0, 0)), selector.get());
+
+        let board = selector.select_next_column(board);
+        let board = selector.select_next_column(board);
+        let board = selector.select_next_card(board);
+        assert_eq!(Some((2, 1)), selector.get());
+
+        let board = selector.select_next_column(board);
+        let board = selector.select_next_card(board);
+        assert_eq!(Some((2, 1)), selector.get());
+
+        selector.disable_selection(board);
+        assert_eq!(None, selector.get());
 
         Ok(())
     }

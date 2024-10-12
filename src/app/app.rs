@@ -68,6 +68,14 @@ impl App {
         self.board = self.selector.disable_selection(self.board.clone());
     }
 
+    pub fn get_selection(&self) -> Option<(usize, usize)> {
+        self.selector.get()
+    }
+
+    pub fn edit_card(&mut self, column: usize, card: usize) {
+        self.log(format!("Editing card {} in column {}", card, column));
+    }
+
     pub fn write(&mut self) {
         match self.board.to_file(&self.file_name) {
             Ok(_) => self.log(format!("Board written to {}", self.file_name)),
