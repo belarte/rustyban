@@ -100,37 +100,37 @@ mod tests {
 
     #[test]
     fn card_selection() -> Result<()> {
-        let mut board = Board::open("res/test_board.json")?;
+        let board = Board::open("res/test_board.json")?;
         let mut selector = CardSelector::new();
 
         assert_eq!(false, board.columns(0).get_card(0).is_selected());
-        let mut board = selector.select_next_card(board);
+        let board = selector.select_next_card(board);
         assert_eq!(true, board.columns(0).get_card(0).is_selected());
 
         assert_eq!(false, board.columns(0).get_card(1).is_selected());
-        let mut board = selector.select_next_card(board);
+        let board = selector.select_next_card(board);
         assert_eq!(true, board.columns(0).get_card(1).is_selected());
 
         assert_eq!(false, board.columns(0).get_card(2).is_selected());
-        let mut board = selector.select_next_card(board);
+        let board = selector.select_next_card(board);
         assert_eq!(true, board.columns(0).get_card(2).is_selected());
 
         assert_eq!(false, board.columns(1).get_card(0).is_selected());
         let board = selector.select_next_column(board);
-        let mut board = selector.select_next_card(board);
+        let board = selector.select_next_card(board);
         assert_eq!(true, board.columns(1).get_card(0).is_selected());
 
         assert_eq!(false, board.columns(2).get_card(0).is_selected());
         let board = selector.select_next_column(board);
         let board = selector.select_next_column(board);
-        let mut board = selector.select_prev_card(board);
+        let board = selector.select_prev_card(board);
         assert_eq!(true, board.columns(2).get_card(0).is_selected());
 
         assert_eq!(false, board.columns(0).get_card(0).is_selected());
         let board = selector.select_prev_column(board);
         let board = selector.select_prev_column(board);
         let board = selector.select_prev_column(board);
-        let mut board = selector.select_prev_column(board);
+        let board = selector.select_prev_column(board);
         assert_eq!(true, board.columns(0).get_card(0).is_selected());
 
         Ok(())

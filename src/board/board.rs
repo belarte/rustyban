@@ -53,8 +53,8 @@ impl Board {
         }
     }
 
-    pub fn columns(&mut self, index: usize) -> &mut Column {
-        &mut self.columns[index]
+    pub fn columns(&self, index: usize) -> &Column {
+        &self.columns[index]
     }
 
     pub fn columns_count(&self) -> usize {
