@@ -3,9 +3,7 @@ use ratatui::{
     layout::{Constraint, Flex, Layout, Rect},
     style::Stylize,
     symbols::border,
-    widgets::{
-        Block, Clear, Widget
-    },
+    widgets::{Block, Clear, Widget},
 };
 use tui_textarea::{Input, TextArea};
 
@@ -31,9 +29,7 @@ impl Save<'_> {
         let mut text_area = TextArea::default();
         text_area.set_block(block);
 
-        return Self {
-            text_area,
-        }
+        return Self { text_area };
     }
 
     pub fn push(&mut self, input: Input) {

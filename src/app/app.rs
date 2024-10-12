@@ -6,8 +6,8 @@ use ratatui::{
     widgets::Widget,
 };
 
-use crate::app::Logger;
 use crate::app::CardSelector;
+use crate::app::Logger;
 use crate::board::Board;
 
 #[derive(Debug)]
@@ -26,7 +26,10 @@ impl App {
             match Board::open(&file_name) {
                 Ok(board) => board,
                 Err(e) => {
-                    logger.log(format!("Cannot read file {} because {}, creating a new board", file_name, e));
+                    logger.log(format!(
+                        "Cannot read file {} because {}, creating a new board",
+                        file_name, e
+                    ));
                     Board::new()
                 }
             }
@@ -100,19 +103,19 @@ impl Widget for &App {
             Constraint::Min(0),
             Constraint::Length(3),
             Constraint::Length(1),
-        ]).areas(area);
+        ])
+        .areas(area);
 
-        let title = Line::from(" Welcome ".bold())
-            .centered();
+        let title = Line::from(" Welcome ".bold()).centered();
         title.render(title_area, buf);
 
         let instructions = Line::from(vec![
-                " Help ".into(),
-                "<?> ".blue().bold(),
-                "Quit ".into(),
-                "<q> ".blue().bold(),
+            " Help ".into(),
+            "<?> ".blue().bold(),
+            "Quit ".into(),
+            "<q> ".blue().bold(),
         ])
-            .centered();
+        .centered();
         instructions.render(instructions_area, buf);
 
         self.board.render(board_area, buf);

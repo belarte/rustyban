@@ -15,4 +15,3 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     Ok(app_result?)
 }
-

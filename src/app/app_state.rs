@@ -2,11 +2,11 @@ use crossterm::event::KeyEvent;
 use ratatui::Frame;
 
 use super::{
-    app::App, 
+    app::App,
     card_editor::CardEditor,
     event_handler::{normal_mode, save_mode},
     help::Help,
-    save_to_file::Save
+    save_to_file::Save,
 };
 
 #[derive(Debug, PartialEq, Eq)]
@@ -30,9 +30,9 @@ impl<'a> AppState<'a> {
     pub fn handle_events(&mut self, app: &mut App, event: KeyEvent) {
         match &self.state {
             State::Normal => self.state = normal_mode(app, event),
-            State::Save{ save } => self.state = save_mode(save, app, event),
-            State::Edit{ editor: _ }  => self.state = State::Normal,
-            State::Help   => self.state = State::Normal,
+            State::Save { save } => self.state = save_mode(save, app, event),
+            State::Edit { editor: _ } => self.state = State::Normal,
+            State::Help => self.state = State::Normal,
         }
     }
 
@@ -41,9 +41,9 @@ impl<'a> AppState<'a> {
 
         match &self.state {
             State::Normal => {}
-            State::Save{ save } => frame.render_widget(save, frame.area()),
-            State::Edit{ editor } => frame.render_widget(editor, frame.area()),
-            State::Help   => frame.render_widget(Help, frame.area()),
+            State::Save { save } => frame.render_widget(save, frame.area()),
+            State::Edit { editor } => frame.render_widget(editor, frame.area()),
+            State::Help => frame.render_widget(Help, frame.area()),
         }
     }
 }
@@ -83,4 +83,3 @@ mod tests {
         Ok(())
     }
 }
-

@@ -4,7 +4,7 @@ use ratatui::{
     style::Stylize,
     symbols::border,
     text::Line,
-    widgets::{block::Title, Block, Paragraph, Widget}
+    widgets::{block::Title, Block, Paragraph, Widget},
 };
 
 #[derive(Debug)]
@@ -15,7 +15,10 @@ pub struct Logger {
 
 impl Logger {
     pub fn new() -> Self {
-        Self { counter: 0, message: String::new() }
+        Self {
+            counter: 0,
+            message: String::new(),
+        }
     }
 
     pub fn log(&mut self, msg: String) {
@@ -37,9 +40,7 @@ impl Widget for &Logger {
 
         let message = Line::from(vec![" ".into(), self.show().into()]);
 
-        Paragraph::new(message)
-            .block(block)
-            .render(area, buf);
+        Paragraph::new(message).block(block).render(area, buf);
     }
 }
 

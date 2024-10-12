@@ -6,7 +6,8 @@ use ratatui::{
     layout::Rect,
     symbols::border,
     text::{Line, Text},
-    widgets::{Block, Paragraph, Widget}};
+    widgets::{Block, Paragraph, Widget},
+};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Default, Deserialize, Serialize)]
@@ -84,17 +85,13 @@ impl Widget for &Card {
             border::ROUNDED
         };
 
-        let block = Block::bordered()
-            .border_set(border);
+        let block = Block::bordered().border_set(border);
 
         let text = Text::from(vec![
             Line::from(self.short_description.borrow()),
-            Line::from(self.creation_date.format("%Y-%m-%d %H:%M").to_string())
+            Line::from(self.creation_date.format("%Y-%m-%d %H:%M").to_string()),
         ]);
 
-        Paragraph::new(text)
-            .block(block)
-            .render(area, buf);
+        Paragraph::new(text).block(block).render(area, buf);
     }
 }
-

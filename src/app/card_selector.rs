@@ -83,7 +83,7 @@ impl CardSelector {
 
     fn prev_column_index(&self, board: &Board, current_index: usize) -> usize {
         if current_index == 0 {
-            return 0
+            return 0;
         }
 
         min(current_index - 1, board.columns_count() - 1)

@@ -39,4 +39,3 @@ impl<'a> AppRunner<'a> {
         self.state.render(&self.app, frame)
     }
 }
-

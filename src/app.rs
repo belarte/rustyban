@@ -5,11 +5,11 @@ mod card_editor;
 mod card_selector;
 mod event_handler;
 mod help;
-mod save_to_file;
 mod logger;
+mod save_to_file;
 
-pub use app_runner::AppRunner;
 use app::App;
+pub use app_runner::AppRunner;
 use app_state::AppState;
 use card_selector::CardSelector;
 use logger::Logger;

@@ -1,7 +1,7 @@
+mod board;
 mod card;
 mod column;
-mod board;
 
+pub use board::Board;
 use card::Card;
 use column::Column;
-pub use board::Board;

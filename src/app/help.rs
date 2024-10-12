@@ -5,7 +5,8 @@ use ratatui::{
     symbols::border,
     text::{Line, Text},
     widgets::{
-        block::{Position, Title}, Block, Clear, Paragraph, Widget
+        block::{Position, Title},
+        Block, Clear, Paragraph, Widget,
     },
 };
 
@@ -19,43 +20,23 @@ impl Widget for Help {
         let title = Title::from(" Help ".bold());
         let status = Title::from(" Press any key to dismiss ");
         let text = Text::from(vec![
-            Line::from(vec![
-                " <h/j/k/l> ".bold(),
-                "Select card".into()
-            ]),
-            Line::from(vec![
-                " <←/↓/↑/→> ".bold(),
-                "Select card".into()
-            ]),
-            Line::from(vec![
-                " <w> ".bold(),
-                "Write the board to file".into()
-            ]),
+            Line::from(vec![" <h/j/k/l> ".bold(), "Select card".into()]),
+            Line::from(vec![" <←/↓/↑/→> ".bold(), "Select card".into()]),
+            Line::from(vec![" <w> ".bold(), "Write the board to file".into()]),
             Line::from(vec![
                 " <W> ".bold(),
-                "Write the board to a new file (opens pop up)".into()
+                "Write the board to a new file (opens pop up)".into(),
             ]),
-            Line::from(vec![
-                " <q> ".bold(),
-                "Quit the application".into()
-            ]),
-            Line::from(vec![
-                " <?> ".bold(),
-                "Toggle this help message".into()
-            ]),
+            Line::from(vec![" <q> ".bold(), "Quit the application".into()]),
+            Line::from(vec![" <?> ".bold(), "Toggle this help message".into()]),
         ]);
 
         let block = Block::bordered()
-            .title(title
-                .alignment(Alignment::Center))
-            .title(status
-                .alignment(Alignment::Center)
-                .position(Position::Bottom))
+            .title(title.alignment(Alignment::Center))
+            .title(status.alignment(Alignment::Center).position(Position::Bottom))
             .on_dark_gray()
             .border_set(border::ROUNDED);
-        Paragraph::new(text)
-            .block(block)
-            .render(area, buf);
+        Paragraph::new(text).block(block).render(area, buf);
     }
 }
 

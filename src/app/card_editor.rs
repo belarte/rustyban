@@ -4,7 +4,7 @@ use ratatui::{
     style::Stylize,
     symbols::border,
     text::Line,
-    widgets::{Block, Clear, Paragraph, Widget}
+    widgets::{Block, Clear, Paragraph, Widget},
 };
 
 #[derive(Debug)]
@@ -36,9 +36,7 @@ impl Widget for &CardEditor {
 
         let text = Line::from("Coming soon!");
 
-        Paragraph::new(text)
-            .block(block)
-            .render(area, buf);
+        Paragraph::new(text).block(block).render(area, buf);
     }
 }
 
@@ -49,4 +47,3 @@ fn editor_area(area: Rect) -> Rect {
     let [area] = horizontal.areas(area);
     area
 }
-

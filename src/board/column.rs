@@ -19,7 +19,10 @@ pub struct Column {
 
 impl Column {
     pub fn new(header: &str) -> Self {
-        Column { header: header.into(), cards: vec![] }
+        Column {
+            header: header.into(),
+            cards: vec![],
+        }
     }
 
     pub fn header(&self) -> &str {
@@ -44,7 +47,7 @@ impl Column {
 
     pub fn prev_card_index(&self, current_index: usize) -> usize {
         if current_index == 0 {
-            return 0
+            return 0;
         }
 
         self.get_card_index(current_index - 1)
@@ -96,12 +99,9 @@ mod tests {
 impl Widget for &Column {
     fn render(self, area: Rect, buf: &mut Buffer) {
         let header = format!(" {} ", self.header);
-        let title = Title::from(header.bold())
-            .alignment(Alignment::Center);
-        
-        let block = Block::bordered()
-            .title(title)
-            .border_set(border::THICK);
+        let title = Title::from(header.bold()).alignment(Alignment::Center);
+
+        let block = Block::bordered().title(title).border_set(border::THICK);
 
         let inner_area = block.inner(area);
         let areas = Layout::vertical([Constraint::Max(4); 4]).split(inner_area);

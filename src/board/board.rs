@@ -1,9 +1,12 @@
-use std::{fs::File, io::{Read, Result, Write}};
+use std::{
+    fs::File,
+    io::{Read, Result, Write},
+};
 
 use ratatui::{
     buffer::Buffer,
     layout::{Constraint, Layout, Rect},
-    widgets::Widget
+    widgets::Widget,
 };
 use serde::{Deserialize, Serialize};
 
@@ -33,10 +36,10 @@ impl Board {
         return match serde_json::from_str(&content) {
             Ok(board) => Ok(board),
             Err(e) => Err(e.into()),
-        }
+        };
     }
 
-    pub fn to_file(&mut self, file_name: &str) -> Result<()>  {
+    pub fn to_file(&mut self, file_name: &str) -> Result<()> {
         let content = self.to_json_string().expect("Cannot write file");
 
         let file = File::create(file_name);
@@ -50,7 +53,7 @@ impl Board {
         return match serde_json::to_string_pretty(&self) {
             Ok(res) => Ok(res),
             Err(e) => Err(e.into()),
-        }
+        };
     }
 
     pub fn columns(&self, index: usize) -> &Column {
@@ -76,9 +79,12 @@ impl Board {
 
 impl Widget for &Board {
     fn render(self, area: Rect, buf: &mut Buffer) {
-        let [left, center, right] = Layout::horizontal(
-            [Constraint::Percentage(33), Constraint::Percentage(34), Constraint::Percentage(33)]
-        ).areas(area);
+        let [left, center, right] = Layout::horizontal([
+            Constraint::Percentage(33),
+            Constraint::Percentage(34),
+            Constraint::Percentage(33),
+        ])
+        .areas(area);
 
         for (column, area) in self.columns.iter().zip([left, center, right].iter()) {
             column.render(*area, buf);
