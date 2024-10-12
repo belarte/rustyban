@@ -1,6 +1,7 @@
 mod app;
 mod app_runner;
 mod app_state;
+mod card_editor;
 mod card_selector;
 mod event_handler;
 mod help;

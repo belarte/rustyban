@@ -1,7 +1,7 @@
 use crossterm::event::{KeyCode, KeyEvent};
 use tui_textarea::{Input, Key};
 
-use crate::app::{App, app_state::State};
+use crate::app::{app_state::State, card_editor::CardEditor, App};
 
 use super::save_to_file::Save;
 
@@ -27,7 +27,7 @@ pub fn normal_mode<'a>(app: &mut App, key_event: KeyEvent) -> State<'a> {
             match app.get_selection() {
                 Some((column, card)) => {
                     app.edit_card(column, card);
-                    return State::Edit
+                    return State::Edit{ editor: CardEditor::new() }
                 }
                 None => return State::Normal
             }
