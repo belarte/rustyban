@@ -36,6 +36,10 @@ impl Card {
         &self.short_description
     }
 
+    pub fn long_description(&self) -> &String {
+        &self.long_description
+    }
+
     pub fn is_selected(&self) -> bool {
         self.is_selected
     }

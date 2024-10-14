@@ -26,8 +26,9 @@ pub fn normal_mode<'a>(app: &mut App, key_event: KeyEvent) -> State<'a> {
         KeyCode::Char('e') | KeyCode::Enter => match app.get_selection() {
             Some((column, card)) => {
                 app.edit_card(column, card);
+                let card = app.get_selected_card().expect("Card should be selected new");
                 return State::Edit {
-                    editor: CardEditor::new(),
+                    editor: CardEditor::new(card),
                 };
             }
             None => return State::Normal,

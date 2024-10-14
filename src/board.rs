@@ -3,5 +3,5 @@ mod card;
 mod column;
 
 pub use board::Board;
-use card::Card;
+pub use card::Card;
 use column::Column;

@@ -6,7 +6,7 @@ use ratatui::{
     widgets::Widget,
 };
 
-use crate::app::CardSelector;
+use crate::{app::CardSelector, board::Card};
 use crate::app::Logger;
 use crate::board::Board;
 
@@ -73,6 +73,10 @@ impl App {
 
     pub fn get_selection(&self) -> Option<(usize, usize)> {
         self.selector.get()
+    }
+
+    pub fn get_selected_card(&self) -> Option<Card> {
+        self.selector.get_selected_card(self.board.clone())
     }
 
     pub fn edit_card(&mut self, column: usize, card: usize) {

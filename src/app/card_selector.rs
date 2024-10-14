@@ -1,6 +1,6 @@
 use std::cmp::min;
 
-use crate::board::Board;
+use crate::board::{Board, Card};
 
 #[derive(Debug, Default)]
 pub struct CardSelector {
@@ -21,6 +21,14 @@ impl CardSelector {
     pub fn get(&self) -> Option<(usize, usize)> {
         if self.selection_enabled {
             Some((self.selected_column, self.selected_card))
+        } else {
+            None
+        }
+    }
+
+    pub fn get_selected_card(&self, board: Board) -> Option<Card> {
+        if self.selection_enabled {
+            Some(board.columns(self.selected_column).get_card(self.selected_card).clone())
         } else {
             None
         }

@@ -7,6 +7,8 @@ use ratatui::{
 };
 use tui_textarea::TextArea;
 
+use crate::board::Card;
+
 #[derive(Debug)]
 pub struct CardEditor<'a> {
     text_areas: Vec<TextArea<'a>>,
@@ -21,7 +23,7 @@ impl PartialEq for CardEditor<'_> {
 impl Eq for CardEditor<'_> {}
 
 impl CardEditor<'_> {
-    pub fn new() -> Self {
+    pub fn new(card: Card) -> Self {
         let short_description_block = Block::bordered()
             .title(" Short description: ")
             .on_dark_gray()
@@ -32,8 +34,8 @@ impl CardEditor<'_> {
             .border_set(border::PLAIN);
 
         let mut text_areas = vec![
-            TextArea::new(vec!["Coming soon...".into()]),
-            TextArea::new(vec!["Coming soon...".into(), "With more context!".into()]),
+            TextArea::new(vec![card.short_description().to_string()]),
+            TextArea::new(vec![card.long_description().to_string()]),
         ];
 
         text_areas[0].set_block(short_description_block);
