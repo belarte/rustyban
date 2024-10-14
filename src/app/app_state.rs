@@ -4,7 +4,7 @@ use ratatui::Frame;
 use super::{
     app::App,
     card_editor::CardEditor,
-    event_handler::{normal_mode, save_mode},
+    event_handler::{edit_mode, normal_mode, save_mode},
     help::Help,
     save_to_file::Save,
 };
@@ -31,7 +31,7 @@ impl<'a> AppState<'a> {
         match &self.state {
             State::Normal => self.state = normal_mode(app, event),
             State::Save { save } => self.state = save_mode(save, app, event),
-            State::Edit { editor: _ } => self.state = State::Normal,
+            State::Edit { editor } => self.state = edit_mode(editor, app, event),
             State::Help => self.state = State::Normal,
         }
     }

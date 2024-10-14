@@ -9,7 +9,7 @@ use tui_textarea::TextArea;
 
 use crate::board::Card;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct CardEditor<'a> {
     text_areas: Vec<TextArea<'a>>,
 }

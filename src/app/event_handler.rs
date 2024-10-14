@@ -51,6 +51,16 @@ pub fn normal_mode<'a>(app: &mut App, key_event: KeyEvent) -> State<'a> {
     }
 }
 
+pub fn edit_mode<'a>(editor: &CardEditor<'a>, _: &mut App, key_event: KeyEvent) -> State<'a> {
+    match key_event.into() {
+        Input { key: Key::Esc, .. } => State::Normal,
+        _ => {
+            let editor = editor.clone();
+            State::Edit { editor }
+        }
+    }
+}
+
 pub fn save_mode<'a>(save: &Save<'a>, app: &mut App, key_event: KeyEvent) -> State<'a> {
     match key_event.into() {
         Input { key: Key::Esc, .. } => State::Normal,
