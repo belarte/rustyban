@@ -51,11 +51,10 @@ pub fn normal_mode<'a>(app: &mut App, key_event: KeyEvent) -> State<'a> {
     }
 }
 
-pub fn edit_mode<'a>(editor: &CardEditor<'a>, _: &mut App, key_event: KeyEvent) -> State<'a> {
+pub fn edit_mode<'a>(mut editor: CardEditor<'a>, _: &mut App, key_event: KeyEvent) -> State<'a> {
     match key_event.into() {
         Input { key: Key::Esc, .. } => State::Normal,
         Input { key: Key::Tab, .. } => {
-            let mut editor = editor.clone();
             editor.next_field();
             State::Edit { editor }
         }
@@ -66,7 +65,7 @@ pub fn edit_mode<'a>(editor: &CardEditor<'a>, _: &mut App, key_event: KeyEvent) 
     }
 }
 
-pub fn save_mode<'a>(save: &Save<'a>, app: &mut App, key_event: KeyEvent) -> State<'a> {
+pub fn save_mode<'a>(mut save: Save<'a>, app: &mut App, key_event: KeyEvent) -> State<'a> {
     match key_event.into() {
         Input { key: Key::Esc, .. } => State::Normal,
         Input { key: Key::Enter, .. } => {
@@ -74,7 +73,6 @@ pub fn save_mode<'a>(save: &Save<'a>, app: &mut App, key_event: KeyEvent) -> Sta
             State::Normal
         }
         input => {
-            let mut save = save.clone();
             save.push(input);
             State::Save { save }
         }

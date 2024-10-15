@@ -30,8 +30,8 @@ impl<'a> AppState<'a> {
     pub fn handle_events(&mut self, app: &mut App, event: KeyEvent) {
         match &self.state {
             State::Normal => self.state = normal_mode(app, event),
-            State::Save { save } => self.state = save_mode(save, app, event),
-            State::Edit { editor } => self.state = edit_mode(editor, app, event),
+            State::Save { save } => self.state = save_mode(save.clone(), app, event),
+            State::Edit { editor } => self.state = edit_mode(editor.clone(), app, event),
             State::Help => self.state = State::Normal,
         }
     }
