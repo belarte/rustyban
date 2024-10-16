@@ -64,6 +64,11 @@ impl Column {
         column.cards[card_index] = card;
         column
     }
+
+    pub fn update_card(mut column: Column, card_index: usize, card: Card) -> Column {
+        column.cards[card_index] = card;
+        column
+    }
 }
 
 impl Widget for &Column {

@@ -23,13 +23,9 @@ pub fn normal_mode<'a>(app: &mut App, key_event: KeyEvent) -> State<'a> {
             app.select_next_column();
             State::Normal
         }
-        KeyCode::Char('e') | KeyCode::Enter => match app.get_selection() {
-            Some((column, card)) => {
-                app.edit_card(column, card);
-                let card = app.get_selected_card().expect("Card should be selected new");
-                return State::Edit {
-                    editor: CardEditor::new(card),
-                };
+        KeyCode::Char('e') | KeyCode::Enter => match app.get_selected_card() {
+            Some(card) => {
+                State::Edit { editor: CardEditor::new(card) }
             }
             None => State::Normal,
         },
@@ -51,15 +47,20 @@ pub fn normal_mode<'a>(app: &mut App, key_event: KeyEvent) -> State<'a> {
     }
 }
 
-pub fn edit_mode<'a>(mut editor: CardEditor<'a>, _: &mut App, key_event: KeyEvent) -> State<'a> {
+pub fn edit_mode<'a>(mut editor: CardEditor<'a>, app: &mut App, key_event: KeyEvent) -> State<'a> {
     match key_event.into() {
         Input { key: Key::Esc, .. } => State::Normal,
+        Input { key: Key::Enter, .. } => {
+            let card = editor.get_card();
+            app.update_card(card);
+            State::Normal
+        }
         Input { key: Key::Tab, .. } => {
             editor.next_field();
             State::Edit { editor }
         }
-        _ => {
-            let editor = editor.clone();
+        input => {
+            editor.input(input);
             State::Edit { editor }
         }
     }

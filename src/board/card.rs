@@ -44,6 +44,16 @@ impl Card {
         self.is_selected
     }
 
+    pub fn update_short_description(mut card: Card, short_description: &str) -> Card {
+        card.short_description = short_description.into();
+        card
+    }
+
+    pub fn update_long_description(mut card: Card, long_description: &str) -> Card {
+        card.long_description = long_description.into();
+        card
+    }
+
     pub fn select(mut card: Card) -> Self {
         card.is_selected = true;
         card

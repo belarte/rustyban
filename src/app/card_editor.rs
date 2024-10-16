@@ -13,6 +13,7 @@ use crate::board::Card;
 pub struct CardEditor<'a> {
     text_areas: Vec<TextArea<'a>>,
     selected: usize,
+    card: Card,
 }
 
 impl PartialEq for CardEditor<'_> {
@@ -25,19 +26,38 @@ impl Eq for CardEditor<'_> {}
 
 impl CardEditor<'_> {
     pub fn new(card: Card) -> Self {
+        let mut short_description = TextArea::new(vec![card.short_description().to_string()]);
+        let mut long_description = TextArea::new(vec![card.long_description().to_string()]);
+        short_description.move_cursor(tui_textarea::CursorMove::End);
+        long_description.move_cursor(tui_textarea::CursorMove::End);
+
         let text_areas = vec![
-            TextArea::new(vec![card.short_description().to_string()]),
-            TextArea::new(vec![card.long_description().to_string()]),
+            short_description,
+            long_description,
         ];
 
         Self {
             text_areas,
             selected: 0,
+            card,
         }
+    }
+
+    pub fn input(&mut self, input: tui_textarea::Input) {
+        self.text_areas[self.selected].input(input);
     }
 
     pub fn next_field(&mut self) {
         self.selected = (self.selected + 1) % self.text_areas.len();
+    }
+
+    pub fn get_card(&self) -> Card {
+        let card = self.card.clone();
+        let short_description = self.text_areas[0].lines().join("\n");
+        let long_description = self.text_areas[1].lines().join("\n");
+        let card = Card::update_short_description(card, &short_description);
+        
+        Card::update_long_description(card, &long_description)
     }
 }
 
@@ -63,11 +83,11 @@ impl Widget for &CardEditor<'_> {
             .border_set(border::PLAIN);
 
         let short_description_block = get_block(" Short description: ".into(), self.selected == 0);
-        let long_description_block = get_block(" Long description: ".into(), self.selected == 1);
-
         let mut short_description = self.text_areas[0].clone();
-        let mut long_description = self.text_areas[1].clone();
         short_description.set_block(short_description_block);
+
+        let long_description_block = get_block(" Long description: ".into(), self.selected == 1);
+        let mut long_description = self.text_areas[1].clone();
         long_description.set_block(long_description_block);
 
         let inner_area = block.inner(area);

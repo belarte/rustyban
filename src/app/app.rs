@@ -71,16 +71,18 @@ impl App {
         self.board = self.selector.disable_selection(self.board.clone());
     }
 
-    pub fn get_selection(&self) -> Option<(usize, usize)> {
-        self.selector.get()
-    }
-
     pub fn get_selected_card(&self) -> Option<Card> {
         self.selector.get_selected_card(self.board.clone())
     }
 
-    pub fn edit_card(&mut self, column: usize, card: usize) {
-        self.log(format!("Editing card {} in column {}", card, column));
+    pub fn update_card(&mut self, card: Card) {
+        match self.selector.get() {
+            Some((column, card_index)) => {
+                self.board = Board::update_card(self.board.clone(), column, card_index, card);
+                self.log(format!("Card written to column {} at index {}", column, card_index));
+            }
+            None => self.log("No card selected".to_string()),
+        }
     }
 
     pub fn write(&mut self) {

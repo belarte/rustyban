@@ -10,7 +10,7 @@ use ratatui::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::board::Column;
+use crate::board::{Card, Column};
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Board {
@@ -81,6 +81,12 @@ impl Board {
         board.columns[column_index] = column;
         board
     }
+
+    pub fn update_card(mut board: Board, column_index: usize, card_index: usize, card: Card) -> Board {
+        let column = Column::update_card(board.columns[column_index].clone(), card_index, card);
+        board.columns[column_index] = column;
+        board
+    }
 }
 
 impl Widget for &Board {
@@ -127,7 +133,7 @@ mod tests {
         let path = "board.txt";
         let _ = fs::remove_file(path);
 
-        let mut board = Board::new();
+        let board = Board::new();
         let res = board.to_file(path);
 
         assert!(res.is_ok());
