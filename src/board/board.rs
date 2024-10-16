@@ -17,6 +17,12 @@ pub struct Board {
     columns: Vec<Column>,
 }
 
+impl Default for Board {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Board {
     pub fn new() -> Self {
         let todo = Column::new("TODO");
@@ -33,13 +39,13 @@ impl Board {
         let mut file = File::open(file_name)?;
         file.read_to_string(&mut content)?;
 
-        return match serde_json::from_str(&content) {
+        match serde_json::from_str(&content) {
             Ok(board) => Ok(board),
             Err(e) => Err(e.into()),
-        };
+        }
     }
 
-    pub fn to_file(&mut self, file_name: &str) -> Result<()> {
+    pub fn to_file(&self, file_name: &str) -> Result<()> {
         let content = self.to_json_string().expect("Cannot write file");
 
         let file = File::create(file_name);
@@ -50,10 +56,10 @@ impl Board {
     }
 
     fn to_json_string(&self) -> Result<String> {
-        return match serde_json::to_string_pretty(&self) {
+        match serde_json::to_string_pretty(&self) {
             Ok(res) => Ok(res),
             Err(e) => Err(e.into()),
-        };
+        }
     }
 
     pub fn columns(&self, index: usize) -> &Column {
@@ -122,7 +128,7 @@ mod tests {
         let _ = fs::remove_file(path);
 
         let mut board = Board::new();
-        let res = board.to_file(path.into());
+        let res = board.to_file(path);
 
         assert!(res.is_ok());
         assert!(fs::metadata(path).is_ok());

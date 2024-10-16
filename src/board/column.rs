@@ -66,6 +66,23 @@ impl Column {
     }
 }
 
+impl Widget for &Column {
+    fn render(self, area: Rect, buf: &mut Buffer) {
+        let header = format!(" {} ", self.header);
+        let title = Title::from(header.bold()).alignment(Alignment::Center);
+
+        let block = Block::bordered().title(title).border_set(border::THICK);
+
+        let inner_area = block.inner(area);
+        let areas = Layout::vertical([Constraint::Max(4); 4]).split(inner_area);
+        self.cards.iter().enumerate().for_each(|(i, card)| {
+            card.render(areas[i], buf);
+        });
+
+        block.render(area, buf);
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use std::io::Result;
@@ -93,22 +110,5 @@ mod tests {
         assert_eq!(2, column.prev_card_index(999));
 
         Ok(())
-    }
-}
-
-impl Widget for &Column {
-    fn render(self, area: Rect, buf: &mut Buffer) {
-        let header = format!(" {} ", self.header);
-        let title = Title::from(header.bold()).alignment(Alignment::Center);
-
-        let block = Block::bordered().title(title).border_set(border::THICK);
-
-        let inner_area = block.inner(area);
-        let areas = Layout::vertical([Constraint::Max(4); 4]).split(inner_area);
-        self.cards.iter().enumerate().for_each(|(i, card)| {
-            card.render(areas[i], buf);
-        });
-
-        block.render(area, buf);
     }
 }

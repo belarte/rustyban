@@ -31,7 +31,7 @@ pub fn normal_mode<'a>(app: &mut App, key_event: KeyEvent) -> State<'a> {
                     editor: CardEditor::new(card),
                 };
             }
-            None => return State::Normal,
+            None => State::Normal,
         },
         KeyCode::Esc => {
             app.disable_selection();

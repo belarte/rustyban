@@ -55,35 +55,6 @@ impl Card {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use std::io::Result;
-
-    use chrono::Local;
-
-    use super::Card;
-
-    #[test]
-    fn selection() -> Result<()> {
-        let card = Card::new("test", Local::now());
-        assert_eq!(false, card.is_selected());
-
-        let card = Card::deselect(card);
-        assert_eq!(false, card.is_selected());
-
-        let card = Card::select(card);
-        assert_eq!(true, card.is_selected());
-
-        let card = Card::select(card);
-        assert_eq!(true, card.is_selected());
-
-        let card = Card::deselect(card);
-        assert_eq!(false, card.is_selected());
-
-        Ok(())
-    }
-}
-
 impl Widget for &Card {
     fn render(self, area: Rect, buf: &mut Buffer) {
         let border = if self.is_selected {
@@ -100,5 +71,34 @@ impl Widget for &Card {
         ]);
 
         Paragraph::new(text).block(block).render(area, buf);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::io::Result;
+
+    use chrono::Local;
+
+    use super::Card;
+
+    #[test]
+    fn selection() -> Result<()> {
+        let card = Card::new("test", Local::now());
+        assert!(!card.is_selected());
+
+        let card = Card::deselect(card);
+        assert!(!card.is_selected());
+
+        let card = Card::select(card);
+        assert!(card.is_selected());
+
+        let card = Card::select(card);
+        assert!(card.is_selected());
+
+        let card = Card::deselect(card);
+        assert!(!card.is_selected());
+
+        Ok(())
     }
 }

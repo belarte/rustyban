@@ -20,6 +20,12 @@ impl PartialEq for Save<'_> {
 
 impl Eq for Save<'_> {}
 
+impl Default for Save<'_> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Save<'_> {
     pub fn new() -> Self {
         let block = Block::bordered()
@@ -29,7 +35,7 @@ impl Save<'_> {
         let mut text_area = TextArea::default();
         text_area.set_block(block);
 
-        return Self { text_area };
+        Self { text_area }
     }
 
     pub fn push(&mut self, input: Input) {

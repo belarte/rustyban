@@ -13,6 +13,12 @@ pub struct Logger {
     message: String,
 }
 
+impl Default for Logger {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Logger {
     pub fn new() -> Self {
         Self {
