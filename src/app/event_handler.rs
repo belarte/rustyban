@@ -47,7 +47,7 @@ pub fn normal_mode<'a>(app: &mut App, key_event: KeyEvent) -> State<'a> {
     }
 }
 
-pub fn edit_mode<'a>(mut editor: CardEditor<'a>, app: &mut App, key_event: KeyEvent) -> State<'a> {
+pub fn edit_mode<'a>(mut editor: CardEditor, app: &mut App, key_event: KeyEvent) -> State<'a> {
     match key_event.into() {
         Input { key: Key::Esc, .. } => State::Normal,
         Input { key: Key::Enter, .. } => {

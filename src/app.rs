@@ -7,6 +7,7 @@ mod event_handler;
 mod help;
 mod logger;
 mod save_to_file;
+mod text_widget;
 
 use app::App;
 pub use app_runner::AppRunner;

@@ -13,7 +13,7 @@ use super::{
 pub enum State<'a> {
     Normal,
     Save { save: Save<'a> },
-    Edit { editor: CardEditor<'a> },
+    Edit { editor: CardEditor },
     Help,
 }
 

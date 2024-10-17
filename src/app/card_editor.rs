@@ -5,74 +5,68 @@ use ratatui::{
     symbols::border,
     widgets::{Block, Clear, Widget},
 };
-use tui_textarea::{Input, TextArea};
+use tui_textarea::Input;
 
 use crate::board::Card;
+use crate::app::text_widget::TextWidget;
 
 #[derive(Debug, Clone)]
-pub struct CardEditor<'a> {
-    text_areas: Vec<TextArea<'a>>,
+pub struct CardEditor {
+    widgets: Vec<TextWidget>,
     selected: usize,
     card: Card,
 }
 
-impl PartialEq for CardEditor<'_> {
+impl PartialEq for CardEditor {
     fn eq(&self, _other: &Self) -> bool {
         true
     }
 }
 
-impl Eq for CardEditor<'_> {}
+impl Eq for CardEditor {}
 
-impl CardEditor<'_> {
+impl CardEditor {
     pub fn new(card: Card) -> Self {
-        let mut short_description = TextArea::new(vec![card.short_description().to_string()]);
-        let mut long_description = TextArea::new(vec![card.long_description().to_string()]);
-        short_description.move_cursor(tui_textarea::CursorMove::End);
-        long_description.move_cursor(tui_textarea::CursorMove::End);
-
-        let text_areas = vec![
-            short_description,
-            long_description,
+        let widgets = vec![
+            TextWidget::new("Short description".into(), card.short_description().to_string(), Constraint::Length(3), true),
+            TextWidget::new("Long description".into(), card.long_description().to_string(), Constraint::Length(10), false),
         ];
 
         Self {
-            text_areas,
+            widgets,
             selected: 0,
             card,
         }
     }
 
     pub fn input(&mut self, input: Input) {
-        self.text_areas[self.selected].input(input);
+        self.widgets[self.selected].input(input);
     }
 
     pub fn next_field(&mut self) {
-        self.selected = (self.selected + 1) % self.text_areas.len();
+        self.widgets[self.selected].select(false);
+        self.selected = (self.selected + 1) % self.widgets.len();
+        self.widgets[self.selected].select(true);
     }
 
     pub fn get_card(&self) -> Card {
         let card = self.card.clone();
-        let short_description = self.text_areas[0].lines().join("\n");
-        let long_description = self.text_areas[1].lines().join("\n");
+        let short_description = self.widgets[0].lines().join("\n");
+        let long_description = self.widgets[1].lines().join("\n");
         let card = Card::update_short_description(card, &short_description);
         
         Card::update_long_description(card, &long_description)
     }
+
+    fn areas(&self, area: Rect) -> [Rect; 2] {
+        let constraints: Vec<Constraint> = self.widgets.iter()
+            .map(|widget| widget.constaint())
+            .collect();
+        Layout::vertical(constraints).areas(area)
+    }
 }
 
-fn get_block(title: String, is_selected: bool) -> Block<'static> {
-    Block::bordered()
-        .title(title)
-        .on_dark_gray()
-        .border_set(if is_selected {
-            border::DOUBLE
-        } else {
-            border::PLAIN
-        })
-}
-
-impl Widget for &CardEditor<'_> {
+impl Widget for &CardEditor {
     fn render(self, area: Rect, buf: &mut Buffer) {
         let area = editor_area(area);
         Clear.render(area, buf);
@@ -81,22 +75,14 @@ impl Widget for &CardEditor<'_> {
             .title(" Edit card ")
             .on_blue()
             .border_set(border::PLAIN);
-
-        let short_description_block = get_block(" Short description: ".into(), self.selected == 0);
-        let mut short_description = self.text_areas[0].clone();
-        short_description.set_block(short_description_block);
-
-        let long_description_block = get_block(" Long description: ".into(), self.selected == 1);
-        let mut long_description = self.text_areas[1].clone();
-        long_description.set_block(long_description_block);
-
         let inner_area = block.inner(area);
-        let [short_area, long_area] =
-            Layout::vertical([Constraint::Length(3), Constraint::Length(10)]).areas(inner_area);
-
         block.render(area, buf);
-        short_description.render(short_area, buf);
-        long_description.render(long_area, buf);
+
+        let areas = self.areas(inner_area);
+
+        for (widget, area) in self.widgets.iter().zip(areas.iter()) {
+            widget.render(*area, buf);
+        }
     }
 }
 
