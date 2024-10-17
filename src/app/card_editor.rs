@@ -5,7 +5,7 @@ use ratatui::{
     symbols::border,
     widgets::{Block, Clear, Widget},
 };
-use tui_textarea::TextArea;
+use tui_textarea::{Input, TextArea};
 
 use crate::board::Card;
 
@@ -43,7 +43,7 @@ impl CardEditor<'_> {
         }
     }
 
-    pub fn input(&mut self, input: tui_textarea::Input) {
+    pub fn input(&mut self, input: Input) {
         self.text_areas[self.selected].input(input);
     }
 
