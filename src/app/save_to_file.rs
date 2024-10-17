@@ -45,11 +45,6 @@ impl Save<'_> {
     pub fn get(&self) -> String {
         self.text_area.lines()[0].clone()
     }
-
-    pub fn clear(&mut self) {
-        self.text_area.delete_line_by_head();
-        self.text_area.delete_line_by_end();
-    }
 }
 
 impl Widget for &Save<'_> {
@@ -89,10 +84,6 @@ mod tests {
         save.push(Input::from(KeyEvent::new(KeyCode::Char('t'), KeyModifiers::NONE)));
 
         assert_eq!("test", save.get());
-
-        save.clear();
-
-        assert_eq!("", save.get());
 
         Ok(())
     }
