@@ -79,7 +79,6 @@ impl App {
         match self.selector.get() {
             Some((column, card_index)) => {
                 self.board = Board::update_card(self.board.clone(), column, card_index, card);
-                self.log(format!("Card written to column {} at index {}", column, card_index));
             }
             None => self.log("No card selected".to_string()),
         }
