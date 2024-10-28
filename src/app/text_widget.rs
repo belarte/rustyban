@@ -19,7 +19,11 @@ pub struct TextWidget {
 
 impl TextWidget {
     pub fn new(label: String, text: String, constraint: Constraint, selected: bool) -> Self {
-        let mut text_area = TextArea::new(vec![text]);
+        let vec: Vec<String> = text
+            .split('\n')
+            .map(String::from)
+            .collect();
+        let mut text_area = TextArea::new(vec);
         text_area.move_cursor(tui_textarea::CursorMove::End);
 
         Self {
