@@ -1,6 +1,6 @@
 use ratatui::{
     buffer::Buffer,
-    layout::{Constraint, Flex, Layout, Rect},
+    layout::{Constraint, Layout, Rect},
     style::Stylize,
     symbols::border,
     widgets::{Block, Clear, Widget},
@@ -9,6 +9,7 @@ use tui_textarea::Input;
 
 use crate::board::Card;
 use crate::app::text_widget::TextWidget;
+use crate::app::widget_utils::centered_popup_area;
 
 #[derive(Debug, Clone)]
 pub struct CardEditor {
@@ -66,9 +67,12 @@ impl CardEditor {
     }
 }
 
+const WIDGET_HEIGHT: u16 = 15;
+const WIDGET_WIDTH: u16 = 64;
+
 impl Widget for &CardEditor {
     fn render(self, area: Rect, buf: &mut Buffer) {
-        let area = editor_area(area);
+        let area = centered_popup_area(area, Constraint::Length(WIDGET_WIDTH), Constraint::Length(WIDGET_HEIGHT));
         Clear.render(area, buf);
 
         let block = Block::bordered()
@@ -84,15 +88,4 @@ impl Widget for &CardEditor {
             widget.render(*area, buf);
         }
     }
-}
-
-const WIDGET_HEIGHT: u16 = 15;
-const WIDGET_WIDTH: u16 = 64;
-
-fn editor_area(area: Rect) -> Rect {
-    let vertical = Layout::vertical([Constraint::Length(WIDGET_HEIGHT)]).flex(Flex::Center);
-    let horizontal = Layout::horizontal([Constraint::Length(WIDGET_WIDTH)]).flex(Flex::Center);
-    let [area] = vertical.areas(area);
-    let [area] = horizontal.areas(area);
-    area
 }

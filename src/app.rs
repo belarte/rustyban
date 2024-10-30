@@ -8,6 +8,7 @@ mod help;
 mod logger;
 mod save_to_file;
 mod text_widget;
+mod widget_utils;
 
 use app::App;
 pub use app_runner::AppRunner;
