@@ -86,9 +86,12 @@ impl Widget for &CardEditor {
     }
 }
 
+const WIDGET_HEIGHT: u16 = 15;
+const WIDGET_WIDTH: u16 = 64;
+
 fn editor_area(area: Rect) -> Rect {
-    let vertical = Layout::vertical([Constraint::Percentage(50)]).flex(Flex::Center);
-    let horizontal = Layout::horizontal([Constraint::Percentage(50)]).flex(Flex::Center);
+    let vertical = Layout::vertical([Constraint::Length(WIDGET_HEIGHT)]).flex(Flex::Center);
+    let horizontal = Layout::horizontal([Constraint::Length(WIDGET_WIDTH)]).flex(Flex::Center);
     let [area] = vertical.areas(area);
     let [area] = horizontal.areas(area);
     area
