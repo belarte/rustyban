@@ -1,11 +1,13 @@
 use ratatui::{
     buffer::Buffer,
-    layout::{Constraint, Flex, Layout, Rect},
+    layout::{Constraint, Rect},
     style::Stylize,
     symbols::border,
     widgets::{Block, Clear, Widget},
 };
 use tui_textarea::{Input, TextArea};
+
+use super::widget_utils::centered_popup_area;
 
 #[derive(Debug, Clone)]
 pub struct Save<'a> {
@@ -49,18 +51,10 @@ impl Save<'_> {
 
 impl Widget for &Save<'_> {
     fn render(self, area: Rect, buf: &mut Buffer) {
-        let area = save_area(area);
+        let area = centered_popup_area(area, Constraint::Length(64), Constraint::Length(3));
         Clear.render(area, buf);
         self.text_area.render(area, buf);
     }
-}
-
-fn save_area(area: Rect) -> Rect {
-    let vertical = Layout::vertical([Constraint::Length(3)]).flex(Flex::Center);
-    let horizontal = Layout::horizontal([Constraint::Percentage(60)]).flex(Flex::Center);
-    let [area] = vertical.areas(area);
-    let [area] = horizontal.areas(area);
-    area
 }
 
 #[cfg(test)]
