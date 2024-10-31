@@ -24,6 +24,8 @@ impl Widget for Help {
         let text = Text::from(vec![
             Line::from(vec![" <h/j/k/l> ".bold(), "Select card".into()]),
             Line::from(vec![" <←/↓/↑/→> ".bold(), "Select card".into()]),
+            Line::from(vec![" <e>  ".bold(), "Edit selected card".into()]),
+            Line::from(vec![" <CR> ".bold(), "Edit selected card".into()]),
             Line::from(vec![" <w> ".bold(), "Write the board to file".into()]),
             Line::from(vec![
                 " <W> ".bold(),

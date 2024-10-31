@@ -1,9 +1,5 @@
 use ratatui::{
-    buffer::Buffer,
-    layout::{Constraint, Layout, Rect},
-    style::Stylize,
-    symbols::border,
-    widgets::{Block, Clear, Widget},
+    buffer::Buffer, layout::{Alignment, Constraint, Layout, Rect}, style::Stylize, symbols::border, text::Line, widgets::{block::{Position, Title}, Block, Clear, Widget}
 };
 use tui_textarea::Input;
 
@@ -76,7 +72,15 @@ impl Widget for &CardEditor {
         Clear.render(area, buf);
 
         let block = Block::bordered()
-            .title(" Edit card ")
+            .title(Title::from(" Edit card ".bold()).alignment(Alignment::Center))
+            .title(Title::from(Line::from(vec![
+                        " <Ctrl-s> ".bold(),
+                        "Save -".into(),
+                        " <ESC> ".bold(),
+                        "Discard changes ".into(),
+            ]))
+                .alignment(Alignment::Center)
+                .position(Position::Bottom))
             .on_blue()
             .border_set(border::PLAIN);
         let inner_area = block.inner(area);

@@ -3,7 +3,7 @@ use ratatui::{
     layout::{Constraint, Rect},
     style::Stylize,
     symbols::border,
-    widgets::{Block, Widget}
+    widgets::{block::Title, Block, Widget}
 };
 use tui_textarea::{Input, TextArea};
 
@@ -53,7 +53,7 @@ impl TextWidget {
 
 impl Widget for &TextWidget {
     fn render(self, area: Rect, buf: &mut Buffer) {
-        let title = format!(" {} ", self.label);
+        let title = Title::from(format!(" {} ", self.label).bold());
         let block = Block::bordered()
             .title(title)
             .on_dark_gray()
