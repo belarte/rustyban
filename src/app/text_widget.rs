@@ -3,11 +3,9 @@ use ratatui::{
     layout::{Constraint, Rect},
     style::Stylize,
     symbols::border,
-    widgets::{block::Title, Block, Widget}
+    widgets::{block::Title, Block, Widget},
 };
 use tui_textarea::{Input, TextArea};
-
-
 
 #[derive(Debug, Clone)]
 pub struct TextWidget {
@@ -19,10 +17,7 @@ pub struct TextWidget {
 
 impl TextWidget {
     pub fn new(label: String, text: String, constraint: Constraint, selected: bool) -> Self {
-        let vec: Vec<String> = text
-            .split('\n')
-            .map(String::from)
-            .collect();
+        let vec: Vec<String> = text.split('\n').map(String::from).collect();
         let mut text_area = TextArea::new(vec);
         text_area.move_cursor(tui_textarea::CursorMove::End);
 
@@ -57,11 +52,7 @@ impl Widget for &TextWidget {
         let block = Block::bordered()
             .title(title)
             .on_dark_gray()
-            .border_set(if self.selected {
-                border::DOUBLE
-            } else {
-                border::PLAIN
-            });
+            .border_set(if self.selected { border::DOUBLE } else { border::PLAIN });
 
         let mut text_area = self.text_area.clone();
         text_area.set_block(block);

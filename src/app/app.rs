@@ -6,9 +6,9 @@ use ratatui::{
     widgets::Widget,
 };
 
-use crate::{app::CardSelector, board::Card};
 use crate::app::Logger;
 use crate::board::Board;
+use crate::{app::CardSelector, board::Card};
 
 #[derive(Debug)]
 pub struct App {

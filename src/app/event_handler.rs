@@ -24,9 +24,9 @@ pub fn normal_mode<'a>(app: &mut App, key_event: KeyEvent) -> State<'a> {
             State::Normal
         }
         KeyCode::Char('e') | KeyCode::Enter => match app.get_selected_card() {
-            Some(card) => {
-                State::Edit { editor: CardEditor::new(card) }
-            }
+            Some(card) => State::Edit {
+                editor: CardEditor::new(card),
+            },
             None => State::Normal,
         },
         KeyCode::Esc => {
@@ -50,7 +50,11 @@ pub fn normal_mode<'a>(app: &mut App, key_event: KeyEvent) -> State<'a> {
 pub fn edit_mode<'a>(mut editor: CardEditor, app: &mut App, key_event: KeyEvent) -> State<'a> {
     match key_event.into() {
         Input { key: Key::Esc, .. } => State::Normal,
-        Input { key: Key::Char('s'), ctrl: true, .. } => {
+        Input {
+            key: Key::Char('s'),
+            ctrl: true,
+            ..
+        } => {
             let card = editor.get_card();
             app.update_card(card);
             State::Normal
