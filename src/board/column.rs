@@ -33,10 +33,6 @@ impl Column {
         &self.cards[i]
     }
 
-    pub fn add_card(&mut self, card: Card) {
-        self.cards.push(card);
-    }
-
     pub fn get_card_index(&self, index: usize) -> usize {
         min(index, self.cards.len() - 1)
     }
@@ -51,6 +47,16 @@ impl Column {
         }
 
         self.get_card_index(current_index - 1)
+    }
+
+    pub fn insert_card(mut column: Column, card: Card, index: usize) -> Column {
+        column.cards.insert(index, card);
+        column
+    }
+
+    pub fn remove_card(mut column: Column, index: usize) -> Column {
+        column.cards.remove(index);
+        column
     }
 
     pub fn select_card(mut column: Column, card_index: usize) -> Column {
@@ -127,6 +133,43 @@ mod tests {
         assert_eq!(0, column.prev_card_index(1));
         assert_eq!(1, column.prev_card_index(2));
         assert_eq!(2, column.prev_card_index(999));
+
+        Ok(())
+    }
+
+    #[test]
+    fn insert_and_remove_cards() -> Result<()> {
+        let now = Local::now();
+        let column = Column::new("test", vec![]);
+
+        let column = Column::insert_card(column, Card::new("card 3", now), 0);
+        let column = Column::insert_card(column, Card::new("card 1", now), 0);
+        let column = Column::insert_card(column, Card::new("card 2", now), 1);
+        let column = Column::insert_card(column, Card::new("card 4", now), 3);
+
+        assert_eq!(4, column.cards.len());
+        assert_eq!("card 1", column.get_card(0).short_description());
+        assert_eq!("card 2", column.get_card(1).short_description());
+        assert_eq!("card 3", column.get_card(2).short_description());
+        assert_eq!("card 4", column.get_card(3).short_description());
+
+        let column = Column::remove_card(column, 0);
+        assert_eq!(3, column.cards.len());
+        assert_eq!("card 2", column.get_card(0).short_description());
+        assert_eq!("card 3", column.get_card(1).short_description());
+        assert_eq!("card 4", column.get_card(2).short_description());
+
+        let column = Column::remove_card(column, 2);
+        assert_eq!(2, column.cards.len());
+        assert_eq!("card 2", column.get_card(0).short_description());
+        assert_eq!("card 3", column.get_card(1).short_description());
+
+        let column = Column::remove_card(column, 1);
+        assert_eq!(1, column.cards.len());
+        assert_eq!("card 2", column.get_card(0).short_description());
+
+        let column = Column::remove_card(column, 0);
+        assert_eq!(0, column.cards.len());
 
         Ok(())
     }
