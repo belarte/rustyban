@@ -18,10 +18,10 @@ pub struct Column {
 }
 
 impl Column {
-    pub fn new(header: &str) -> Self {
+    pub fn new(header: &str, cards: Vec<Card>) -> Self {
         Column {
             header: header.into(),
-            cards: vec![],
+            cards,
         }
     }
 
@@ -72,7 +72,7 @@ impl Column {
 
     pub fn increase_priority(mut column: Column, card_index: usize) -> Column {
         if card_index > 0 && card_index < column.cards.len() {
-            column.cards.swap(card_index, card_index-1);
+            column.cards.swap(card_index, card_index - 1);
         }
 
         column
@@ -80,7 +80,7 @@ impl Column {
 
     pub fn decrease_priority(mut column: Column, card_index: usize) -> Column {
         if card_index < column.cards.len() - 1 {
-            column.cards.swap(card_index, card_index+1);
+            column.cards.swap(card_index, card_index + 1);
         }
 
         column
@@ -116,11 +116,7 @@ mod tests {
 
     #[test]
     fn selection() -> Result<()> {
-        let mut column = Column::new("test");
-
-        column.add_card(Card::default());
-        column.add_card(Card::default());
-        column.add_card(Card::default());
+        let column = Column::new("test", vec![Card::default(), Card::default(), Card::default()]);
 
         assert_eq!(1, column.next_card_index(0));
         assert_eq!(2, column.next_card_index(1));
@@ -138,10 +134,14 @@ mod tests {
     #[test]
     fn change_priority() -> Result<()> {
         let now = Local::now();
-        let mut column = Column::new("test");
-        column.add_card(Card::new("card 1", now));
-        column.add_card(Card::new("card 2", now));
-        column.add_card(Card::new("card 3", now));
+        let column = Column::new(
+            "test",
+            vec![
+                Card::new("card 1", now),
+                Card::new("card 2", now),
+                Card::new("card 3", now),
+            ],
+        );
 
         let column = Column::increase_priority(column, 0);
         let column = Column::increase_priority(column, 2);

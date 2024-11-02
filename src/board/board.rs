@@ -25,9 +25,9 @@ impl Default for Board {
 
 impl Board {
     pub fn new() -> Self {
-        let todo = Column::new("TODO");
-        let doing = Column::new("Doing");
-        let done = Column::new("Done!");
+        let todo = Column::new("TODO", vec![]);
+        let doing = Column::new("Doing", vec![]);
+        let done = Column::new("Done!", vec![]);
 
         Board {
             columns: vec![todo, doing, done],
