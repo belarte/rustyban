@@ -87,6 +87,18 @@ impl Board {
         board.columns[column_index] = column;
         board
     }
+
+    pub fn increase_priority(mut board: Board, column_index: usize, card_index: usize) -> Board {
+        let column = Column::increase_priority(board.columns[column_index].clone(), card_index);
+        board.columns[column_index] = column;
+        board
+    }
+
+    pub fn decrease_priority(mut board: Board, column_index: usize, card_index: usize) -> Board {
+        let column = Column::decrease_priority(board.columns[column_index].clone(), card_index);
+        board.columns[column_index] = column;
+        board
+    }
 }
 
 impl Widget for &Board {

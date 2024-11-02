@@ -84,6 +84,26 @@ impl App {
         }
     }
 
+    pub fn increase_priority(&mut self) {
+        match self.selector.get() {
+            Some((column_index, card_index)) => {
+                self.board = Board::increase_priority(self.board.clone(), column_index, card_index);
+                self.board = self.selector.select_prev_card(self.board.clone());
+            }
+            None => self.log("No card selected".to_string()),
+        }
+    }
+
+    pub fn decrease_priority(&mut self) {
+        match self.selector.get() {
+            Some((column_index, card_index)) => {
+                self.board = Board::decrease_priority(self.board.clone(), column_index, card_index);
+                self.board = self.selector.select_next_card(self.board.clone());
+            }
+            None => self.log("No card selected".to_string()),
+        }
+    }
+
     pub fn write(&mut self) {
         match self.board.to_file(&self.file_name) {
             Ok(_) => self.log(format!("Board written to {}", self.file_name)),

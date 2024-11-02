@@ -69,6 +69,22 @@ impl Column {
         column.cards[card_index] = card;
         column
     }
+
+    pub fn increase_priority(mut column: Column, card_index: usize) -> Column {
+        if card_index > 0 && card_index < column.cards.len() {
+            column.cards.swap(card_index, card_index-1);
+        }
+
+        column
+    }
+
+    pub fn decrease_priority(mut column: Column, card_index: usize) -> Column {
+        if card_index < column.cards.len() - 1 {
+            column.cards.swap(card_index, card_index+1);
+        }
+
+        column
+    }
 }
 
 impl Widget for &Column {
@@ -92,6 +108,8 @@ impl Widget for &Column {
 mod tests {
     use std::io::Result;
 
+    use chrono::Local;
+
     use crate::board::card::Card;
 
     use super::Column;
@@ -113,6 +131,35 @@ mod tests {
         assert_eq!(0, column.prev_card_index(1));
         assert_eq!(1, column.prev_card_index(2));
         assert_eq!(2, column.prev_card_index(999));
+
+        Ok(())
+    }
+
+    #[test]
+    fn change_priority() -> Result<()> {
+        let now = Local::now();
+        let mut column = Column::new("test");
+        column.add_card(Card::new("card 1", now));
+        column.add_card(Card::new("card 2", now));
+        column.add_card(Card::new("card 3", now));
+
+        let column = Column::increase_priority(column, 0);
+        let column = Column::increase_priority(column, 2);
+        let column = Column::increase_priority(column, 1);
+        let column = Column::increase_priority(column, 2);
+
+        assert_eq!("card 3", column.get_card(0).short_description());
+        assert_eq!("card 2", column.get_card(1).short_description());
+        assert_eq!("card 1", column.get_card(2).short_description());
+
+        let column = Column::decrease_priority(column, 2);
+        let column = Column::decrease_priority(column, 1);
+        let column = Column::decrease_priority(column, 0);
+        let column = Column::decrease_priority(column, 1);
+
+        assert_eq!("card 1", column.get_card(0).short_description());
+        assert_eq!("card 2", column.get_card(1).short_description());
+        assert_eq!("card 3", column.get_card(2).short_description());
 
         Ok(())
     }
