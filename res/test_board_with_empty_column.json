@@ -1,0 +1,43 @@
+{
+  "columns": [
+    {
+      "header": "TODO",
+      "cards": [
+        {
+          "short_description": "Buy milk",
+          "long_description": "This is a long explanation of what needs doing.",
+          "creation_date": "2024-09-21T21:21:08.933562+02:00"
+        },
+        {
+          "short_description": "Buy eggs",
+          "long_description": "This is a long explanation of what needs doing.",
+          "creation_date": "2024-09-21T21:21:08.933562+02:00"
+        },
+        {
+          "short_description": "Buy bread",
+          "long_description": "This is a long explanation of what needs doing.",
+          "creation_date": "2024-09-21T21:21:08.933562+02:00"
+        }
+      ]
+    },
+    {
+      "header": "Doing",
+      "cards": []
+    },
+    {
+      "header": "Done!",
+      "cards": [
+        {
+          "short_description": "Eat dinner",
+          "long_description": "This is a long explanation of what needs doing.",
+          "creation_date": "2024-09-21T21:21:08.933562+02:00"
+        },
+        {
+          "short_description": "Wash dishes",
+          "long_description": "This is a long explanation of what needs doing.",
+          "creation_date": "2024-09-21T21:21:08.933562+02:00"
+        }
+      ]
+    }
+  ]
+}

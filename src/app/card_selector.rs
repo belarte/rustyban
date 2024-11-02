@@ -26,8 +26,8 @@ impl CardSelector {
         }
     }
 
-    pub fn get_selected_card(&self, board: Board) -> Option<Card> {
-        if self.selection_enabled {
+    pub fn get_selected_card(&self, board: &Board) -> Option<Card> {
+        if self.selection_enabled && !board.columns(self.selected_column).is_empty() {
             Some(board.columns(self.selected_column).get_card(self.selected_card).clone())
         } else {
             None
@@ -164,6 +164,18 @@ mod tests {
 
         selector.disable_selection(board);
         assert_eq!(None, selector.get());
+
+        Ok(())
+    }
+
+    #[test]
+    fn returns_none_on_empty_board() -> Result<()> {
+        let board = Board::open("res/test_board_with_empty_column.json")?;
+        let mut selector = CardSelector::new();
+
+        let board = selector.select_next_column(board);
+        let board = selector.select_next_column(board);
+        assert_eq!(None, selector.get_selected_card(&board));
 
         Ok(())
     }

@@ -29,11 +29,19 @@ impl Column {
         &self.header
     }
 
+    pub fn is_empty(&self) -> bool {
+        self.cards.len() == 0
+    }
+
     pub fn get_card(&self, i: usize) -> &Card {
         &self.cards[i]
     }
 
     pub fn get_card_index(&self, index: usize) -> usize {
+        if self.is_empty() {
+            return 0
+        }
+
         min(index, self.cards.len() - 1)
     }
 
@@ -60,19 +68,25 @@ impl Column {
     }
 
     pub fn select_card(mut column: Column, card_index: usize) -> Column {
-        let card = Card::select(column.cards[card_index].clone());
-        column.cards[card_index] = card;
+        if !column.is_empty() {
+            let card = Card::select(column.cards[card_index].clone());
+            column.cards[card_index] = card;
+        }
         column
     }
 
     pub fn deselect_card(mut column: Column, card_index: usize) -> Column {
-        let card = Card::deselect(column.cards[card_index].clone());
-        column.cards[card_index] = card;
+        if !column.is_empty() {
+            let card = Card::deselect(column.cards[card_index].clone());
+            column.cards[card_index] = card;
+        }
         column
     }
 
     pub fn update_card(mut column: Column, card_index: usize, card: Card) -> Column {
-        column.cards[card_index] = card;
+        if !column.is_empty() {
+            column.cards[card_index] = card;
+        }
         column
     }
 
@@ -80,7 +94,6 @@ impl Column {
         if card_index > 0 && card_index < column.cards.len() {
             column.cards.swap(card_index, card_index - 1);
         }
-
         column
     }
 
@@ -88,7 +101,6 @@ impl Column {
         if card_index < column.cards.len() - 1 {
             column.cards.swap(card_index, card_index + 1);
         }
-
         column
     }
 }
@@ -168,8 +180,9 @@ mod tests {
         assert_eq!(1, column.cards.len());
         assert_eq!("card 2", column.get_card(0).short_description());
 
+        assert!(!column.is_empty());
         let column = Column::remove_card(column, 0);
-        assert_eq!(0, column.cards.len());
+        assert!(column.is_empty());
 
         Ok(())
     }

@@ -72,7 +72,7 @@ impl App {
     }
 
     pub fn get_selected_card(&self) -> Option<Card> {
-        self.selector.get_selected_card(self.board.clone())
+        self.selector.get_selected_card(&self.board)
     }
 
     pub fn update_card(&mut self, card: Card) {
