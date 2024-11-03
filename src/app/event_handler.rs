@@ -23,6 +23,10 @@ pub fn normal_mode<'a>(app: &mut App, key_event: KeyEvent) -> State<'a> {
             app.select_next_column();
             State::Normal
         }
+        KeyCode::Char('H') => {
+            app.mark_card_undone();
+            State::Normal
+        }
         KeyCode::Char('J') => {
             app.decrease_priority();
             State::Normal

@@ -115,6 +115,17 @@ impl App {
         }
     }
 
+    pub fn mark_card_undone(&mut self) {
+        match self.selector.get() {
+            Some((column_index, card_index)) => {
+                self.board = Board::mark_card_undone(self.board.clone(), column_index, card_index);
+                self.board = self.selector.select_prev_column(self.board.clone());
+                self.board = self.selector.select_top_card(self.board.clone());
+            }
+            None => self.log("No card selected".to_string()),
+        }
+    }
+
     pub fn write(&mut self) {
         match self.board.to_file(&self.file_name) {
             Ok(_) => self.log(format!("Board written to {}", self.file_name)),

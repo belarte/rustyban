@@ -108,6 +108,15 @@ impl Board {
         }
         board
     }
+
+    pub fn mark_card_undone(mut board: Board, column_index: usize, card_index: usize) -> Board {
+        if column_index > 0 {
+            let card = board.columns(column_index).get_card(card_index).clone();
+            board.columns[column_index] = Column::remove_card(board.columns(column_index).clone(), card_index);
+            board.columns[column_index-1] = Column::insert_card(board.columns(column_index-1).clone(), card, 0);
+        }
+        board
+    }
 }
 
 impl Widget for &Board {
