@@ -31,6 +31,10 @@ pub fn normal_mode<'a>(app: &mut App, key_event: KeyEvent) -> State<'a> {
             app.increase_priority();
             State::Normal
         }
+        KeyCode::Char('L') => {
+            app.mark_card_done();
+            State::Normal
+        }
         KeyCode::Char('e') | KeyCode::Enter => match app.get_selected_card() {
             Some(card) => State::Edit {
                 editor: CardEditor::new(card),
