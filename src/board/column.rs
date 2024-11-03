@@ -113,7 +113,7 @@ impl Widget for &Column {
         let block = Block::bordered().title(title).border_set(border::THICK);
 
         let inner_area = block.inner(area);
-        let areas = Layout::vertical([Constraint::Max(4); 4]).split(inner_area);
+        let areas = Layout::vertical([Constraint::Max(4); 12]).split(inner_area);
         self.cards.iter().enumerate().for_each(|(i, card)| {
             card.render(areas[i], buf);
         });
