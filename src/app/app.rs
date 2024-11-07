@@ -1,3 +1,5 @@
+use std::cmp::min;
+
 use ratatui::{
     buffer::Buffer,
     layout::{Constraint, Layout, Rect},
@@ -108,8 +110,8 @@ impl App {
         match self.selector.get() {
             Some((column_index, card_index)) => {
                 self.board = Board::mark_card_done(self.board.clone(), column_index, card_index);
-                self.board = self.selector.select_next_column(self.board.clone());
-                self.board = self.selector.select_top_card(self.board.clone());
+                let new_index = min(column_index + 1, 2);
+                self.selector.set(new_index, 0);
             }
             None => self.log("No card selected".to_string()),
         }
@@ -119,8 +121,8 @@ impl App {
         match self.selector.get() {
             Some((column_index, card_index)) => {
                 self.board = Board::mark_card_undone(self.board.clone(), column_index, card_index);
-                self.board = self.selector.select_prev_column(self.board.clone());
-                self.board = self.selector.select_top_card(self.board.clone());
+                let new_index = if column_index > 0 { column_index - 1 } else { 0 };
+                self.selector.set(new_index, 0);
             }
             None => self.log("No card selected".to_string()),
         }
@@ -167,5 +169,37 @@ impl Widget for &App {
 
         self.board.render(board_area, buf);
         self.logger.render(logger_area, buf);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::io::Result;
+
+    use super::App;
+
+    #[test]
+    fn mark_done_and_undone() -> Result<()> {
+        let mut app = App::new("res/test_board.json".to_string());
+
+        app.select_next_card();
+        app.select_next_card();
+        app.select_next_card();
+        let card = app.get_selected_card().unwrap();
+        assert_eq!("Buy bread", card.short_description());
+
+        app.mark_card_done();
+        let card = app.get_selected_card().unwrap();
+        assert_eq!("Buy bread", card.short_description());
+
+        app.select_next_column();
+        app.select_next_card();
+        let card = app.get_selected_card().unwrap();
+        assert_eq!("Wash dishes", card.short_description());
+
+        app.mark_card_undone();
+        assert_eq!("Wash dishes", card.short_description());
+
+        Ok(())
     }
 }

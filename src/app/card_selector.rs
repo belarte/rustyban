@@ -26,6 +26,11 @@ impl CardSelector {
         }
     }
 
+    pub fn set(&mut self, selected_column: usize, selected_card: usize) {
+        self.selected_column = selected_column;
+        self.selected_card = selected_card;
+    }
+
     pub fn get_selected_card(&self, board: &Board) -> Option<Card> {
         if self.selection_enabled && !board.columns(self.selected_column).is_empty() {
             Some(board.columns(self.selected_column).get_card(self.selected_card).clone())
@@ -80,17 +85,6 @@ impl CardSelector {
         Board::select_card(board, self.selected_column, self.selected_card)
     }
 
-    pub fn select_top_card(&mut self, mut board: Board) -> Board {
-        if self.selection_enabled {
-            board = Board::deselect_card(board.clone(), self.selected_column, self.selected_card);
-            self.selected_card = 0;
-        } else {
-            self.selection_enabled = true;
-        }
-
-        Board::select_card(board, self.selected_column, self.selected_card)
-    }
-
     pub fn disable_selection(&mut self, board: Board) -> Board {
         self.selection_enabled = false;
         Board::deselect_card(board.clone(), self.selected_column, self.selected_card)
@@ -134,10 +128,6 @@ mod tests {
         let board = selector.select_next_card(board);
         assert!(board.columns(0).get_card(2).is_selected());
 
-        assert!(!board.columns(0).get_card(0).is_selected());
-        let board = selector.select_top_card(board);
-        assert!(board.columns(0).get_card(0).is_selected());
-
         assert!(!board.columns(1).get_card(0).is_selected());
         let board = selector.select_next_column(board);
         let board = selector.select_next_card(board);
@@ -176,9 +166,6 @@ mod tests {
         let board = selector.select_next_column(board);
         let board = selector.select_next_card(board);
         assert_eq!(Some((2, 1)), selector.get());
-
-        let board = selector.select_top_card(board);
-        assert_eq!(Some((2, 0)), selector.get());
 
         selector.disable_selection(board);
         assert_eq!(None, selector.get());
