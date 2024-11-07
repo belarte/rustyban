@@ -104,7 +104,7 @@ impl Board {
         if column_index < board.columns.len() - 1 {
             let card = board.columns(column_index).get_card(card_index).clone();
             board.columns[column_index] = Column::remove_card(board.columns(column_index).clone(), card_index);
-            board.columns[column_index+1] = Column::insert_card(board.columns(column_index+1).clone(), card, 0);
+            board.columns[column_index + 1] = Column::insert_card(board.columns(column_index + 1).clone(), card, 0);
         }
         board
     }
@@ -113,7 +113,7 @@ impl Board {
         if column_index > 0 {
             let card = board.columns(column_index).get_card(card_index).clone();
             board.columns[column_index] = Column::remove_card(board.columns(column_index).clone(), card_index);
-            board.columns[column_index-1] = Column::insert_card(board.columns(column_index-1).clone(), card, 0);
+            board.columns[column_index - 1] = Column::insert_card(board.columns(column_index - 1).clone(), card, 0);
         }
         board
     }

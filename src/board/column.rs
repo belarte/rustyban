@@ -39,7 +39,7 @@ impl Column {
 
     pub fn get_card_index(&self, index: usize) -> usize {
         if self.is_empty() {
-            return 0
+            return 0;
         }
 
         min(index, self.cards.len() - 1)
