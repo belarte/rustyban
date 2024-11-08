@@ -54,14 +54,12 @@ impl Card {
         card
     }
 
-    pub fn select(mut card: Card) -> Self {
-        card.is_selected = true;
-        card
+    pub fn select(&mut self) {
+        self.is_selected = true;
     }
 
-    pub fn deselect(mut card: Card) -> Self {
-        card.is_selected = false;
-        card
+    pub fn deselect(&mut self) {
+        self.is_selected = false;
     }
 }
 
@@ -94,19 +92,19 @@ mod tests {
 
     #[test]
     fn selection() -> Result<()> {
-        let card = Card::new("test", Local::now());
+        let mut card = Card::new("test", Local::now());
         assert!(!card.is_selected());
 
-        let card = Card::deselect(card);
+        card.deselect();
         assert!(!card.is_selected());
 
-        let card = Card::select(card);
+        card.select();
         assert!(card.is_selected());
 
-        let card = Card::select(card);
+        card.select();
         assert!(card.is_selected());
 
-        let card = Card::deselect(card);
+        card.deselect();
         assert!(!card.is_selected());
 
         Ok(())

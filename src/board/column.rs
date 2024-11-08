@@ -69,16 +69,14 @@ impl Column {
 
     pub fn select_card(mut column: Column, card_index: usize) -> Column {
         if !column.is_empty() {
-            let card = Card::select(column.cards[card_index].clone());
-            column.cards[card_index] = card;
+            column.cards[card_index].select();
         }
         column
     }
 
     pub fn deselect_card(mut column: Column, card_index: usize) -> Column {
         if !column.is_empty() {
-            let card = Card::deselect(column.cards[card_index].clone());
-            column.cards[card_index] = card;
+            column.cards[card_index].deselect();
         }
         column
     }
