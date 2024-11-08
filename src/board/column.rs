@@ -57,14 +57,12 @@ impl Column {
         self.get_card_index(current_index - 1)
     }
 
-    pub fn insert_card(mut column: Column, card: Card, index: usize) -> Column {
-        column.cards.insert(index, card);
-        column
+    pub fn insert_card(&mut self, card: Card, index: usize) {
+        self.cards.insert(index, card);
     }
 
-    pub fn remove_card(mut column: Column, index: usize) -> Column {
-        column.cards.remove(index);
-        column
+    pub fn remove_card(&mut self, index: usize) {
+        self.cards.remove(index);
     }
 
     pub fn select_card(&mut self, card_index: usize) {
@@ -79,25 +77,22 @@ impl Column {
         }
     }
 
-    pub fn update_card(mut column: Column, card_index: usize, card: Card) -> Column {
-        if !column.is_empty() {
-            column.cards[card_index] = card;
+    pub fn update_card(&mut self, card_index: usize, card: Card) {
+        if !self.is_empty() {
+            self.cards[card_index] = card;
         }
-        column
     }
 
-    pub fn increase_priority(mut column: Column, card_index: usize) -> Column {
-        if card_index > 0 && card_index < column.cards.len() {
-            column.cards.swap(card_index, card_index - 1);
+    pub fn increase_priority(&mut self, card_index: usize) {
+        if card_index > 0 && card_index < self.cards.len() {
+            self.cards.swap(card_index, card_index - 1);
         }
-        column
     }
 
-    pub fn decrease_priority(mut column: Column, card_index: usize) -> Column {
-        if card_index < column.cards.len() - 1 {
-            column.cards.swap(card_index, card_index + 1);
+    pub fn decrease_priority(&mut self, card_index: usize) {
+        if card_index < self.cards.len() - 1 {
+            self.cards.swap(card_index, card_index + 1);
         }
-        column
     }
 }
 
@@ -148,12 +143,12 @@ mod tests {
     #[test]
     fn insert_and_remove_cards() -> Result<()> {
         let now = Local::now();
-        let column = Column::new("test", vec![]);
+        let mut column = Column::new("test", vec![]);
 
-        let column = Column::insert_card(column, Card::new("card 3", now), 0);
-        let column = Column::insert_card(column, Card::new("card 1", now), 0);
-        let column = Column::insert_card(column, Card::new("card 2", now), 1);
-        let column = Column::insert_card(column, Card::new("card 4", now), 3);
+        column.insert_card(Card::new("card 3", now), 0);
+        column.insert_card(Card::new("card 1", now), 0);
+        column.insert_card(Card::new("card 2", now), 1);
+        column.insert_card(Card::new("card 4", now), 3);
 
         assert_eq!(4, column.cards.len());
         assert_eq!("card 1", column.get_card(0).short_description());
@@ -161,23 +156,23 @@ mod tests {
         assert_eq!("card 3", column.get_card(2).short_description());
         assert_eq!("card 4", column.get_card(3).short_description());
 
-        let column = Column::remove_card(column, 0);
+        column.remove_card(0);
         assert_eq!(3, column.cards.len());
         assert_eq!("card 2", column.get_card(0).short_description());
         assert_eq!("card 3", column.get_card(1).short_description());
         assert_eq!("card 4", column.get_card(2).short_description());
 
-        let column = Column::remove_card(column, 2);
+        column.remove_card(2);
         assert_eq!(2, column.cards.len());
         assert_eq!("card 2", column.get_card(0).short_description());
         assert_eq!("card 3", column.get_card(1).short_description());
 
-        let column = Column::remove_card(column, 1);
+        column.remove_card(1);
         assert_eq!(1, column.cards.len());
         assert_eq!("card 2", column.get_card(0).short_description());
 
         assert!(!column.is_empty());
-        let column = Column::remove_card(column, 0);
+        column.remove_card(0);
         assert!(column.is_empty());
 
         Ok(())
@@ -186,7 +181,7 @@ mod tests {
     #[test]
     fn change_priority() -> Result<()> {
         let now = Local::now();
-        let column = Column::new(
+        let mut column = Column::new(
             "test",
             vec![
                 Card::new("card 1", now),
@@ -195,19 +190,19 @@ mod tests {
             ],
         );
 
-        let column = Column::increase_priority(column, 0);
-        let column = Column::increase_priority(column, 2);
-        let column = Column::increase_priority(column, 1);
-        let column = Column::increase_priority(column, 2);
+        column.increase_priority(0);
+        column.increase_priority(2);
+        column.increase_priority(1);
+        column.increase_priority(2);
 
         assert_eq!("card 3", column.get_card(0).short_description());
         assert_eq!("card 2", column.get_card(1).short_description());
         assert_eq!("card 1", column.get_card(2).short_description());
 
-        let column = Column::decrease_priority(column, 2);
-        let column = Column::decrease_priority(column, 1);
-        let column = Column::decrease_priority(column, 0);
-        let column = Column::decrease_priority(column, 1);
+        column.decrease_priority(2);
+        column.decrease_priority(1);
+        column.decrease_priority(0);
+        column.decrease_priority(1);
 
         assert_eq!("card 1", column.get_card(0).short_description());
         assert_eq!("card 2", column.get_card(1).short_description());

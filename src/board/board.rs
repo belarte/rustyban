@@ -79,28 +79,25 @@ impl Board {
     }
 
     pub fn update_card(mut board: Board, column_index: usize, card_index: usize, card: Card) -> Board {
-        let column = Column::update_card(board.columns[column_index].clone(), card_index, card);
-        board.columns[column_index] = column;
+        board.columns[column_index].update_card(card_index, card);
         board
     }
 
     pub fn increase_priority(mut board: Board, column_index: usize, card_index: usize) -> Board {
-        let column = Column::increase_priority(board.columns[column_index].clone(), card_index);
-        board.columns[column_index] = column;
+        board.columns[column_index].increase_priority(card_index);
         board
     }
 
     pub fn decrease_priority(mut board: Board, column_index: usize, card_index: usize) -> Board {
-        let column = Column::decrease_priority(board.columns[column_index].clone(), card_index);
-        board.columns[column_index] = column;
+        board.columns[column_index].decrease_priority(card_index);
         board
     }
 
     pub fn mark_card_done(mut board: Board, column_index: usize, card_index: usize) -> Board {
         if column_index < board.columns.len() - 1 {
             let card = board.columns(column_index).get_card(card_index).clone();
-            board.columns[column_index] = Column::remove_card(board.columns(column_index).clone(), card_index);
-            board.columns[column_index + 1] = Column::insert_card(board.columns(column_index + 1).clone(), card, 0);
+            board.columns[column_index].remove_card(card_index);
+            board.columns[column_index + 1].insert_card(card, 0);
         }
         board
     }
@@ -108,8 +105,8 @@ impl Board {
     pub fn mark_card_undone(mut board: Board, column_index: usize, card_index: usize) -> Board {
         if column_index > 0 {
             let card = board.columns(column_index).get_card(card_index).clone();
-            board.columns[column_index] = Column::remove_card(board.columns(column_index).clone(), card_index);
-            board.columns[column_index - 1] = Column::insert_card(board.columns(column_index - 1).clone(), card, 0);
+            board.columns[column_index].remove_card(card_index);
+            board.columns[column_index - 1].insert_card(card, 0);
         }
         board
     }
