@@ -78,37 +78,32 @@ impl Board {
         self.columns[column_index].deselect_card(card_index);
     }
 
-    pub fn update_card(mut board: Board, column_index: usize, card_index: usize, card: Card) -> Board {
-        board.columns[column_index].update_card(card_index, card);
-        board
+    pub fn update_card(&mut self, column_index: usize, card_index: usize, card: Card) {
+        self.columns[column_index].update_card(card_index, card);
     }
 
-    pub fn increase_priority(mut board: Board, column_index: usize, card_index: usize) -> Board {
-        board.columns[column_index].increase_priority(card_index);
-        board
+    pub fn increase_priority(&mut self, column_index: usize, card_index: usize) {
+        self.columns[column_index].increase_priority(card_index);
     }
 
-    pub fn decrease_priority(mut board: Board, column_index: usize, card_index: usize) -> Board {
-        board.columns[column_index].decrease_priority(card_index);
-        board
+    pub fn decrease_priority(&mut self, column_index: usize, card_index: usize) {
+        self.columns[column_index].decrease_priority(card_index);
     }
 
-    pub fn mark_card_done(mut board: Board, column_index: usize, card_index: usize) -> Board {
-        if column_index < board.columns.len() - 1 {
-            let card = board.columns(column_index).get_card(card_index).clone();
-            board.columns[column_index].remove_card(card_index);
-            board.columns[column_index + 1].insert_card(card, 0);
+    pub fn mark_card_done(&mut self, column_index: usize, card_index: usize) {
+        if column_index < self.columns.len() - 1 {
+            let card = self.columns(column_index).get_card(card_index).clone();
+            self.columns[column_index].remove_card(card_index);
+            self.columns[column_index + 1].insert_card(card, 0);
         }
-        board
     }
 
-    pub fn mark_card_undone(mut board: Board, column_index: usize, card_index: usize) -> Board {
+    pub fn mark_card_undone(&mut self, column_index: usize, card_index: usize) {
         if column_index > 0 {
-            let card = board.columns(column_index).get_card(card_index).clone();
-            board.columns[column_index].remove_card(card_index);
-            board.columns[column_index - 1].insert_card(card, 0);
+            let card = self.columns(column_index).get_card(card_index).clone();
+            self.columns[column_index].remove_card(card_index);
+            self.columns[column_index - 1].insert_card(card, 0);
         }
-        board
     }
 }
 

@@ -80,7 +80,7 @@ impl App {
     pub fn update_card(&mut self, card: Card) {
         match self.selector.get() {
             Some((column, card_index)) => {
-                self.board = Board::update_card(self.board.clone(), column, card_index, card);
+                self.board.update_card(column, card_index, card);
             }
             None => self.log("No card selected".to_string()),
         }
@@ -89,7 +89,7 @@ impl App {
     pub fn increase_priority(&mut self) {
         match self.selector.get() {
             Some((column_index, card_index)) => {
-                self.board = Board::increase_priority(self.board.clone(), column_index, card_index);
+                self.board.increase_priority(column_index, card_index);
                 self.selector.select_prev_card(&mut self.board);
             }
             None => self.log("No card selected".to_string()),
@@ -99,7 +99,7 @@ impl App {
     pub fn decrease_priority(&mut self) {
         match self.selector.get() {
             Some((column_index, card_index)) => {
-                self.board = Board::decrease_priority(self.board.clone(), column_index, card_index);
+                self.board.decrease_priority(column_index, card_index);
                 self.selector.select_next_card(&mut self.board);
             }
             None => self.log("No card selected".to_string()),
@@ -109,7 +109,7 @@ impl App {
     pub fn mark_card_done(&mut self) {
         match self.selector.get() {
             Some((column_index, card_index)) => {
-                self.board = Board::mark_card_done(self.board.clone(), column_index, card_index);
+                self.board.mark_card_done(column_index, card_index);
                 let new_index = min(column_index + 1, 2);
                 self.selector.set(new_index, 0);
             }
@@ -120,7 +120,7 @@ impl App {
     pub fn mark_card_undone(&mut self) {
         match self.selector.get() {
             Some((column_index, card_index)) => {
-                self.board = Board::mark_card_undone(self.board.clone(), column_index, card_index);
+                self.board.mark_card_undone(column_index, card_index);
                 let new_index = if column_index > 0 { column_index - 1 } else { 0 };
                 self.selector.set(new_index, 0);
             }
