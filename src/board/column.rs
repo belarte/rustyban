@@ -67,18 +67,16 @@ impl Column {
         column
     }
 
-    pub fn select_card(mut column: Column, card_index: usize) -> Column {
-        if !column.is_empty() {
-            column.cards[card_index].select();
+    pub fn select_card(&mut self, card_index: usize) {
+        if !self.is_empty() {
+            self.cards[card_index].select();
         }
-        column
     }
 
-    pub fn deselect_card(mut column: Column, card_index: usize) -> Column {
-        if !column.is_empty() {
-            column.cards[card_index].deselect();
+    pub fn deselect_card(&mut self, card_index: usize) {
+        if !self.is_empty() {
+            self.cards[card_index].deselect();
         }
-        column
     }
 
     pub fn update_card(mut column: Column, card_index: usize, card: Card) -> Column {

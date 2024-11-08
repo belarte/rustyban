@@ -71,14 +71,12 @@ impl Board {
     }
 
     pub fn select_card(mut board: Board, column_index: usize, card_index: usize) -> Board {
-        let column = Column::select_card(board.columns[column_index].clone(), card_index);
-        board.columns[column_index] = column;
+        board.columns[column_index].select_card(card_index);
         board
     }
 
     pub fn deselect_card(mut board: Board, column_index: usize, card_index: usize) -> Board {
-        let column = Column::deselect_card(board.columns[column_index].clone(), card_index);
-        board.columns[column_index] = column;
+        board.columns[column_index].deselect_card(card_index);
         board
     }
 
