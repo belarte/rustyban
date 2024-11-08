@@ -41,53 +41,58 @@ impl CardSelector {
 
     pub fn select_next_column(&mut self, mut board: Board) -> Board {
         if self.selection_enabled {
-            board = Board::deselect_card(board.clone(), self.selected_column, self.selected_card);
+            board.deselect_card(self.selected_column, self.selected_card);
             self.selected_column = self.next_column_index(&board, self.selected_column);
             self.selected_card = board.columns(self.selected_column).get_card_index(self.selected_card);
         } else {
             self.selection_enabled = true;
         }
 
-        Board::select_card(board, self.selected_column, self.selected_card)
+        board.select_card(self.selected_column, self.selected_card);
+        board
     }
 
     pub fn select_prev_column(&mut self, mut board: Board) -> Board {
         if self.selection_enabled {
-            board = Board::deselect_card(board.clone(), self.selected_column, self.selected_card);
+            board.deselect_card(self.selected_column, self.selected_card);
             self.selected_column = self.prev_column_index(&board, self.selected_column);
             self.selected_card = board.columns(self.selected_column).get_card_index(self.selected_card);
         } else {
             self.selection_enabled = true;
         }
 
-        Board::select_card(board, self.selected_column, self.selected_card)
+        board.select_card(self.selected_column, self.selected_card);
+        board
     }
 
     pub fn select_next_card(&mut self, mut board: Board) -> Board {
         if self.selection_enabled {
-            board = Board::deselect_card(board.clone(), self.selected_column, self.selected_card);
+            board.deselect_card(self.selected_column, self.selected_card);
             self.selected_card = board.columns(self.selected_column).next_card_index(self.selected_card);
         } else {
             self.selection_enabled = true;
         }
 
-        Board::select_card(board, self.selected_column, self.selected_card)
+        board.select_card(self.selected_column, self.selected_card);
+        board
     }
 
     pub fn select_prev_card(&mut self, mut board: Board) -> Board {
         if self.selection_enabled {
-            board = Board::deselect_card(board.clone(), self.selected_column, self.selected_card);
+            board.deselect_card(self.selected_column, self.selected_card);
             self.selected_card = board.columns(self.selected_column).prev_card_index(self.selected_card);
         } else {
             self.selection_enabled = true;
         }
 
-        Board::select_card(board, self.selected_column, self.selected_card)
+        board.select_card(self.selected_column, self.selected_card);
+        board
     }
 
-    pub fn disable_selection(&mut self, board: Board) -> Board {
+    pub fn disable_selection(&mut self, mut board: Board) -> Board {
         self.selection_enabled = false;
-        Board::deselect_card(board.clone(), self.selected_column, self.selected_card)
+        board.deselect_card(self.selected_column, self.selected_card);
+        board
     }
 
     fn next_column_index(&self, board: &Board, current_index: usize) -> usize {

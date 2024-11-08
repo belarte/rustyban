@@ -70,14 +70,12 @@ impl Board {
         self.columns.len()
     }
 
-    pub fn select_card(mut board: Board, column_index: usize, card_index: usize) -> Board {
-        board.columns[column_index].select_card(card_index);
-        board
+    pub fn select_card(&mut self, column_index: usize, card_index: usize) {
+        self.columns[column_index].select_card(card_index);
     }
 
-    pub fn deselect_card(mut board: Board, column_index: usize, card_index: usize) -> Board {
-        board.columns[column_index].deselect_card(card_index);
-        board
+    pub fn deselect_card(&mut self, column_index: usize, card_index: usize) {
+        self.columns[column_index].deselect_card(card_index);
     }
 
     pub fn update_card(mut board: Board, column_index: usize, card_index: usize, card: Card) -> Board {
