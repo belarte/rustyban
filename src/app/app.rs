@@ -54,23 +54,23 @@ impl App {
     }
 
     pub fn select_next_column(&mut self) {
-        self.board = self.selector.select_next_column(self.board.clone());
+        self.selector.select_next_column(&mut self.board);
     }
 
     pub fn select_prev_column(&mut self) {
-        self.board = self.selector.select_prev_column(self.board.clone());
+        self.selector.select_prev_column(&mut self.board);
     }
 
     pub fn select_next_card(&mut self) {
-        self.board = self.selector.select_next_card(self.board.clone());
+        self.selector.select_next_card(&mut self.board);
     }
 
     pub fn select_prev_card(&mut self) {
-        self.board = self.selector.select_prev_card(self.board.clone());
+        self.selector.select_prev_card(&mut self.board);
     }
 
     pub fn disable_selection(&mut self) {
-        self.board = self.selector.disable_selection(self.board.clone());
+        self.selector.disable_selection(&mut self.board);
     }
 
     pub fn get_selected_card(&self) -> Option<Card> {
@@ -90,7 +90,7 @@ impl App {
         match self.selector.get() {
             Some((column_index, card_index)) => {
                 self.board = Board::increase_priority(self.board.clone(), column_index, card_index);
-                self.board = self.selector.select_prev_card(self.board.clone());
+                self.selector.select_prev_card(&mut self.board);
             }
             None => self.log("No card selected".to_string()),
         }
@@ -100,7 +100,7 @@ impl App {
         match self.selector.get() {
             Some((column_index, card_index)) => {
                 self.board = Board::decrease_priority(self.board.clone(), column_index, card_index);
-                self.board = self.selector.select_next_card(self.board.clone());
+                self.selector.select_next_card(&mut self.board);
             }
             None => self.log("No card selected".to_string()),
         }

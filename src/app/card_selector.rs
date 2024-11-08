@@ -39,7 +39,7 @@ impl CardSelector {
         }
     }
 
-    pub fn select_next_column(&mut self, mut board: Board) -> Board {
+    pub fn select_next_column(&mut self, board: &mut Board) {
         if self.selection_enabled {
             board.deselect_card(self.selected_column, self.selected_card);
             self.selected_column = self.next_column_index(&board, self.selected_column);
@@ -49,10 +49,9 @@ impl CardSelector {
         }
 
         board.select_card(self.selected_column, self.selected_card);
-        board
     }
 
-    pub fn select_prev_column(&mut self, mut board: Board) -> Board {
+    pub fn select_prev_column(&mut self, board: &mut Board) {
         if self.selection_enabled {
             board.deselect_card(self.selected_column, self.selected_card);
             self.selected_column = self.prev_column_index(&board, self.selected_column);
@@ -62,10 +61,9 @@ impl CardSelector {
         }
 
         board.select_card(self.selected_column, self.selected_card);
-        board
     }
 
-    pub fn select_next_card(&mut self, mut board: Board) -> Board {
+    pub fn select_next_card(&mut self, board: &mut Board) {
         if self.selection_enabled {
             board.deselect_card(self.selected_column, self.selected_card);
             self.selected_card = board.columns(self.selected_column).next_card_index(self.selected_card);
@@ -74,10 +72,9 @@ impl CardSelector {
         }
 
         board.select_card(self.selected_column, self.selected_card);
-        board
     }
 
-    pub fn select_prev_card(&mut self, mut board: Board) -> Board {
+    pub fn select_prev_card(&mut self, board: &mut Board) {
         if self.selection_enabled {
             board.deselect_card(self.selected_column, self.selected_card);
             self.selected_card = board.columns(self.selected_column).prev_card_index(self.selected_card);
@@ -86,13 +83,11 @@ impl CardSelector {
         }
 
         board.select_card(self.selected_column, self.selected_card);
-        board
     }
 
-    pub fn disable_selection(&mut self, mut board: Board) -> Board {
+    pub fn disable_selection(&mut self, board: &mut Board) {
         self.selection_enabled = false;
         board.deselect_card(self.selected_column, self.selected_card);
-        board
     }
 
     fn next_column_index(&self, board: &Board, current_index: usize) -> usize {
@@ -118,37 +113,37 @@ mod tests {
 
     #[test]
     fn card_selection() -> Result<()> {
-        let board = Board::open("res/test_board.json")?;
+        let mut board = Board::open("res/test_board.json")?;
         let mut selector = CardSelector::new();
 
         assert!(!board.columns(0).get_card(0).is_selected());
-        let board = selector.select_next_card(board);
+        selector.select_next_card(&mut board);
         assert!(board.columns(0).get_card(0).is_selected());
 
         assert!(!board.columns(0).get_card(1).is_selected());
-        let board = selector.select_next_card(board);
+        selector.select_next_card(&mut board);
         assert!(board.columns(0).get_card(1).is_selected());
 
         assert!(!board.columns(0).get_card(2).is_selected());
-        let board = selector.select_next_card(board);
+        selector.select_next_card(&mut board);
         assert!(board.columns(0).get_card(2).is_selected());
 
         assert!(!board.columns(1).get_card(0).is_selected());
-        let board = selector.select_next_column(board);
-        let board = selector.select_next_card(board);
+        selector.select_next_column(&mut board);
+        selector.select_next_card(&mut board);
         assert!(board.columns(1).get_card(0).is_selected());
 
         assert!(!board.columns(2).get_card(0).is_selected());
-        let board = selector.select_next_column(board);
-        let board = selector.select_next_column(board);
-        let board = selector.select_prev_card(board);
+        selector.select_next_column(&mut board);
+        selector.select_next_column(&mut board);
+        selector.select_prev_card(&mut board);
         assert!(board.columns(2).get_card(0).is_selected());
 
         assert!(!board.columns(0).get_card(0).is_selected());
-        let board = selector.select_prev_column(board);
-        let board = selector.select_prev_column(board);
-        let board = selector.select_prev_column(board);
-        let board = selector.select_prev_column(board);
+        selector.select_prev_column(&mut board);
+        selector.select_prev_column(&mut board);
+        selector.select_prev_column(&mut board);
+        selector.select_prev_column(&mut board);
         assert!(board.columns(0).get_card(0).is_selected());
 
         Ok(())
@@ -156,23 +151,23 @@ mod tests {
 
     #[test]
     fn get_the_card_index() -> Result<()> {
-        let board = Board::open("res/test_board.json")?;
+        let mut board = Board::open("res/test_board.json")?;
         let mut selector = CardSelector::new();
 
         assert_eq!(None, selector.get());
-        let board = selector.select_next_card(board);
+        selector.select_next_card(&mut board);
         assert_eq!(Some((0, 0)), selector.get());
 
-        let board = selector.select_next_column(board);
-        let board = selector.select_next_column(board);
-        let board = selector.select_next_card(board);
+        selector.select_next_column(&mut board);
+        selector.select_next_column(&mut board);
+        selector.select_next_card(&mut board);
         assert_eq!(Some((2, 1)), selector.get());
 
-        let board = selector.select_next_column(board);
-        let board = selector.select_next_card(board);
+        selector.select_next_column(&mut board);
+        selector.select_next_card(&mut board);
         assert_eq!(Some((2, 1)), selector.get());
 
-        selector.disable_selection(board);
+        selector.disable_selection(&mut board);
         assert_eq!(None, selector.get());
 
         Ok(())
@@ -180,12 +175,12 @@ mod tests {
 
     #[test]
     fn returns_none_on_empty_board() -> Result<()> {
-        let board = Board::open("res/test_board_with_empty_column.json")?;
+        let mut board = Board::open("res/test_board_with_empty_column.json")?;
         let mut selector = CardSelector::new();
 
-        let board = selector.select_next_column(board);
-        let board = selector.select_next_column(board);
-        assert_eq!(None, selector.get_selected_card(&board));
+        selector.select_next_column(&mut board);
+        selector.select_next_column(&mut board);
+        assert_eq!(None, selector.get_selected_card(&mut board));
 
         Ok(())
     }
