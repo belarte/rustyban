@@ -65,12 +65,13 @@ impl CardEditor {
     }
 
     pub fn get_card(&self) -> Card {
-        let card = self.card.clone();
+        let mut card = self.card.clone();
         let short_description = self.widgets[0].lines().join("\n");
         let long_description = self.widgets[1].lines().join("\n");
-        let card = Card::update_short_description(card, &short_description);
+        card.update_short_description(&short_description);
 
-        Card::update_long_description(card, &long_description)
+        card.update_long_description(&long_description);
+        card
     }
 
     fn areas(&self, area: Rect) -> [Rect; 2] {
