@@ -42,8 +42,8 @@ impl CardSelector {
     pub fn select_next_column(&mut self, board: &mut Board) {
         if self.selection_enabled {
             board.deselect_card(self.selected_column, self.selected_card);
-            self.selected_column = self.next_column_index(&board, self.selected_column);
-            self.selected_card = board.columns(self.selected_column).get_card_index(self.selected_card);
+            self.selected_column = self.next_column_index(board, self.selected_column);
+            self.selected_card = self.get_card_index(board, self.selected_card);
         } else {
             self.selection_enabled = true;
         }
@@ -54,8 +54,8 @@ impl CardSelector {
     pub fn select_prev_column(&mut self, board: &mut Board) {
         if self.selection_enabled {
             board.deselect_card(self.selected_column, self.selected_card);
-            self.selected_column = self.prev_column_index(&board, self.selected_column);
-            self.selected_card = board.columns(self.selected_column).get_card_index(self.selected_card);
+            self.selected_column = self.prev_column_index(board, self.selected_column);
+            self.selected_card = self.get_card_index(board, self.selected_card);
         } else {
             self.selection_enabled = true;
         }
@@ -66,7 +66,7 @@ impl CardSelector {
     pub fn select_next_card(&mut self, board: &mut Board) {
         if self.selection_enabled {
             board.deselect_card(self.selected_column, self.selected_card);
-            self.selected_card = board.columns(self.selected_column).next_card_index(self.selected_card);
+            self.selected_card = self.next_card_index(board);
         } else {
             self.selection_enabled = true;
         }
@@ -77,7 +77,7 @@ impl CardSelector {
     pub fn select_prev_card(&mut self, board: &mut Board) {
         if self.selection_enabled {
             board.deselect_card(self.selected_column, self.selected_card);
-            self.selected_card = board.columns(self.selected_column).prev_card_index(self.selected_card);
+            self.selected_card = self.prev_card_index(board);
         } else {
             self.selection_enabled = true;
         }
@@ -88,6 +88,28 @@ impl CardSelector {
     pub fn disable_selection(&mut self, board: &mut Board) {
         self.selection_enabled = false;
         board.deselect_card(self.selected_column, self.selected_card);
+    }
+
+    fn get_card_index(&self, board: &Board, index: usize) -> usize {
+        let column = board.columns(self.selected_column);
+
+        if column.is_empty() {
+            return 0;
+        }
+
+        min(index, column.size() - 1)
+    }
+
+    fn next_card_index(&self, board: &Board) -> usize {
+        self.get_card_index(board, self.selected_card + 1)
+    }
+
+    fn prev_card_index(&self, board: &Board) -> usize {
+        if self.selected_card == 0 {
+            return 0;
+        }
+
+        self.get_card_index(board, self.selected_card - 1)
     }
 
     fn next_column_index(&self, board: &Board, current_index: usize) -> usize {

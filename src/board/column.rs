@@ -1,5 +1,3 @@
-use std::cmp::min;
-
 use ratatui::{
     buffer::Buffer,
     layout::{Alignment, Constraint, Layout, Rect},
@@ -29,32 +27,16 @@ impl Column {
         &self.header
     }
 
+    pub fn size(&self) -> usize {
+        self.cards.len()
+    }
+
     pub fn is_empty(&self) -> bool {
         self.cards.len() == 0
     }
 
     pub fn get_card(&self, i: usize) -> &Card {
         &self.cards[i]
-    }
-
-    pub fn get_card_index(&self, index: usize) -> usize {
-        if self.is_empty() {
-            return 0;
-        }
-
-        min(index, self.cards.len() - 1)
-    }
-
-    pub fn next_card_index(&self, current_index: usize) -> usize {
-        self.get_card_index(current_index + 1)
-    }
-
-    pub fn prev_card_index(&self, current_index: usize) -> usize {
-        if current_index == 0 {
-            return 0;
-        }
-
-        self.get_card_index(current_index - 1)
     }
 
     pub fn insert_card(&mut self, card: Card, index: usize) {
@@ -122,23 +104,6 @@ mod tests {
     use crate::board::card::Card;
 
     use super::Column;
-
-    #[test]
-    fn selection() -> Result<()> {
-        let column = Column::new("test", vec![Card::default(), Card::default(), Card::default()]);
-
-        assert_eq!(1, column.next_card_index(0));
-        assert_eq!(2, column.next_card_index(1));
-        assert_eq!(2, column.next_card_index(2));
-        assert_eq!(2, column.next_card_index(999));
-
-        assert_eq!(0, column.prev_card_index(0));
-        assert_eq!(0, column.prev_card_index(1));
-        assert_eq!(1, column.prev_card_index(2));
-        assert_eq!(2, column.prev_card_index(999));
-
-        Ok(())
-    }
 
     #[test]
     fn insert_and_remove_cards() -> Result<()> {
