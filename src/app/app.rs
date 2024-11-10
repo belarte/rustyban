@@ -109,9 +109,10 @@ impl App {
     pub fn mark_card_done(&mut self) {
         match self.selector.get() {
             Some((column_index, card_index)) => {
-                self.board.mark_card_done(column_index, card_index);
-                let new_index = min(column_index + 1, 2);
-                self.selector.set(new_index, 0);
+                if self.board.mark_card_done(column_index, card_index) {
+                    let new_index = min(column_index + 1, 2);
+                    self.selector.set(new_index, 0);
+                }
             }
             None => self.log("No card selected".to_string()),
         }
@@ -120,9 +121,10 @@ impl App {
     pub fn mark_card_undone(&mut self) {
         match self.selector.get() {
             Some((column_index, card_index)) => {
-                self.board.mark_card_undone(column_index, card_index);
-                let new_index = if column_index > 0 { column_index - 1 } else { 0 };
-                self.selector.set(new_index, 0);
+                if self.board.mark_card_undone(column_index, card_index) {
+                    let new_index = if column_index > 0 { column_index - 1 } else { 0 };
+                    self.selector.set(new_index, 0);
+                }
             }
             None => self.log("No card selected".to_string()),
         }
