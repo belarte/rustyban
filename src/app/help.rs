@@ -16,7 +16,7 @@ pub struct Help;
 
 impl Widget for Help {
     fn render(self, area: Rect, buf: &mut Buffer) {
-        let area = centered_popup_area(area, Constraint::Percentage(60), Constraint::Percentage(20));
+        let area = centered_popup_area(area, Constraint::Length(60), Constraint::Length(14));
         Clear.render(area, buf);
 
         let title = Title::from(" Help ".bold());
@@ -26,6 +26,10 @@ impl Widget for Help {
             Line::from(vec![" <←/↓/↑/→> ".bold(), "Select card".into()]),
             Line::from(vec![" <e>  ".bold(), "Edit selected card".into()]),
             Line::from(vec![" <CR> ".bold(), "Edit selected card".into()]),
+            Line::from(vec![" <K> ".bold(), "Increase priotity of selected card".into()]),
+            Line::from(vec![" <J> ".bold(), "Decrease priotity of selected card".into()]),
+            Line::from(vec![" <L> ".bold(), "Mark selected card done".into()]),
+            Line::from(vec![" <H> ".bold(), "Mark selected card undone".into()]),
             Line::from(vec![" <w> ".bold(), "Write the board to file".into()]),
             Line::from(vec![
                 " <W> ".bold(),

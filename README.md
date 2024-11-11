@@ -20,6 +20,6 @@ Use `<h/j/k/l>` or the arrow keys to select a card.
 - [x] Write board to file
 - [x] Read board from file
 - [x] Select a card
-- [ ] Edit a card
+- [x] Edit a card
 - [ ] Add a card
-- [ ] Move a card
+- [x] Move a card
