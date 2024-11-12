@@ -200,6 +200,7 @@ mod tests {
         assert_eq!("Wash dishes", card.short_description());
 
         app.mark_card_undone();
+        let card = app.get_selected_card().unwrap();
         assert_eq!("Wash dishes", card.short_description());
 
         Ok(())
