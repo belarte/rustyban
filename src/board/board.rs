@@ -70,6 +70,10 @@ impl Board {
         self.columns.len()
     }
 
+    pub fn insert_card(&mut self, column_index: usize, card_index: usize, card: Card) {
+        self.columns[column_index].insert_card(card, card_index);
+    }
+
     pub fn select_card(&mut self, column_index: usize, card_index: usize) {
         self.columns[column_index].select_card(card_index);
     }
@@ -131,6 +135,8 @@ impl Widget for &Board {
 #[cfg(test)]
 mod tests {
     use std::fs;
+
+    use chrono::Local;
 
     use super::*;
 
@@ -225,6 +231,55 @@ mod tests {
         for (column_index, card_index, expected) in cases {
             let mut board = board.clone();
             assert_eq!(expected, board.mark_card_undone(column_index, card_index));
+        }
+
+        Ok(())
+    }
+
+    #[test]
+    fn inserting_card() -> Result<()> {
+        let board = Board::open("res/test_board.json")?;
+        let description = "new description";
+        let new_card = Card::new(description, Local::now());
+
+        let cases: Vec<(usize, usize, &str)> = vec![
+            (0, 0, "Buy milk"),
+            (0, 1, "Buy eggs"),
+            (0, 2, "Buy bread"),
+            (1, 0, "Cook dinner"),
+            (2, 0, "Eat dinner"),
+            (2, 1, "Wash dishes"),
+        ];
+
+        for (column_index, card_index, old_description) in cases {
+            let mut board = board.clone();
+
+            assert_eq!(old_description, board.columns(column_index).get_card(card_index).short_description());
+            board.insert_card(column_index, card_index, new_card.clone());
+            assert_eq!(old_description, board.columns(column_index).get_card(card_index + 1).short_description());
+            assert_eq!(description, board.columns(column_index).get_card(card_index).short_description());
+        }
+
+        Ok(())
+    }
+
+    #[test]
+    fn appending_card() -> Result<()> {
+        let board = Board::open("res/test_board.json")?;
+        let description = "new description";
+        let new_card = Card::new(description, Local::now());
+
+        let cases: Vec<(usize, usize)> = vec![
+            (0, 3),
+            (1, 1),
+            (2, 2),
+        ];
+
+        for (column_index, card_index) in cases {
+            let mut board = board.clone();
+
+            board.insert_card(column_index, card_index, new_card.clone());
+            assert_eq!(description, board.columns(column_index).get_card(card_index).short_description());
         }
 
         Ok(())
