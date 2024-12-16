@@ -4,7 +4,7 @@ use ratatui::Frame;
 use super::{
     app::App,
     card_editor::CardEditor,
-    event_handler::{edit_mode, normal_mode, save_mode},
+    event_handler::{edit, normal, save},
     help::Help,
     save_to_file::Save,
 };
@@ -29,9 +29,9 @@ impl<'a> AppState<'a> {
 
     pub fn handle_events(&mut self, app: &mut App, event: KeyEvent) {
         match &self.state {
-            State::Normal => self.state = normal_mode(app, event),
-            State::Save { save } => self.state = save_mode(save.clone(), app, event),
-            State::Edit { editor } => self.state = edit_mode(editor.clone(), app, event),
+            State::Normal => self.state = normal::handler(app, event),
+            State::Save { save } => self.state = save::handler(save.clone(), app, event),
+            State::Edit { editor } => self.state = edit::handler(editor.clone(), app, event),
             State::Help => self.state = State::Normal,
         }
     }
