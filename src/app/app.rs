@@ -119,17 +119,17 @@ impl App {
         }
     }
 
-    pub fn insert_card(&mut self) {
+    pub fn insert_card(&mut self) -> Option<Card> {
         match self.selector.get() {
             Some((column_index, card_index)) => {
-                let msg = format!("Inserting card at position ({}, {})", column_index, card_index);
                 self.board.deselect_card(column_index, card_index);
                 self.board.insert_card(column_index, card_index, Card::new("TODO", Local::now()));
                 self.board.select_card(column_index, card_index);
-                self.log(msg);
             }
             None => self.log("No card selected".to_string()),
-        }
+        };
+
+        self.get_selected_card()
     }
 
     pub fn mark_card_undone(&mut self) {
@@ -224,14 +224,15 @@ mod tests {
     fn card_insertion() -> Result<()> {
         let mut app = App::new("res/test_board.json".to_string());
 
+        assert_eq!(None, app.insert_card());
+
         app.select_next_card();
         app.select_next_card();
         app.select_next_card();
         let card = app.get_selected_card().unwrap();
         assert_eq!("Buy bread", card.short_description());
 
-        app.insert_card();
-        let card = app.get_selected_card().unwrap();
+        let card = app.insert_card().unwrap();
         assert_eq!("TODO", card.short_description());
 
         let card = app.board.columns(0).get_card(3);
