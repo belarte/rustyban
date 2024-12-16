@@ -10,6 +10,8 @@ use ratatui::{
 };
 use serde::{Deserialize, Serialize};
 
+use crate::time;
+
 #[derive(Clone, Debug, Default, Deserialize, Serialize, PartialEq)]
 pub struct Card {
     short_description: String,
@@ -73,7 +75,7 @@ impl Widget for &Card {
 
         let text = Text::from(vec![
             Line::from(self.short_description.borrow()),
-            Line::from(self.creation_date.format("%Y-%m-%d %H:%M").to_string()),
+            Line::from(time::format(self.creation_date)),
         ]);
 
         Paragraph::new(text).block(block).render(area, buf);
