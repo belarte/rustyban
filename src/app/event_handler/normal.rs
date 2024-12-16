@@ -65,3 +65,70 @@ pub fn handler<'a>(app: &mut App, key_event: KeyEvent) -> State<'a> {
         _ => State::Normal,
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use std::{char, io::Result};
+
+    use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
+
+    use crate::app::{app::App, app_state::State};
+
+    use super::handler;
+
+    fn build_event(c: char) -> KeyEvent {
+        KeyEvent::new(KeyCode::Char(c), KeyModifiers::empty())
+    }
+
+    #[test]
+    fn card_navigation() -> Result<()> {
+        let mut app = App::new("res/test_board.json".to_string());
+
+        let keys = vec!['h', 'j', 'k', 'l', 'H', 'J', 'K', 'L'];
+
+        for key in keys {
+            let state = handler(&mut app, build_event(key));
+            assert_eq!(State::Normal, state);
+        }
+
+        Ok(())
+    }
+
+    #[test]
+    fn switch_to_edit_mode() -> Result<()> {
+        let mut app = App::new("res/test_board.json".to_string());
+        app.select_next_card();
+
+        let keys = vec!['e', 'i'];
+
+        for key in keys {
+            let state = handler(&mut app, build_event(key));
+            assert!(matches!(state, State::Edit{ .. }));
+        }
+
+        Ok(())
+    }
+
+    #[test]
+    fn edit_card_does_nothing_when_selection_is_disabled() -> Result<()> {
+        let mut app = App::new("res/test_board.json".to_string());
+
+        let keys = vec!['e', 'i'];
+
+        for key in keys {
+            let state = handler(&mut app, build_event(key));
+            assert_eq!(State::Normal, state);
+        }
+
+        Ok(())
+    }
+
+    #[test]
+    fn help() -> Result<()> {
+        let mut app = App::new("res/test_board.json".to_string());
+        let state = handler(&mut app, build_event('?'));
+        assert_eq!(State::Help, state);
+
+        Ok(())
+    }
+}
