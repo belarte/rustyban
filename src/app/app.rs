@@ -1,5 +1,6 @@
 use std::cmp::min;
 
+use chrono::Local;
 use ratatui::{
     buffer::Buffer,
     layout::{Constraint, Layout, Rect},
@@ -118,6 +119,19 @@ impl App {
         }
     }
 
+    pub fn insert_card(&mut self) {
+        match self.selector.get() {
+            Some((column_index, card_index)) => {
+                let msg = format!("Inserting card at position ({}, {})", column_index, card_index);
+                self.board.deselect_card(column_index, card_index);
+                self.board.insert_card(column_index, card_index, Card::new("TODO", Local::now()));
+                self.board.select_card(column_index, card_index);
+                self.log(msg);
+            }
+            None => self.log("No card selected".to_string()),
+        }
+    }
+
     pub fn mark_card_undone(&mut self) {
         match self.selector.get() {
             Some((column_index, card_index)) => {
@@ -202,6 +216,32 @@ mod tests {
         app.mark_card_undone();
         let card = app.get_selected_card().unwrap();
         assert_eq!("Wash dishes", card.short_description());
+
+        Ok(())
+    }
+
+    #[test]
+    fn card_insertion() -> Result<()> {
+        let mut app = App::new("res/test_board.json".to_string());
+
+        app.select_next_card();
+        app.select_next_card();
+        app.select_next_card();
+        let card = app.get_selected_card().unwrap();
+        assert_eq!("Buy bread", card.short_description());
+
+        app.insert_card();
+        let card = app.get_selected_card().unwrap();
+        assert_eq!("TODO", card.short_description());
+
+        let card = app.board.columns(0).get_card(3);
+        assert!(!card.is_selected());
+        let card = app.board.columns(0).get_card(2);
+        assert!(card.is_selected());
+        
+        app.select_next_card();
+        let card = app.get_selected_card().unwrap();
+        assert_eq!("Buy bread", card.short_description());
 
         Ok(())
     }
