@@ -202,7 +202,7 @@ mod tests {
 
         selector.select_next_column(&mut board);
         selector.select_next_column(&mut board);
-        assert_eq!(None, selector.get_selected_card(&mut board));
+        assert_eq!(None, selector.get_selected_card(&board));
 
         Ok(())
     }
