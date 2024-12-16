@@ -254,10 +254,19 @@ mod tests {
         for (column_index, card_index, old_description) in cases {
             let mut board = board.clone();
 
-            assert_eq!(old_description, board.columns(column_index).get_card(card_index).short_description());
+            assert_eq!(
+                old_description,
+                board.columns(column_index).get_card(card_index).short_description()
+            );
             board.insert_card(column_index, card_index, new_card.clone());
-            assert_eq!(old_description, board.columns(column_index).get_card(card_index + 1).short_description());
-            assert_eq!(description, board.columns(column_index).get_card(card_index).short_description());
+            assert_eq!(
+                old_description,
+                board.columns(column_index).get_card(card_index + 1).short_description()
+            );
+            assert_eq!(
+                description,
+                board.columns(column_index).get_card(card_index).short_description()
+            );
         }
 
         Ok(())
@@ -269,17 +278,16 @@ mod tests {
         let description = "new description";
         let new_card = Card::new(description, Local::now());
 
-        let cases: Vec<(usize, usize)> = vec![
-            (0, 3),
-            (1, 1),
-            (2, 2),
-        ];
+        let cases: Vec<(usize, usize)> = vec![(0, 3), (1, 1), (2, 2)];
 
         for (column_index, card_index) in cases {
             let mut board = board.clone();
 
             board.insert_card(column_index, card_index, new_card.clone());
-            assert_eq!(description, board.columns(column_index).get_card(card_index).short_description());
+            assert_eq!(
+                description,
+                board.columns(column_index).get_card(card_index).short_description()
+            );
         }
 
         Ok(())

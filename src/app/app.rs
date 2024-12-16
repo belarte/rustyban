@@ -123,7 +123,8 @@ impl App {
         match self.selector.get() {
             Some((column_index, card_index)) => {
                 self.board.deselect_card(column_index, card_index);
-                self.board.insert_card(column_index, card_index, Card::new("TODO", Local::now()));
+                self.board
+                    .insert_card(column_index, card_index, Card::new("TODO", Local::now()));
                 self.board.select_card(column_index, card_index);
             }
             None => self.log("No card selected".to_string()),
@@ -239,7 +240,7 @@ mod tests {
         assert!(!card.is_selected());
         let card = app.board.columns(0).get_card(2);
         assert!(card.is_selected());
-        
+
         app.select_next_card();
         let card = app.get_selected_card().unwrap();
         assert_eq!("Buy bread", card.short_description());
