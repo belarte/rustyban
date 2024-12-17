@@ -3,7 +3,7 @@ use std::borrow::Borrow;
 use chrono::{DateTime, Local};
 use ratatui::{
     buffer::Buffer,
-    layout::Rect,
+    layout::{Alignment, Rect},
     symbols::border,
     text::{Line, Text},
     widgets::{Block, Paragraph, Widget},
@@ -72,10 +72,11 @@ impl Widget for &Card {
         };
 
         let block = Block::bordered().border_set(border);
+        let now = Local::now();
 
         let text = Text::from(vec![
             Line::from(self.short_description.borrow()),
-            Line::from(time::format(self.creation_date)),
+            Line::from(time::pretty_diff(self.creation_date, now)).alignment(Alignment::Right),
         ]);
 
         Paragraph::new(text).block(block).render(area, buf);
