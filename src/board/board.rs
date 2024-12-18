@@ -62,8 +62,12 @@ impl Board {
         }
     }
 
-    pub fn columns(&self, index: usize) -> &Column {
+    pub fn column(&self, index: usize) -> &Column {
         &self.columns[index]
+    }
+
+    pub fn card(&self, column_index: usize, card_index: usize) -> &Card {
+        &self.columns[column_index].get_card(card_index)
     }
 
     pub fn columns_count(&self) -> usize {
@@ -99,7 +103,7 @@ impl Board {
             return false;
         }
 
-        let card = self.columns(column_index).get_card(card_index).clone();
+        let card = self.card(column_index, card_index).clone();
         self.columns[column_index].remove_card(card_index);
         self.columns[column_index + 1].insert_card(card, 0);
         true
@@ -110,7 +114,7 @@ impl Board {
             return false;
         }
 
-        let card = self.columns(column_index).get_card(card_index).clone();
+        let card = self.card(column_index, card_index).clone();
         self.columns[column_index].remove_card(card_index);
         self.columns[column_index - 1].insert_card(card, 0);
         true
@@ -256,16 +260,16 @@ mod tests {
 
             assert_eq!(
                 old_description,
-                board.columns(column_index).get_card(card_index).short_description()
+                board.card(column_index, card_index).short_description()
             );
             board.insert_card(column_index, card_index, new_card.clone());
             assert_eq!(
                 old_description,
-                board.columns(column_index).get_card(card_index + 1).short_description()
+                board.card(column_index, card_index + 1).short_description()
             );
             assert_eq!(
                 description,
-                board.columns(column_index).get_card(card_index).short_description()
+                board.card(column_index, card_index).short_description()
             );
         }
 
@@ -286,7 +290,7 @@ mod tests {
             board.insert_card(column_index, card_index, new_card.clone());
             assert_eq!(
                 description,
-                board.columns(column_index).get_card(card_index).short_description()
+                board.card(column_index, card_index).short_description()
             );
         }
 

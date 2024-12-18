@@ -32,8 +32,8 @@ impl CardSelector {
     }
 
     pub fn get_selected_card(&self, board: &Board) -> Option<Card> {
-        if self.selection_enabled && !board.columns(self.selected_column).is_empty() {
-            Some(board.columns(self.selected_column).get_card(self.selected_card).clone())
+        if self.selection_enabled && !board.column(self.selected_column).is_empty() {
+            Some(board.card(self.selected_column, self.selected_card).clone())
         } else {
             None
         }
@@ -91,7 +91,7 @@ impl CardSelector {
     }
 
     fn get_card_index(&self, board: &Board, index: usize) -> usize {
-        let column = board.columns(self.selected_column);
+        let column = board.column(self.selected_column);
 
         if column.is_empty() {
             return 0;
@@ -138,35 +138,35 @@ mod tests {
         let mut board = Board::open("res/test_board.json")?;
         let mut selector = CardSelector::new();
 
-        assert!(!board.columns(0).get_card(0).is_selected());
+        assert!(!board.card(0, 0).is_selected());
         selector.select_next_card(&mut board);
-        assert!(board.columns(0).get_card(0).is_selected());
+        assert!(board.card(0, 0).is_selected());
 
-        assert!(!board.columns(0).get_card(1).is_selected());
+        assert!(!board.card(0, 1).is_selected());
         selector.select_next_card(&mut board);
-        assert!(board.columns(0).get_card(1).is_selected());
+        assert!(board.card(0, 1).is_selected());
 
-        assert!(!board.columns(0).get_card(2).is_selected());
+        assert!(!board.card(0, 2).is_selected());
         selector.select_next_card(&mut board);
-        assert!(board.columns(0).get_card(2).is_selected());
+        assert!(board.card(0, 2).is_selected());
 
-        assert!(!board.columns(1).get_card(0).is_selected());
+        assert!(!board.card(1, 0).is_selected());
         selector.select_next_column(&mut board);
         selector.select_next_card(&mut board);
-        assert!(board.columns(1).get_card(0).is_selected());
+        assert!(board.card(1, 0).is_selected());
 
-        assert!(!board.columns(2).get_card(0).is_selected());
+        assert!(!board.card(2, 0).is_selected());
         selector.select_next_column(&mut board);
         selector.select_next_column(&mut board);
         selector.select_prev_card(&mut board);
-        assert!(board.columns(2).get_card(0).is_selected());
+        assert!(board.card(2, 0).is_selected());
 
-        assert!(!board.columns(0).get_card(0).is_selected());
+        assert!(!board.card(0, 0).is_selected());
         selector.select_prev_column(&mut board);
         selector.select_prev_column(&mut board);
         selector.select_prev_column(&mut board);
         selector.select_prev_column(&mut board);
-        assert!(board.columns(0).get_card(0).is_selected());
+        assert!(board.card(0, 0).is_selected());
 
         Ok(())
     }

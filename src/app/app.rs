@@ -236,9 +236,9 @@ mod tests {
         let card = app.insert_card().unwrap();
         assert_eq!("TODO", card.short_description());
 
-        let card = app.board.columns(0).get_card(3);
+        let card = app.board.card(0, 3);
         assert!(!card.is_selected());
-        let card = app.board.columns(0).get_card(2);
+        let card = app.board.card(0, 2);
         assert!(card.is_selected());
 
         app.select_next_card();
