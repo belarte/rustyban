@@ -79,70 +79,51 @@ impl App {
     }
 
     pub fn update_card(&mut self, card: Card) {
-        match self.selector.get() {
-            Some((column, card_index)) => {
-                self.board.update_card(column, card_index, card);
-            }
-            None => self.log("No card selected".to_string()),
-        }
-    }
-
-    pub fn increase_priority(&mut self) {
-        match self.selector.get() {
-            Some((column_index, card_index)) => {
-                self.board.increase_priority(column_index, card_index);
-                self.selector.select_prev_card(&mut self.board);
-            }
-            None => self.log("No card selected".to_string()),
-        }
-    }
-
-    pub fn decrease_priority(&mut self) {
-        match self.selector.get() {
-            Some((column_index, card_index)) => {
-                self.board.decrease_priority(column_index, card_index);
-                self.selector.select_next_card(&mut self.board);
-            }
-            None => self.log("No card selected".to_string()),
-        }
-    }
-
-    pub fn mark_card_done(&mut self) {
-        match self.selector.get() {
-            Some((column_index, card_index)) => {
-                if self.board.mark_card_done(column_index, card_index) {
-                    let new_index = min(column_index + 1, 2);
-                    self.selector.set(new_index, 0);
-                }
-            }
-            None => self.log("No card selected".to_string()),
-        }
+        self.with_selected_card(|this, column, card_index| {
+            this.board.update_card(column, card_index, card.clone());
+        });
     }
 
     pub fn insert_card(&mut self) -> Option<Card> {
-        match self.selector.get() {
-            Some((column_index, card_index)) => {
-                self.board.deselect_card(column_index, card_index);
-                self.board
-                    .insert_card(column_index, card_index, Card::new("TODO", Local::now()));
-                self.board.select_card(column_index, card_index);
-            }
-            None => self.log("No card selected".to_string()),
-        };
+        self.with_selected_card(|this, column_index, card_index| {
+            this.board.deselect_card(column_index, card_index);
+            this.board.insert_card(column_index, card_index, Card::new("TODO", Local::now()));
+            this.board.select_card(column_index, card_index);
+        });
 
         self.get_selected_card()
     }
 
-    pub fn mark_card_undone(&mut self) {
-        match self.selector.get() {
-            Some((column_index, card_index)) => {
-                if self.board.mark_card_undone(column_index, card_index) {
-                    let new_index = if column_index > 0 { column_index - 1 } else { 0 };
-                    self.selector.set(new_index, 0);
-                }
+    pub fn increase_priority(&mut self) {
+        self.with_selected_card(|this, column_index, card_index| {
+            this.board.increase_priority(column_index, card_index);
+            this.selector.select_prev_card(&mut this.board);
+        });
+    }
+
+    pub fn decrease_priority(&mut self) {
+        self.with_selected_card(|this, column_index, card_index| {
+            this.board.decrease_priority(column_index, card_index);
+            this.selector.select_next_card(&mut this.board);
+        });
+    }
+
+    pub fn mark_card_done(&mut self) {
+        self.with_selected_card(|this, column_index, card_index| {
+            if this.board.mark_card_done(column_index, card_index) {
+                let new_index = min(column_index + 1, 2);
+                this.selector.set(new_index, 0);
             }
-            None => self.log("No card selected".to_string()),
-        }
+        });
+    }
+
+    pub fn mark_card_undone(&mut self) {
+        self.with_selected_card(|this, column_index, card_index| {
+            if this.board.mark_card_undone(column_index, card_index) {
+                let new_index = if column_index > 0 { column_index - 1 } else { 0 };
+                this.selector.set(new_index, 0);
+            }
+        });
     }
 
     pub fn write(&mut self) {
@@ -155,6 +136,16 @@ impl App {
     pub fn write_to_file(&mut self, file_name: String) {
         self.file_name = file_name;
         self.write();
+    }
+
+    fn with_selected_card<F>(&mut self, mut action: F)
+    where
+        F: FnMut(&mut Self, usize, usize),
+    {
+        match self.selector.get() {
+            Some((column_index, card_index)) => action(self, column_index, card_index),
+            None => self.log("No card selected".to_string()),
+        }
     }
 
     fn log(&mut self, msg: String) {
