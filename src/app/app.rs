@@ -22,6 +22,11 @@ pub struct App {
     pub exit: bool,
 }
 
+pub enum InsertPosition {
+    Current,
+    Top,
+}
+
 impl App {
     pub fn new(file_name: String) -> Self {
         let mut logger = Logger::new();
@@ -84,11 +89,18 @@ impl App {
         });
     }
 
-    pub fn insert_card(&mut self) -> Option<Card> {
+    pub fn insert_card(&mut self, position: InsertPosition) -> Option<Card> {
         self.with_selected_card(|this, column_index, card_index| {
             this.board.deselect_card(column_index, card_index);
+
+            let card_index = match position {
+                InsertPosition::Current => card_index,
+                InsertPosition::Top => 0,
+            };
+
             this.board.insert_card(column_index, card_index, Card::new("TODO", Local::now()));
             this.board.select_card(column_index, card_index);
+            this.selector.set(column_index, card_index);
         });
 
         self.get_selected_card()
@@ -184,6 +196,8 @@ impl Widget for &App {
 mod tests {
     use std::io::Result;
 
+    use crate::app::app::InsertPosition;
+
     use super::App;
 
     #[test]
@@ -213,10 +227,17 @@ mod tests {
     }
 
     #[test]
-    fn card_insertion() -> Result<()> {
+    fn insertion_does_nothing_when_no_card_selected() -> Result<()> {
         let mut app = App::new("res/test_board.json".to_string());
 
-        assert_eq!(None, app.insert_card());
+        assert_eq!(None, app.insert_card(InsertPosition::Current));
+
+        Ok(())
+    }
+
+    #[test]
+    fn insertion_at_current_position() -> Result<()> {
+        let mut app = App::new("res/test_board.json".to_string());
 
         app.select_next_card();
         app.select_next_card();
@@ -224,7 +245,7 @@ mod tests {
         let card = app.get_selected_card().unwrap();
         assert_eq!("Buy bread", card.short_description());
 
-        let card = app.insert_card().unwrap();
+        let card = app.insert_card(InsertPosition::Current).unwrap();
         assert_eq!("TODO", card.short_description());
 
         let card = app.board.card(0, 3);
@@ -235,6 +256,28 @@ mod tests {
         app.select_next_card();
         let card = app.get_selected_card().unwrap();
         assert_eq!("Buy bread", card.short_description());
+
+        Ok(())
+    }
+
+    #[test]
+    fn insertion_at_top() -> Result<()> {
+        let mut app = App::new("res/test_board.json".to_string());
+
+        app.select_next_card();
+        app.select_next_card();
+        app.select_next_card();
+        let card = app.get_selected_card().unwrap();
+        assert_eq!("Buy bread", card.short_description());
+
+        let card = app.board.card(0, 0);
+        assert_eq!("Buy milk", card.short_description());
+        let card = app.insert_card(InsertPosition::Top).unwrap();
+        assert_eq!("TODO", card.short_description());
+        let card = app.board.card(0, 0);
+        assert_eq!("TODO", card.short_description());
+        let card = app.get_selected_card().unwrap();
+        assert_eq!("TODO", card.short_description());
 
         Ok(())
     }

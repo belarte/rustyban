@@ -1,6 +1,6 @@
 use crossterm::event::{KeyCode, KeyEvent};
 
-use crate::app::{app::App, app_state::State, card_editor::CardEditor, save_to_file::Save};
+use crate::app::{app::{App, InsertPosition}, app_state::State, card_editor::CardEditor, save_to_file::Save};
 
 pub fn handler<'a>(app: &mut App, key_event: KeyEvent) -> State<'a> {
     match key_event.code {
@@ -18,6 +18,7 @@ pub fn handler<'a>(app: &mut App, key_event: KeyEvent) -> State<'a> {
 
         // Card edition
         KeyCode::Char('i') => card_edition(app, Edition::InsertAtCurrentPosition),
+        KeyCode::Char('I') => card_edition(app, Edition::InsertTop),
         KeyCode::Char('e') | KeyCode::Enter => card_edition(app, Edition::EditCurrent),
 
         // Other operations
@@ -78,12 +79,14 @@ fn card_marking<'a>(app: &mut App, operation: Operation) -> State<'a> {
 enum Edition {
     EditCurrent,
     InsertAtCurrentPosition,
+    InsertTop,
 }
 
 fn card_edition<'a>(app: &mut App, operation: Edition) -> State<'a> {
     let card = match operation {
         Edition::EditCurrent => app.get_selected_card(),
-        Edition::InsertAtCurrentPosition => app.insert_card(),
+        Edition::InsertAtCurrentPosition => app.insert_card(InsertPosition::Current),
+        Edition::InsertTop => app.insert_card(InsertPosition::Top),
     };
 
     match card {
