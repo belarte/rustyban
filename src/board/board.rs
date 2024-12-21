@@ -67,7 +67,7 @@ impl Board {
     }
 
     pub fn card(&self, column_index: usize, card_index: usize) -> &Card {
-        &self.columns[column_index].get_card(card_index)
+        self.columns[column_index].get_card(card_index)
     }
 
     pub fn columns_count(&self) -> usize {
