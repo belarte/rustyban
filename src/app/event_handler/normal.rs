@@ -18,7 +18,9 @@ pub fn handler<'a>(app: &mut App, key_event: KeyEvent) -> State<'a> {
 
         // Card edition
         KeyCode::Char('i') => card_edition(app, Edition::InsertAtCurrentPosition),
+        KeyCode::Char('a') => card_edition(app, Edition::InsertAtNextPosition),
         KeyCode::Char('I') => card_edition(app, Edition::InsertTop),
+        KeyCode::Char('A') => card_edition(app, Edition::InsertBottom),
         KeyCode::Char('e') | KeyCode::Enter => card_edition(app, Edition::EditCurrent),
 
         // Other operations
@@ -79,14 +81,18 @@ fn card_marking<'a>(app: &mut App, operation: Operation) -> State<'a> {
 enum Edition {
     EditCurrent,
     InsertAtCurrentPosition,
+    InsertAtNextPosition,
     InsertTop,
+    InsertBottom,
 }
 
 fn card_edition<'a>(app: &mut App, operation: Edition) -> State<'a> {
     let card = match operation {
         Edition::EditCurrent => app.get_selected_card(),
         Edition::InsertAtCurrentPosition => app.insert_card(InsertPosition::Current),
+        Edition::InsertAtNextPosition => app.insert_card(InsertPosition::Next),
         Edition::InsertTop => app.insert_card(InsertPosition::Top),
+        Edition::InsertBottom => app.insert_card(InsertPosition::Bottom),
     };
 
     match card {

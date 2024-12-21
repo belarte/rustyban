@@ -24,7 +24,9 @@ pub struct App {
 
 pub enum InsertPosition {
     Current,
+    Next,
     Top,
+    Bottom,
 }
 
 impl App {
@@ -95,7 +97,9 @@ impl App {
 
             let card_index = match position {
                 InsertPosition::Current => card_index,
+                InsertPosition::Next => card_index + 1,
                 InsertPosition::Top => 0,
+                InsertPosition::Bottom => this.board.column(column_index).size(),
             };
 
             this.board.insert_card(column_index, card_index, Card::new("TODO", Local::now()));
