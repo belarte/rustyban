@@ -21,5 +21,5 @@ Use `<h/j/k/l>` or the arrow keys to select a card.
 - [x] Read board from file
 - [x] Select a card
 - [x] Edit a card
-- [ ] Add a card
+- [x] Add a card
 - [x] Move a card
