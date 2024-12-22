@@ -26,9 +26,13 @@ impl CardSelector {
         }
     }
 
-    pub fn set(&mut self, selected_column: usize, selected_card: usize) {
-        self.selected_column = selected_column;
-        self.selected_card = selected_card;
+    pub fn set(&mut self, column_index: usize, card_index: usize, board: &Board) {
+        self.selected_column = min(column_index, board.columns_count() - 1);
+        self.selected_card = if board.column(self.selected_column).is_empty() {
+            0
+        } else {
+            min(card_index, board.column(self.selected_column).size() - 1)
+        }
     }
 
     pub fn get_selected_card(&self, board: &Board) -> Option<Card> {
@@ -185,6 +189,35 @@ mod tests {
 
         selector.disable_selection(&mut board);
         assert_eq!(None, selector.get());
+
+        Ok(())
+    }
+
+    #[test]
+    fn set_the_card_index() -> Result<()> {
+        let mut board = Board::open("res/test_board_with_empty_column.json")?;
+        let mut selector = CardSelector::new();
+        selector.select_next_card(&mut board);
+
+        let cases: Vec<((usize, usize), (usize, usize))> = vec![
+            ((0, 0), (0, 0)),
+            ((0, 1), (0, 1)),
+            ((0, 2), (0, 2)),
+            ((0, 3), (0, 2)),
+            ((1, 0), (1, 0)),
+            ((2, 0), (2, 0)),
+            ((2, 1), (2, 1)),
+            ((2, 2), (2, 1)),
+            ((3, 0), (2, 0)),
+        ];
+
+        for (input, expected) in cases {
+            let (column_index, card_index) = input;
+            selector.set(column_index, card_index, &board);
+
+            let output = selector.get().unwrap();
+            assert_eq!(expected, output);
+        }
 
         Ok(())
     }

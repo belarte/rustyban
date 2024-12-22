@@ -104,7 +104,7 @@ impl App {
 
             this.board.insert_card(column_index, card_index, Card::new("TODO", Local::now()));
             this.board.select_card(column_index, card_index);
-            this.selector.set(column_index, card_index);
+            this.selector.set(column_index, card_index, &this.board);
         });
 
         self.get_selected_card()
@@ -128,7 +128,7 @@ impl App {
         self.with_selected_card(|this, column_index, card_index| {
             if this.board.mark_card_done(column_index, card_index) {
                 let new_index = min(column_index + 1, 2);
-                this.selector.set(new_index, 0);
+                this.selector.set(new_index, 0, &this.board);
             }
         });
     }
@@ -137,7 +137,7 @@ impl App {
         self.with_selected_card(|this, column_index, card_index| {
             if this.board.mark_card_undone(column_index, card_index) {
                 let new_index = if column_index > 0 { column_index - 1 } else { 0 };
-                this.selector.set(new_index, 0);
+                this.selector.set(new_index, 0, &this.board);
             }
         });
     }
