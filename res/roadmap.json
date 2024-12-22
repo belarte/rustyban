@@ -1,0 +1,42 @@
+{
+  "columns": [
+    {
+      "header": "TODO",
+      "cards": [
+        {
+          "short_description": "Fix column layout to allow more than current size",
+          "long_description": "",
+          "creation_date": "2024-12-22T11:26:24.858842+01:00"
+        },
+        {
+          "short_description": "Delete card",
+          "long_description": "",
+          "creation_date": "2024-12-22T11:23:49.619955+01:00"
+        },
+        {
+          "short_description": "Improve help popup",
+          "long_description": "Could use tabs",
+          "creation_date": "2024-12-22T11:24:14.895881+01:00"
+        },
+        {
+          "short_description": "Add creation date to card popup",
+          "long_description": "",
+          "creation_date": "2024-12-22T11:24:57.501825+01:00"
+        },
+        {
+          "short_description": "Add history to card",
+          "long_description": "Maybe a nice view with colors?",
+          "creation_date": "2024-12-22T11:27:23.239805+01:00"
+        }
+      ]
+    },
+    {
+      "header": "Doing",
+      "cards": []
+    },
+    {
+      "header": "Done!",
+      "cards": []
+    }
+  ]
+}
