@@ -110,6 +110,18 @@ impl App {
         self.get_selected_card()
     }
 
+    pub fn remove_card(&mut self) {
+        self.with_selected_card(|this, column_index, card_index| {
+            if this.board.column(column_index).is_empty() {
+                return;
+            }
+
+            this.selector.select_next_card(&mut this.board);
+            this.board.remove_card(column_index, card_index);
+            this.selector.set(column_index, card_index, &this.board);
+        });
+    }
+
     pub fn increase_priority(&mut self) {
         self.with_selected_card(|this, column_index, card_index| {
             this.board.increase_priority(column_index, card_index);
@@ -282,6 +294,18 @@ mod tests {
         assert_eq!("TODO", card.short_description());
         let card = app.get_selected_card().unwrap();
         assert_eq!("TODO", card.short_description());
+
+        Ok(())
+    }
+
+    #[test]
+    fn deletion() -> Result<()> {
+        let mut app = App::new("res/test_board.json".to_string());
+
+        app.select_next_column();
+        app.select_next_column();
+        app.remove_card();
+        app.remove_card();
 
         Ok(())
     }
