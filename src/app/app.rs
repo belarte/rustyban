@@ -62,19 +62,27 @@ impl App {
     }
 
     pub fn select_next_column(&mut self) {
-        self.selector.select_next_column(&mut self.board);
+        self.card_selection(|this| {
+            this.selector.select_next_column(&this.board)
+        })
     }
 
     pub fn select_prev_column(&mut self) {
-        self.selector.select_prev_column(&mut self.board);
+        self.card_selection(|this| {
+            this.selector.select_prev_column(&this.board)
+        })
     }
 
     pub fn select_next_card(&mut self) {
-        self.selector.select_next_card(&mut self.board);
+        self.card_selection(|this| {
+            this.selector.select_next_card(&this.board)
+        })
     }
 
     pub fn select_prev_card(&mut self) {
-        self.selector.select_prev_card(&mut self.board);
+        self.card_selection(|this| {
+            this.selector.select_prev_card(&this.board)
+        })
     }
 
     pub fn disable_selection(&mut self) {
@@ -116,7 +124,7 @@ impl App {
                 return;
             }
 
-            this.selector.select_next_card(&mut this.board);
+            this.select_next_card();
             this.board.remove_card(column_index, card_index);
             this.selector.set(column_index, card_index, &this.board);
         });
@@ -125,14 +133,14 @@ impl App {
     pub fn increase_priority(&mut self) {
         self.with_selected_card(|this, column_index, card_index| {
             this.board.increase_priority(column_index, card_index);
-            this.selector.select_prev_card(&mut this.board);
+            this.select_prev_card();
         });
     }
 
     pub fn decrease_priority(&mut self) {
         self.with_selected_card(|this, column_index, card_index| {
             this.board.decrease_priority(column_index, card_index);
-            this.selector.select_next_card(&mut this.board);
+            this.select_next_card();
         });
     }
 
@@ -174,6 +182,18 @@ impl App {
             Some((column_index, card_index)) => action(self, column_index, card_index),
             None => self.log("No card selected".to_string()),
         }
+    }
+
+    fn card_selection<F>(&mut self, mut action: F)
+    where 
+        F: FnMut(&mut Self) -> (usize, usize),
+    {
+        if let Some((column_index, card_index)) = self.selector.get() {
+            self.board.deselect_card(column_index, card_index);
+        }
+
+        let (column_index, card_index) = action(self);
+        self.board.select_card(column_index, card_index);
     }
 
     fn log(&mut self, msg: String) {
