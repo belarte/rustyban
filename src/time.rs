@@ -25,10 +25,11 @@ mod tests {
     use crate::time;
 
     fn local_date_from_string(date: &str) -> DateTime<Local> {
-        let naive_datetime = NaiveDateTime::parse_from_str(date, "%Y-%m-%dT%H:%M:%S")
-            .expect("Failed to parse datetime");
+        let naive_datetime =
+            NaiveDateTime::parse_from_str(date, "%Y-%m-%dT%H:%M:%S").expect("Failed to parse datetime");
 
-        let datetime_local: DateTime<Local> = Local.from_local_datetime(&naive_datetime)
+        let datetime_local: DateTime<Local> = Local
+            .from_local_datetime(&naive_datetime)
             .single()
             .expect("Failed to convert to local datetime");
 

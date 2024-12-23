@@ -29,7 +29,10 @@ impl Widget for Help {
             Line::from(vec![" <i> ".bold(), "Insert card a current position".into()]),
             Line::from(vec![" <I> ".bold(), "Insert card at the top of current column".into()]),
             Line::from(vec![" <a> ".bold(), "Insert card a next position".into()]),
-            Line::from(vec![" <A> ".bold(), "Insert card at the bottom of current clumn".into()]),
+            Line::from(vec![
+                " <A> ".bold(),
+                "Insert card at the bottom of current clumn".into(),
+            ]),
             Line::from(vec![" <K> ".bold(), "Increase priotity of selected card".into()]),
             Line::from(vec![" <J> ".bold(), "Decrease priotity of selected card".into()]),
             Line::from(vec![" <L> ".bold(), "Mark selected card done".into()]),

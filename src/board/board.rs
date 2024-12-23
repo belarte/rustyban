@@ -271,10 +271,7 @@ mod tests {
                 old_description,
                 board.card(column_index, card_index + 1).short_description()
             );
-            assert_eq!(
-                description,
-                board.card(column_index, card_index).short_description()
-            );
+            assert_eq!(description, board.card(column_index, card_index).short_description());
         }
 
         Ok(())
@@ -292,10 +289,7 @@ mod tests {
             let mut board = board.clone();
 
             board.insert_card(column_index, card_index, new_card.clone());
-            assert_eq!(
-                description,
-                board.card(column_index, card_index).short_description()
-            );
+            assert_eq!(description, board.card(column_index, card_index).short_description());
         }
 
         Ok(())

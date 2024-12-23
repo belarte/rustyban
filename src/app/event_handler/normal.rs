@@ -1,6 +1,11 @@
 use crossterm::event::{KeyCode, KeyEvent};
 
-use crate::app::{app::{App, InsertPosition}, app_state::State, card_editor::CardEditor, save_to_file::Save};
+use crate::app::{
+    app::{App, InsertPosition},
+    app_state::State,
+    card_editor::CardEditor,
+    save_to_file::Save,
+};
 
 pub fn handler<'a>(app: &mut App, key_event: KeyEvent) -> State<'a> {
     match key_event.code {
@@ -146,7 +151,7 @@ mod tests {
 
         for key in keys {
             let state = handler(&mut app, build_event(key));
-            assert!(matches!(state, State::Edit{ .. }));
+            assert!(matches!(state, State::Edit { .. }));
         }
 
         Ok(())
