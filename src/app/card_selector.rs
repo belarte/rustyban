@@ -70,9 +70,8 @@ impl CardSelector {
         })
     }
 
-    pub fn disable_selection(&mut self, board: &mut Board) {
+    pub fn disable_selection(&mut self) {
         self.selection_enabled = false;
-        board.deselect_card(self.selected_column, self.selected_card);
     }
 
     fn select<F>(&mut self, board: &Board, update_selection: F) -> (usize, usize)
@@ -158,7 +157,7 @@ mod tests {
 
     #[test]
     fn get_the_card_index() -> Result<()> {
-        let mut board = Board::open("res/test_board.json")?;
+        let board = Board::open("res/test_board.json")?;
         let mut selector = CardSelector::new();
 
         assert_eq!(None, selector.get());
@@ -174,7 +173,7 @@ mod tests {
         selector.select_next_card(&board);
         assert_eq!(Some((2, 1)), selector.get());
 
-        selector.disable_selection(&mut board);
+        selector.disable_selection();
         assert_eq!(None, selector.get());
 
         Ok(())

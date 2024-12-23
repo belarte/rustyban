@@ -86,7 +86,11 @@ impl App {
     }
 
     pub fn disable_selection(&mut self) {
-        self.selector.disable_selection(&mut self.board);
+        if let Some((column_index, card_index)) = self.selector.get() {
+            self.board.deselect_card(column_index, card_index);
+        }
+
+        self.selector.disable_selection();
     }
 
     pub fn get_selected_card(&self) -> Option<Card> {
