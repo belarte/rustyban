@@ -1,4 +1,4 @@
-use std::cmp::min;
+use std::{cell::RefCell, cmp::min, rc::Rc};
 
 use crate::board::{Board, Card};
 
@@ -7,14 +7,16 @@ pub struct CardSelector {
     selected_column: usize,
     selected_card: usize,
     selection_enabled: bool,
+    board: Rc<RefCell<Board>>,
 }
 
 impl CardSelector {
-    pub fn new() -> Self {
+    pub fn new(board: Rc<RefCell<Board>>) -> Self {
         Self {
             selected_column: 0,
             selected_card: 0,
             selection_enabled: false,
+            board,
         }
     }
 
@@ -26,7 +28,8 @@ impl CardSelector {
         }
     }
 
-    pub fn set(&mut self, column_index: usize, card_index: usize, board: &Board) {
+    pub fn set(&mut self, column_index: usize, card_index: usize) {
+        let board = self.board.as_ref().borrow();
         self.selected_column = min(column_index, board.columns_count() - 1);
         self.selected_card = if board.column(self.selected_column).is_empty() {
             0
@@ -35,7 +38,8 @@ impl CardSelector {
         }
     }
 
-    pub fn get_selected_card(&self, board: &Board) -> Option<Card> {
+    pub fn get_selected_card(&self) -> Option<Card> {
+        let board = self.board.as_ref().borrow();
         if self.selection_enabled && !board.column(self.selected_column).is_empty() {
             Some(board.card(self.selected_column, self.selected_card).clone())
         } else {
@@ -43,30 +47,29 @@ impl CardSelector {
         }
     }
 
-    pub fn select_next_column(&mut self, board: &Board) -> (usize, usize) {
-        self.select(board, |this, board| {
-            this.selected_column = this.next_column_index(board, this.selected_column);
-            this.selected_card = this.get_card_index(board, this.selected_card);
+    pub fn select_next_column(&mut self) -> (usize, usize) {
+        self.select(|this| {
+            this.selected_column = this.next_column_index(this.selected_column);
+            this.selected_card = this.get_card_index(this.selected_card);
         })
     }
 
-    pub fn select_prev_column(&mut self, board: &Board) -> (usize, usize) {
-        self.select(board, |this, board| {
-            this.selected_column = this.prev_column_index(board, this.selected_column);
-            this.selected_card = this.get_card_index(board, this.selected_card);
+    pub fn select_prev_column(&mut self) -> (usize, usize) {
+        self.select(|this| {
+            this.selected_column = this.prev_column_index(this.selected_column);
+            this.selected_card = this.get_card_index(this.selected_card);
         })
     }
 
-
-    pub fn select_next_card(&mut self, board: &Board) -> (usize, usize) {
-        self.select(board, |this, board| {
-            this.selected_card = this.next_card_index(board);
+    pub fn select_next_card(&mut self) -> (usize, usize) {
+        self.select(|this| {
+            this.selected_card = this.next_card_index();
         })
     }
 
-    pub fn select_prev_card(&mut self, board: &Board) -> (usize, usize) {
-        self.select(board, |this, board| {
-            this.selected_card = this.prev_card_index(board);
+    pub fn select_prev_card(&mut self) -> (usize, usize) {
+        self.select(|this| {
+            this.selected_card = this.prev_card_index();
         })
     }
 
@@ -74,12 +77,12 @@ impl CardSelector {
         self.selection_enabled = false;
     }
 
-    fn select<F>(&mut self, board: &Board, update_selection: F) -> (usize, usize)
+    fn select<F>(&mut self, update_selection: F) -> (usize, usize)
     where
-        F: FnOnce(&mut Self, &Board),
+        F: FnOnce(&mut Self),
     {
         if self.selection_enabled {
-            update_selection(self, board);
+            update_selection(self);
         } else {
             self.selection_enabled = true;
         }
@@ -87,7 +90,8 @@ impl CardSelector {
         (self.selected_column, self.selected_card)
     }
 
-    fn get_card_index(&self, board: &Board, index: usize) -> usize {
+    fn get_card_index(&self, index: usize) -> usize {
+        let board = self.board.as_ref().borrow();
         let column = board.column(self.selected_column);
 
         if column.is_empty() {
@@ -97,23 +101,26 @@ impl CardSelector {
         min(index, column.size() - 1)
     }
 
-    fn next_card_index(&self, board: &Board) -> usize {
-        self.get_card_index(board, self.selected_card + 1)
+    fn next_card_index(&self) -> usize {
+        self.get_card_index(self.selected_card + 1)
     }
 
-    fn prev_card_index(&self, board: &Board) -> usize {
+    fn prev_card_index(&self) -> usize {
         if self.selected_card == 0 {
             return 0;
         }
 
-        self.get_card_index(board, self.selected_card - 1)
+        self.get_card_index(self.selected_card - 1)
     }
 
-    fn next_column_index(&self, board: &Board, current_index: usize) -> usize {
+    fn next_column_index(&self, current_index: usize) -> usize {
+        let board = self.board.as_ref().borrow();
         min(current_index + 1, board.columns_count() - 1)
     }
 
-    fn prev_column_index(&self, board: &Board, current_index: usize) -> usize {
+    fn prev_column_index(&self, current_index: usize) -> usize {
+        let board = self.board.as_ref().borrow();
+
         if current_index == 0 {
             return 0;
         }
@@ -124,53 +131,58 @@ impl CardSelector {
 
 #[cfg(test)]
 mod tests {
-    use std::io::Result;
+    use std::{cell::RefCell, io::Result, rc::Rc};
 
     use crate::board::Board;
 
     use super::CardSelector;
 
+    fn create_board(file_name: &str) -> Rc<RefCell<Board>> {
+        let board = Board::open(file_name).expect("cannot open file");
+        Rc::new(RefCell::new(board))
+    }
+
     #[test]
     fn card_selection() -> Result<()> {
-        let board = Board::open("res/test_board.json")?;
-        let mut selector = CardSelector::new();
+        let board = create_board("res/test_board.json");
+        let mut selector = CardSelector::new(board);
 
-        assert_eq!((0, 0), selector.select_next_column(&board));
-        assert_eq!((1, 0), selector.select_next_column(&board));
-        assert_eq!((2, 0), selector.select_next_column(&board));
-        assert_eq!((2, 0), selector.select_next_column(&board));
+        assert_eq!((0, 0), selector.select_next_column());
+        assert_eq!((1, 0), selector.select_next_column());
+        assert_eq!((2, 0), selector.select_next_column());
+        assert_eq!((2, 0), selector.select_next_column());
 
-        assert_eq!((1, 0), selector.select_prev_column(&board));
-        assert_eq!((0, 0), selector.select_prev_column(&board));
-        assert_eq!((0, 0), selector.select_prev_column(&board));
-        
-        assert_eq!((0, 1), selector.select_next_card(&board));
-        assert_eq!((0, 2), selector.select_next_card(&board));
-        assert_eq!((0, 2), selector.select_next_card(&board));
+        assert_eq!((1, 0), selector.select_prev_column());
+        assert_eq!((0, 0), selector.select_prev_column());
+        assert_eq!((0, 0), selector.select_prev_column());
 
-        assert_eq!((0, 1), selector.select_prev_card(&board));
-        assert_eq!((0, 0), selector.select_prev_card(&board));
-        assert_eq!((0, 0), selector.select_prev_card(&board));
+        assert_eq!((0, 1), selector.select_next_card());
+        assert_eq!((0, 2), selector.select_next_card());
+        assert_eq!((0, 2), selector.select_next_card());
+
+        assert_eq!((0, 1), selector.select_prev_card());
+        assert_eq!((0, 0), selector.select_prev_card());
+        assert_eq!((0, 0), selector.select_prev_card());
 
         Ok(())
     }
 
     #[test]
     fn get_the_card_index() -> Result<()> {
-        let board = Board::open("res/test_board.json")?;
-        let mut selector = CardSelector::new();
+        let board = create_board("res/test_board.json");
+        let mut selector = CardSelector::new(board);
 
         assert_eq!(None, selector.get());
-        selector.select_next_card(&board);
+        selector.select_next_card();
         assert_eq!(Some((0, 0)), selector.get());
 
-        selector.select_next_column(&board);
-        selector.select_next_column(&board);
-        selector.select_next_card(&board);
+        selector.select_next_column();
+        selector.select_next_column();
+        selector.select_next_card();
         assert_eq!(Some((2, 1)), selector.get());
 
-        selector.select_next_column(&board);
-        selector.select_next_card(&board);
+        selector.select_next_column();
+        selector.select_next_card();
         assert_eq!(Some((2, 1)), selector.get());
 
         selector.disable_selection();
@@ -181,9 +193,9 @@ mod tests {
 
     #[test]
     fn set_the_card_index() -> Result<()> {
-        let board = Board::open("res/test_board_with_empty_column.json")?;
-        let mut selector = CardSelector::new();
-        selector.select_next_card(&board);
+        let board = create_board("res/test_board_with_empty_column.json");
+        let mut selector = CardSelector::new(board);
+        selector.select_next_card();
 
         let cases: Vec<((usize, usize), (usize, usize))> = vec![
             ((0, 0), (0, 0)),
@@ -199,7 +211,7 @@ mod tests {
 
         for (input, expected) in cases {
             let (column_index, card_index) = input;
-            selector.set(column_index, card_index, &board);
+            selector.set(column_index, card_index);
 
             let output = selector.get().unwrap();
             assert_eq!(expected, output);
@@ -210,12 +222,12 @@ mod tests {
 
     #[test]
     fn returns_none_on_empty_board() -> Result<()> {
-        let board = Board::open("res/test_board_with_empty_column.json")?;
-        let mut selector = CardSelector::new();
+        let board = create_board("res/test_board_with_empty_column.json");
+        let mut selector = CardSelector::new(board);
 
-        selector.select_next_column(&board);
-        selector.select_next_column(&board);
-        assert_eq!(None, selector.get_selected_card(&board));
+        selector.select_next_column();
+        selector.select_next_column();
+        assert_eq!(None, selector.get_selected_card());
 
         Ok(())
     }
