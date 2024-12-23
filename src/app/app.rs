@@ -19,7 +19,6 @@ pub struct App {
     logger: Logger,
     board: Rc<RefCell<Board>>,
     selector: CardSelector,
-    pub exit: bool,
 }
 
 pub enum InsertPosition {
@@ -56,12 +55,7 @@ impl App {
             logger,
             board,
             selector,
-            exit: false,
         }
-    }
-
-    pub fn exit(&mut self) {
-        self.exit = true;
     }
 
     pub fn select_next_column(&mut self) {

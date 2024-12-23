@@ -15,6 +15,7 @@ pub enum State<'a> {
     Save { save: Save<'a> },
     Edit { editor: CardEditor },
     Help,
+    Quit,
 }
 
 #[derive(Debug)]
@@ -33,6 +34,7 @@ impl<'a> AppState<'a> {
             State::Save { save } => self.state = save::handler(save.clone(), app, event),
             State::Edit { editor } => self.state = edit::handler(editor.clone(), app, event),
             State::Help => self.state = State::Normal,
+            State::Quit => {}
         }
     }
 
@@ -44,6 +46,7 @@ impl<'a> AppState<'a> {
             State::Save { save } => frame.render_widget(save, frame.area()),
             State::Edit { editor } => frame.render_widget(editor, frame.area()),
             State::Help => frame.render_widget(Help, frame.area()),
+            State::Quit => {}
         }
     }
 }
@@ -63,7 +66,7 @@ mod tests {
         let mut app = App::new("".into());
         let mut state = AppState::new();
         state.handle_events(&mut app, KeyCode::Char('q').into());
-        assert!(app.exit);
+        assert_eq!(State::Quit, state.state);
 
         Ok(())
     }

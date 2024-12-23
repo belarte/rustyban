@@ -39,10 +39,7 @@ pub fn handler<'a>(app: &mut App, key_event: KeyEvent) -> State<'a> {
             State::Normal
         }
         KeyCode::Char('W') => State::Save { save: Save::new() },
-        KeyCode::Char('q') => {
-            app.exit();
-            State::Normal
-        }
+        KeyCode::Char('q') => State::Quit,
         KeyCode::Char('?') => State::Help,
         _ => State::Normal,
     }
@@ -120,12 +117,19 @@ mod tests {
 
     use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 
-    use crate::app::{app::App, app_state::State};
-
-    use super::handler;
+    use crate::app::{app::App, app_state::State, event_handler::normal::handler};
 
     fn build_event(c: char) -> KeyEvent {
         KeyEvent::new(KeyCode::Char(c), KeyModifiers::empty())
+    }
+
+    #[test]
+    fn exit() -> Result<()> {
+        let mut app = App::new("res/test_board.json".to_string());
+        let state = handler(&mut app, build_event('q'));
+        assert_eq!(State::Quit, state);
+
+        Ok(())
     }
 
     #[test]
