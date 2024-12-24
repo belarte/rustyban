@@ -1,4 +1,4 @@
-use std::{cell::RefCell, cmp::min, rc::Rc};
+use std::{cell::RefCell, rc::Rc};
 
 use chrono::Local;
 use ratatui::{
@@ -150,29 +150,23 @@ impl App {
 
     pub fn mark_card_done(&mut self) {
         self.with_selected_card(|this, column_index, card_index| {
-            if this
+            let (column_index, card_index) = this
                 .board
                 .as_ref()
                 .borrow_mut()
-                .mark_card_done(column_index, card_index)
-            {
-                let new_index = min(column_index + 1, 2);
-                this.selector.set(new_index, 0);
-            }
+                .mark_card_done(column_index, card_index);
+            this.selector.set(column_index, card_index);
         });
     }
 
     pub fn mark_card_undone(&mut self) {
         self.with_selected_card(|this, column_index, card_index| {
-            if this
+            let (column_index, card_index) = this
                 .board
                 .as_ref()
                 .borrow_mut()
-                .mark_card_undone(column_index, card_index)
-            {
-                let new_index = if column_index > 0 { column_index - 1 } else { 0 };
-                this.selector.set(new_index, 0);
-            }
+                .mark_card_undone(column_index, card_index);
+            this.selector.set(column_index, card_index);
         });
     }
 

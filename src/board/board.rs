@@ -23,6 +23,31 @@ impl Default for Board {
     }
 }
 
+/// Represents a Kanban board with its basic features
+///
+/// # Examples
+///
+/// ```
+/// use chrono::Local;
+/// use rustyban::board::{Board, Card};
+///
+/// let mut board = Board::new();
+/// 
+/// let now = Local::now();
+/// let card1 = Card::new("Card 1", now);
+/// let card2 = Card::new("Card 2", now);
+/// let card3 = Card::new("Card 3", now);
+///
+/// board.insert_card(0, 0, card1);
+/// board.insert_card(0, 0, card2);
+/// board.insert_card(0, 0, card3);
+///
+/// let res = board.mark_card_done(0, 1);
+/// assert_eq!((1, 0), res);
+/// 
+/// let res = board.mark_card_undone(0, 1);
+/// assert_eq!((0, 1), res);
+/// ```
 impl Board {
     pub fn new() -> Self {
         let todo = Column::new("TODO", vec![]);
@@ -102,26 +127,28 @@ impl Board {
         self.columns[column_index].decrease_priority(card_index);
     }
 
-    pub fn mark_card_done(&mut self, column_index: usize, card_index: usize) -> bool {
+    pub fn mark_card_done(&mut self, column_index: usize, card_index: usize) -> (usize, usize) {
         if column_index >= self.columns.len() - 1 {
-            return false;
+            return (column_index, card_index);
         }
 
         let card = self.card(column_index, card_index).clone();
         self.columns[column_index].remove_card(card_index);
         self.columns[column_index + 1].insert_card(card, 0);
-        true
+
+        (column_index + 1, 0)
     }
 
-    pub fn mark_card_undone(&mut self, column_index: usize, card_index: usize) -> bool {
+    pub fn mark_card_undone(&mut self, column_index: usize, card_index: usize) -> (usize, usize) {
         if column_index == 0 {
-            return false;
+            return (column_index, card_index);
         }
 
         let card = self.card(column_index, card_index).clone();
         self.columns[column_index].remove_card(card_index);
         self.columns[column_index - 1].insert_card(card, 0);
-        true
+
+        (column_index - 1, 0)
     }
 }
 
@@ -206,16 +233,16 @@ mod tests {
     fn marking_card_done() -> Result<()> {
         let board = Board::open("res/test_board.json")?;
 
-        let cases: Vec<(usize, usize, bool)> = vec![
-            (0, 0, true),
-            (0, 1, true),
-            (0, 2, true),
-            (1, 0, true),
-            (2, 0, false),
-            (2, 1, false),
+        let cases: Vec<((usize, usize), (usize, usize))> = vec![
+            ((0, 0), (1, 0)),
+            ((0, 1), (1, 0)),
+            ((0, 2), (1, 0)),
+            ((1, 0), (2, 0)),
+            ((2, 0), (2, 0)),
+            ((2, 1), (2, 1)),
         ];
 
-        for (column_index, card_index, expected) in cases {
+        for ((column_index, card_index), expected) in cases {
             let mut board = board.clone();
             assert_eq!(expected, board.mark_card_done(column_index, card_index));
         }
@@ -227,16 +254,16 @@ mod tests {
     fn marking_card_undone() -> Result<()> {
         let board = Board::open("res/test_board.json")?;
 
-        let cases: Vec<(usize, usize, bool)> = vec![
-            (0, 0, false),
-            (0, 1, false),
-            (0, 2, false),
-            (1, 0, true),
-            (2, 0, true),
-            (2, 1, true),
+        let cases: Vec<((usize, usize), (usize, usize))> = vec![
+            ((0, 0), (0, 0)),
+            ((0, 1), (0, 1)),
+            ((0, 2), (0, 2)),
+            ((1, 0), (0, 0)),
+            ((2, 0), (1, 0)),
+            ((2, 1), (1, 0)),
         ];
 
-        for (column_index, card_index, expected) in cases {
+        for ((column_index, card_index), expected) in cases {
             let mut board = board.clone();
             assert_eq!(expected, board.mark_card_undone(column_index, card_index));
         }
