@@ -22,7 +22,7 @@ mod tests {
 
     use chrono::{DateTime, Local, NaiveDateTime, TimeZone};
 
-    use crate::time;
+    use crate::utils::time;
 
     fn local_date_from_string(date: &str) -> DateTime<Local> {
         let naive_datetime =

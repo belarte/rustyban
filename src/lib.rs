@@ -1,5 +1,5 @@
 mod app;
 mod board;
-mod time;
+mod utils;
 
 pub use app::AppRunner;

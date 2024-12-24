@@ -10,7 +10,7 @@ use ratatui::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::time;
+use crate::utils::time;
 
 #[derive(Clone, Debug, Default, Deserialize, Serialize, PartialEq)]
 pub struct Card {
