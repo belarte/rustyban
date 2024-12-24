@@ -130,21 +130,21 @@ impl App {
 
     pub fn increase_priority(&mut self) {
         self.with_selected_card(|this, column_index, card_index| {
-            this.board
+            let (column_index, card_index) = this.board
                 .as_ref()
                 .borrow_mut()
                 .increase_priority(column_index, card_index);
-            this.select_prev_card();
+            this.selector.set(column_index, card_index);
         });
     }
 
     pub fn decrease_priority(&mut self) {
         self.with_selected_card(|this, column_index, card_index| {
-            this.board
+            let (column_index, card_index) = this.board
                 .as_ref()
                 .borrow_mut()
                 .decrease_priority(column_index, card_index);
-            this.select_next_card();
+            this.selector.set(column_index, card_index);
         });
     }
 

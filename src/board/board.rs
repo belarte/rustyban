@@ -119,12 +119,14 @@ impl Board {
         self.columns[column_index].update_card(card_index, card);
     }
 
-    pub fn increase_priority(&mut self, column_index: usize, card_index: usize) {
-        self.columns[column_index].increase_priority(card_index);
+    pub fn increase_priority(&mut self, column_index: usize, card_index: usize) -> (usize, usize) {
+        let card_index = self.columns[column_index].increase_priority(card_index);
+        (column_index, card_index)
     }
 
-    pub fn decrease_priority(&mut self, column_index: usize, card_index: usize) {
-        self.columns[column_index].decrease_priority(card_index);
+    pub fn decrease_priority(&mut self, column_index: usize, card_index: usize) -> (usize, usize) {
+        let card_index = self.columns[column_index].decrease_priority(card_index);
+        (column_index, card_index)
     }
 
     pub fn mark_card_done(&mut self, column_index: usize, card_index: usize) -> (usize, usize) {
@@ -225,6 +227,42 @@ mod tests {
         assert!(result.contains("Done!"));
         assert!(result.contains("Eat dinner"));
         assert!(result.contains("Wash dishes"));
+
+        Ok(())
+    }
+
+    #[test]
+    fn increasing_priority() -> Result<()> {
+        let board = Board::open("res/test_board.json")?;
+
+        let cases: Vec<((usize, usize), (usize, usize))> = vec![
+            ((0, 0), (0, 0)),
+            ((0, 1), (0, 0)),
+            ((0, 2), (0, 1)),
+        ];
+        
+        for ((column_index, card_index), expected) in cases {
+            let mut board = board.clone();
+            assert_eq!(expected, board.increase_priority(column_index, card_index));
+        }
+
+        Ok(())
+    }
+
+    #[test]
+    fn decreasing_priority() -> Result<()> {
+        let board = Board::open("res/test_board.json")?;
+
+        let cases: Vec<((usize, usize), (usize, usize))> = vec![
+            ((0, 0), (0, 1)),
+            ((0, 1), (0, 2)),
+            ((0, 2), (0, 2)),
+        ];
+        
+        for ((column_index, card_index), expected) in cases {
+            let mut board = board.clone();
+            assert_eq!(expected, board.decrease_priority(column_index, card_index));
+        }
 
         Ok(())
     }

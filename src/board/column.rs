@@ -65,16 +65,24 @@ impl Column {
         }
     }
 
-    pub fn increase_priority(&mut self, card_index: usize) {
+    pub fn increase_priority(&mut self, card_index: usize) -> usize {
         if card_index > 0 && card_index < self.cards.len() {
-            self.cards.swap(card_index, card_index - 1);
+            let new_index = card_index - 1;
+            self.cards.swap(card_index, new_index);
+            return new_index;
         }
+
+        card_index
     }
 
-    pub fn decrease_priority(&mut self, card_index: usize) {
+    pub fn decrease_priority(&mut self, card_index: usize) -> usize {
         if card_index < self.cards.len() - 1 {
+            let new_index = card_index + 1;
             self.cards.swap(card_index, card_index + 1);
+            return new_index;
         }
+
+        card_index
     }
 }
 
