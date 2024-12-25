@@ -122,8 +122,11 @@ impl App {
                 return;
             }
 
-            this.select_next_card();
-            this.board.as_ref().borrow_mut().remove_card(column_index, card_index);
+            let (column_index, card_index) = this.board
+                .as_ref()
+                .borrow_mut()
+                .remove_card(column_index, card_index);
+            this.board.as_ref().borrow_mut().select_card(column_index, card_index);
             this.selector.set(column_index, card_index);
         });
     }

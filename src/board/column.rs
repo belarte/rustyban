@@ -1,3 +1,5 @@
+use std::cmp::min;
+
 use ratatui::{
     buffer::Buffer,
     layout::{Alignment, Constraint, Layout, Rect},
@@ -43,8 +45,14 @@ impl Column {
         self.cards.insert(index, card);
     }
 
-    pub fn remove_card(&mut self, index: usize) {
+    pub fn remove_card(&mut self, index: usize) -> usize {
         self.cards.remove(index);
+
+        if self.is_empty() {
+            0
+        } else {
+            min(index, self.cards.len() - 1)
+        }
     }
 
     pub fn select_card(&mut self, card_index: usize) {
@@ -129,23 +137,27 @@ mod tests {
         assert_eq!("card 3", column.get_card(2).short_description());
         assert_eq!("card 4", column.get_card(3).short_description());
 
-        column.remove_card(0);
+        let index = column.remove_card(0);
+        assert_eq!(0, index);
         assert_eq!(3, column.cards.len());
         assert_eq!("card 2", column.get_card(0).short_description());
         assert_eq!("card 3", column.get_card(1).short_description());
         assert_eq!("card 4", column.get_card(2).short_description());
 
-        column.remove_card(2);
+        let index = column.remove_card(2);
+        assert_eq!(1, index);
         assert_eq!(2, column.cards.len());
         assert_eq!("card 2", column.get_card(0).short_description());
         assert_eq!("card 3", column.get_card(1).short_description());
 
-        column.remove_card(1);
+        let index = column.remove_card(1);
+        assert_eq!(0, index);
         assert_eq!(1, column.cards.len());
         assert_eq!("card 2", column.get_card(0).short_description());
 
         assert!(!column.is_empty());
-        column.remove_card(0);
+        let index = column.remove_card(0);
+        assert_eq!(0, index);
         assert!(column.is_empty());
 
         Ok(())

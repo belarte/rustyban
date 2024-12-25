@@ -103,8 +103,9 @@ impl Board {
         self.columns[column_index].insert_card(card, card_index);
     }
 
-    pub fn remove_card(&mut self, column_index: usize, card_index: usize) {
-        self.columns[column_index].remove_card(card_index);
+    pub fn remove_card(&mut self, column_index: usize, card_index: usize) -> (usize, usize) {
+        let card_index = self.columns[column_index].remove_card(card_index);
+        (column_index, card_index)
     }
 
     pub fn select_card(&mut self, column_index: usize, card_index: usize) {
@@ -365,11 +366,14 @@ mod tests {
         let mut board = Board::open("res/test_board.json")?;
 
         assert_eq!(3, board.column(0).size());
-        board.remove_card(0, 1);
+        let position = board.remove_card(0, 1);
+        assert_eq!((0, 1), position);
         assert_eq!(2, board.column(0).size());
-        board.remove_card(0, 1);
+        let position = board.remove_card(0, 1);
+        assert_eq!((0, 0), position);
         assert_eq!(1, board.column(0).size());
-        board.remove_card(0, 0);
+        let position = board.remove_card(0, 0);
+        assert_eq!((0, 0), position);
         assert_eq!(0, board.column(0).size());
 
         Ok(())
