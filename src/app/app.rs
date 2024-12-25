@@ -88,9 +88,9 @@ impl App {
     }
 
     pub fn update_card(&mut self, card: Card) {
-        self.with_selected_card(|this, column, card_index| {
-            let mut board = this.board.as_ref().borrow_mut();
-            board.update_card(column, card_index, card.clone());
+        self.with_selected_card(|this, column_index, card_index| {
+            this.board.as_ref().borrow_mut().update_card(column_index, card_index, card.clone());
+            (column_index, card_index)
         });
     }
 
@@ -110,7 +110,7 @@ impl App {
                 .borrow_mut()
                 .insert_card(column_index, card_index, Card::new("TODO", Local::now()));
             this.board.as_ref().borrow_mut().select_card(column_index, card_index);
-            this.selector.set(column_index, card_index);
+            (column_index, card_index)
         });
 
         self.get_selected_card()
@@ -118,58 +118,48 @@ impl App {
 
     pub fn remove_card(&mut self) {
         self.with_selected_card(|this, column_index, card_index| {
-            if this.board.as_ref().borrow().column(column_index).is_empty() {
-                return;
-            }
-
             let (column_index, card_index) = this.board
                 .as_ref()
                 .borrow_mut()
                 .remove_card(column_index, card_index);
             this.board.as_ref().borrow_mut().select_card(column_index, card_index);
-            this.selector.set(column_index, card_index);
+            (column_index, card_index)
         });
     }
 
     pub fn increase_priority(&mut self) {
         self.with_selected_card(|this, column_index, card_index| {
-            let (column_index, card_index) = this.board
+            this.board
                 .as_ref()
                 .borrow_mut()
-                .increase_priority(column_index, card_index);
-            this.selector.set(column_index, card_index);
+                .increase_priority(column_index, card_index)
         });
     }
 
     pub fn decrease_priority(&mut self) {
         self.with_selected_card(|this, column_index, card_index| {
-            let (column_index, card_index) = this.board
+            this.board
                 .as_ref()
                 .borrow_mut()
-                .decrease_priority(column_index, card_index);
-            this.selector.set(column_index, card_index);
+                .decrease_priority(column_index, card_index)
         });
     }
 
     pub fn mark_card_done(&mut self) {
         self.with_selected_card(|this, column_index, card_index| {
-            let (column_index, card_index) = this
-                .board
+            this.board
                 .as_ref()
                 .borrow_mut()
-                .mark_card_done(column_index, card_index);
-            this.selector.set(column_index, card_index);
+                .mark_card_done(column_index, card_index)
         });
     }
 
     pub fn mark_card_undone(&mut self) {
         self.with_selected_card(|this, column_index, card_index| {
-            let (column_index, card_index) = this
-                .board
+            this.board
                 .as_ref()
                 .borrow_mut()
-                .mark_card_undone(column_index, card_index);
-            this.selector.set(column_index, card_index);
+                .mark_card_undone(column_index, card_index)
         });
     }
 
@@ -188,10 +178,13 @@ impl App {
 
     fn with_selected_card<F>(&mut self, mut action: F)
     where
-        F: FnMut(&mut Self, usize, usize),
+        F: FnMut(&mut Self, usize, usize) -> (usize, usize),
     {
         match self.selector.get() {
-            Some((column_index, card_index)) => action(self, column_index, card_index),
+            Some((column_index, card_index)) => {
+                let (column_index, card_index) = action(self, column_index, card_index);
+                self.selector.set(column_index, card_index);
+            }
             None => self.log("No card selected".to_string()),
         }
     }
