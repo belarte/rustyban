@@ -46,6 +46,10 @@ impl Column {
     }
 
     pub fn remove_card(&mut self, index: usize) -> usize {
+        if self.cards.is_empty() {
+            return 0;
+        }
+
         self.cards.remove(index);
 
         if self.is_empty() {
@@ -159,6 +163,9 @@ mod tests {
         let index = column.remove_card(0);
         assert_eq!(0, index);
         assert!(column.is_empty());
+
+        let index = column.remove_card(0);
+        assert_eq!(0, index);
 
         Ok(())
     }
