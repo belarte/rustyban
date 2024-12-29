@@ -6,14 +6,14 @@ use ratatui::{
     text::Line,
     widgets::{
         block::{Position, Title},
-        Block, Clear, Widget,
+        Block, Clear, Paragraph, Widget,
     },
 };
 use tui_textarea::Input;
 
-use crate::app::text_widget::TextWidget;
 use crate::app::widget_utils::centered_popup_area;
 use crate::board::Card;
+use crate::{app::text_widget::TextWidget, utils::time};
 
 #[derive(Debug, Clone)]
 pub struct CardEditor {
@@ -74,13 +74,14 @@ impl CardEditor {
         card
     }
 
-    fn areas(&self, area: Rect) -> [Rect; 2] {
-        let constraints: Vec<Constraint> = self.widgets.iter().map(|widget| widget.constaint()).collect();
+    fn areas(&self, area: Rect) -> [Rect; 3] {
+        let mut constraints: Vec<Constraint> = self.widgets.iter().map(|widget| widget.constaint()).collect();
+        constraints.push(Constraint::Min(1));
         Layout::vertical(constraints).areas(area)
     }
 }
 
-const WIDGET_HEIGHT: u16 = 15;
+const WIDGET_HEIGHT: u16 = 16;
 const WIDGET_WIDTH: u16 = 64;
 
 impl Widget for &CardEditor {
@@ -92,27 +93,40 @@ impl Widget for &CardEditor {
         );
         Clear.render(area, buf);
 
-        let block = Block::bordered()
-            .title(Title::from(" Edit card ".bold()).alignment(Alignment::Center))
-            .title(
-                Title::from(Line::from(vec![
-                    " <Ctrl-s> ".bold(),
-                    "Save -".into(),
-                    " <ESC> ".bold(),
-                    "Discard changes ".into(),
-                ]))
-                .alignment(Alignment::Center)
-                .position(Position::Bottom),
-            )
-            .on_blue()
-            .border_set(border::PLAIN);
+        let block = surrounding_block();
         let inner_area = block.inner(area);
         block.render(area, buf);
 
         let areas = self.areas(inner_area);
+        let [short_desc_area, long_desc_area, date_area] = areas;
 
-        for (widget, area) in self.widgets.iter().zip(areas.iter()) {
-            widget.render(*area, buf);
-        }
+        self.widgets[0].render(short_desc_area, buf);
+        self.widgets[1].render(long_desc_area, buf);
+        creation_date_widget(&self.card).render(date_area, buf);
     }
+}
+
+fn surrounding_block() -> Block<'static> {
+    Block::bordered()
+        .title(Title::from(" Edit card ".bold()).alignment(Alignment::Center))
+        .title(
+            Title::from(Line::from(vec![
+                " <Ctrl-s> ".bold(),
+                "Save -".into(),
+                " <ESC> ".bold(),
+                "Discard changes ".into(),
+            ]))
+            .alignment(Alignment::Center)
+            .position(Position::Bottom),
+        )
+        .on_blue()
+        .border_set(border::PLAIN)
+}
+
+fn creation_date_widget(card: &Card) -> Paragraph<'_> {
+    let creation_date_text = Line::from(vec![
+        " Creation date: ".bold(),
+        time::format(card.creation_date()).into(),
+    ]);
+    Paragraph::new(creation_date_text)
 }

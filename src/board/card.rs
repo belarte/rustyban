@@ -42,6 +42,10 @@ impl Card {
         &self.long_description
     }
 
+    pub fn creation_date(&self) -> &DateTime<Local> {
+        &self.creation_date
+    }
+
     pub fn is_selected(&self) -> bool {
         self.is_selected
     }

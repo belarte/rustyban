@@ -1,7 +1,6 @@
 use chrono::{DateTime, Local};
 
-#[allow(dead_code)]
-pub fn format(date: DateTime<Local>) -> String {
+pub fn format(date: &DateTime<Local>) -> String {
     date.format("%Y-%m-%d %H:%M").to_string()
 }
 
@@ -39,7 +38,7 @@ mod tests {
     #[test]
     fn format() -> Result<()> {
         let expected = "2024-12-16 15:30".to_string();
-        let result = time::format(local_date_from_string("2024-12-16T15:30:42"));
+        let result = time::format(&local_date_from_string("2024-12-16T15:30:42"));
 
         assert_eq!(expected, result);
 
