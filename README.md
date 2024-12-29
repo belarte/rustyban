@@ -17,9 +17,8 @@ Use `<h/j/k/l>` or the arrow keys to select a card.
 
 ## Roadmap
 
-- [x] Write board to file
-- [x] Read board from file
-- [x] Select a card
-- [x] Edit a card
-- [x] Add a card
-- [x] Move a card
+Use **Rustyban** to see the roadmap:
+
+```sh
+cargo run -- res/roadmap.json
+```
