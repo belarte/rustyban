@@ -3,7 +3,6 @@ use std::io::Result;
 use crossterm::event::{self, Event, KeyEventKind};
 use ratatui::{DefaultTerminal, Frame};
 
-use crate::app::app_state::State;
 use crate::app::App;
 use crate::app::AppState;
 
@@ -22,7 +21,7 @@ impl<'a> AppRunner<'a> {
     }
 
     pub fn run(&mut self, terminal: &mut DefaultTerminal) -> Result<()> {
-        while self.state.state != State::Quit {
+        while self.state.should_continue() {
             terminal.draw(|frame| self.draw(frame))?;
 
             match event::read()? {

@@ -20,12 +20,16 @@ pub enum State<'a> {
 
 #[derive(Debug)]
 pub struct AppState<'a> {
-    pub state: State<'a>,
+    state: State<'a>,
 }
 
 impl<'a> AppState<'a> {
     pub fn new() -> Self {
         Self { state: State::Normal }
+    }
+
+    pub fn should_continue(&self) -> bool {
+        self.state != State::Quit
     }
 
     pub fn handle_events(&mut self, app: &mut App, event: KeyEvent) {
@@ -65,7 +69,10 @@ mod tests {
     fn handle_exit() -> Result<()> {
         let mut app = App::new("".into());
         let mut state = AppState::new();
+
+        assert!(state.should_continue());
         state.handle_events(&mut app, KeyCode::Char('q').into());
+        assert!(!state.should_continue());
         assert_eq!(State::Quit, state.state);
 
         Ok(())
