@@ -89,7 +89,10 @@ impl App {
 
     pub fn update_card(&mut self, card: Card) {
         self.with_selected_card(|this, column_index, card_index| {
-            this.board.as_ref().borrow_mut().update_card(column_index, card_index, card.clone());
+            this.board
+                .as_ref()
+                .borrow_mut()
+                .update_card(column_index, card_index, card.clone());
             (column_index, card_index)
         });
     }
@@ -118,10 +121,7 @@ impl App {
 
     pub fn remove_card(&mut self) {
         self.with_selected_card(|this, column_index, card_index| {
-            let (column_index, card_index) = this.board
-                .as_ref()
-                .borrow_mut()
-                .remove_card(column_index, card_index);
+            let (column_index, card_index) = this.board.as_ref().borrow_mut().remove_card(column_index, card_index);
             this.board.as_ref().borrow_mut().select_card(column_index, card_index);
             (column_index, card_index)
         });

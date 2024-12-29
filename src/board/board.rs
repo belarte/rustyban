@@ -32,7 +32,7 @@ impl Default for Board {
 /// use rustyban::board::{Board, Card};
 ///
 /// let mut board = Board::new();
-/// 
+///
 /// let now = Local::now();
 /// let card1 = Card::new("Card 1", now);
 /// let card2 = Card::new("Card 2", now);
@@ -44,7 +44,7 @@ impl Default for Board {
 ///
 /// let res = board.mark_card_done(0, 1);
 /// assert_eq!((1, 0), res);
-/// 
+///
 /// let res = board.mark_card_undone(0, 1);
 /// assert_eq!((0, 1), res);
 /// ```
@@ -236,12 +236,8 @@ mod tests {
     fn increasing_priority() -> Result<()> {
         let board = Board::open("res/test_board.json")?;
 
-        let cases: Vec<((usize, usize), (usize, usize))> = vec![
-            ((0, 0), (0, 0)),
-            ((0, 1), (0, 0)),
-            ((0, 2), (0, 1)),
-        ];
-        
+        let cases: Vec<((usize, usize), (usize, usize))> = vec![((0, 0), (0, 0)), ((0, 1), (0, 0)), ((0, 2), (0, 1))];
+
         for ((column_index, card_index), expected) in cases {
             let mut board = board.clone();
             assert_eq!(expected, board.increase_priority(column_index, card_index));
@@ -254,12 +250,8 @@ mod tests {
     fn decreasing_priority() -> Result<()> {
         let board = Board::open("res/test_board.json")?;
 
-        let cases: Vec<((usize, usize), (usize, usize))> = vec![
-            ((0, 0), (0, 1)),
-            ((0, 1), (0, 2)),
-            ((0, 2), (0, 2)),
-        ];
-        
+        let cases: Vec<((usize, usize), (usize, usize))> = vec![((0, 0), (0, 1)), ((0, 1), (0, 2)), ((0, 2), (0, 2))];
+
         for ((column_index, card_index), expected) in cases {
             let mut board = board.clone();
             assert_eq!(expected, board.decrease_priority(column_index, card_index));
