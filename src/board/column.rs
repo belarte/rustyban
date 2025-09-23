@@ -37,8 +37,9 @@ impl Column {
         self.cards.len() == 0
     }
 
-    pub fn get_card(&self, i: usize) -> &Card {
-        &self.cards[i]
+    /// Get a card by index, returning None if out of bounds
+    pub fn card(&self, i: usize) -> Option<&Card> {
+        self.cards.get(i)
     }
 
     pub fn insert_card(&mut self, card: Card, index: usize) {
@@ -136,28 +137,28 @@ mod tests {
         column.insert_card(Card::new("card 4", now), 3);
 
         assert_eq!(4, column.cards.len());
-        assert_eq!("card 1", column.get_card(0).short_description());
-        assert_eq!("card 2", column.get_card(1).short_description());
-        assert_eq!("card 3", column.get_card(2).short_description());
-        assert_eq!("card 4", column.get_card(3).short_description());
+        assert_eq!("card 1", column.card(0).unwrap().short_description());
+        assert_eq!("card 2", column.card(1).unwrap().short_description());
+        assert_eq!("card 3", column.card(2).unwrap().short_description());
+        assert_eq!("card 4", column.card(3).unwrap().short_description());
 
         let index = column.remove_card(0);
         assert_eq!(0, index);
         assert_eq!(3, column.cards.len());
-        assert_eq!("card 2", column.get_card(0).short_description());
-        assert_eq!("card 3", column.get_card(1).short_description());
-        assert_eq!("card 4", column.get_card(2).short_description());
+        assert_eq!("card 2", column.card(0).unwrap().short_description());
+        assert_eq!("card 3", column.card(1).unwrap().short_description());
+        assert_eq!("card 4", column.card(2).unwrap().short_description());
 
         let index = column.remove_card(2);
         assert_eq!(1, index);
         assert_eq!(2, column.cards.len());
-        assert_eq!("card 2", column.get_card(0).short_description());
-        assert_eq!("card 3", column.get_card(1).short_description());
+        assert_eq!("card 2", column.card(0).unwrap().short_description());
+        assert_eq!("card 3", column.card(1).unwrap().short_description());
 
         let index = column.remove_card(1);
         assert_eq!(0, index);
         assert_eq!(1, column.cards.len());
-        assert_eq!("card 2", column.get_card(0).short_description());
+        assert_eq!("card 2", column.card(0).unwrap().short_description());
 
         assert!(!column.is_empty());
         let index = column.remove_card(0);
@@ -187,18 +188,39 @@ mod tests {
         column.increase_priority(1);
         column.increase_priority(2);
 
-        assert_eq!("card 3", column.get_card(0).short_description());
-        assert_eq!("card 2", column.get_card(1).short_description());
-        assert_eq!("card 1", column.get_card(2).short_description());
+        assert_eq!("card 3", column.card(0).unwrap().short_description());
+        assert_eq!("card 2", column.card(1).unwrap().short_description());
+        assert_eq!("card 1", column.card(2).unwrap().short_description());
 
         column.decrease_priority(2);
         column.decrease_priority(1);
         column.decrease_priority(0);
         column.decrease_priority(1);
 
-        assert_eq!("card 1", column.get_card(0).short_description());
-        assert_eq!("card 2", column.get_card(1).short_description());
-        assert_eq!("card 3", column.get_card(2).short_description());
+        assert_eq!("card 1", column.card(0).unwrap().short_description());
+        assert_eq!("card 2", column.card(1).unwrap().short_description());
+        assert_eq!("card 3", column.card(2).unwrap().short_description());
+
+        Ok(())
+    }
+
+    #[test]
+    fn safe_card_access() -> Result<()> {
+        let now = Local::now();
+        let column = Column::new("test", vec![
+            Card::new("card 1", now),
+            Card::new("card 2", now),
+            Card::new("card 3", now),
+        ]);
+
+        // Test safe access within bounds
+        assert!(column.card(0).is_some());
+        assert!(column.card(1).is_some());
+        assert!(column.card(2).is_some());
+        
+        // Test safe access out of bounds
+        assert!(column.card(3).is_none());
+        assert!(column.card(999).is_none());
 
         Ok(())
     }

@@ -77,7 +77,10 @@ impl App {
     pub fn disable_selection(&mut self) {
         if let Some((column_index, card_index)) = self.selector.get() {
             let mut board = self.board.as_ref().borrow_mut();
-            board.deselect_card(column_index, card_index);
+            board.deselect_card(column_index, card_index)
+                .unwrap_or_else(|e| {
+                    self.logger.log(format!("Failed to deselect card: {}", e));
+                });
         }
 
         self.selector.disable_selection();
@@ -92,27 +95,39 @@ impl App {
             this.board
                 .as_ref()
                 .borrow_mut()
-                .update_card(column_index, card_index, card.clone());
+                .update_card(column_index, card_index, card.clone())
+                .unwrap_or_else(|e| {
+                    this.logger.log(format!("Failed to update card: {}", e));
+                });
             (column_index, card_index)
         });
     }
 
     pub fn insert_card(&mut self, position: InsertPosition) -> Option<Card> {
         self.with_selected_card(|this, column_index, card_index| {
-            this.board.as_ref().borrow_mut().deselect_card(column_index, card_index);
+            this.board.as_ref().borrow_mut().deselect_card(column_index, card_index)
+                .unwrap_or_else(|e| {
+                    this.logger.log(format!("Failed to deselect card: {}", e));
+                });
 
             let card_index = match position {
                 InsertPosition::Current => card_index,
                 InsertPosition::Next => card_index + 1,
                 InsertPosition::Top => 0,
-                InsertPosition::Bottom => this.board.as_ref().borrow().column(column_index).size(),
+                InsertPosition::Bottom => this.board.as_ref().borrow().column(column_index).map(|c| c.size()).unwrap_or(0),
             };
 
             this.board
                 .as_ref()
                 .borrow_mut()
-                .insert_card(column_index, card_index, Card::new("TODO", Local::now()));
-            this.board.as_ref().borrow_mut().select_card(column_index, card_index);
+                .insert_card(column_index, card_index, Card::new("TODO", Local::now()))
+                .unwrap_or_else(|e| {
+                    this.logger.log(format!("Failed to insert card: {}", e));
+                });
+            this.board.as_ref().borrow_mut().select_card(column_index, card_index)
+                .unwrap_or_else(|e| {
+                    this.logger.log(format!("Failed to select card: {}", e));
+                });
             (column_index, card_index)
         });
 
@@ -121,8 +136,15 @@ impl App {
 
     pub fn remove_card(&mut self) {
         self.with_selected_card(|this, column_index, card_index| {
-            let (column_index, card_index) = this.board.as_ref().borrow_mut().remove_card(column_index, card_index);
-            this.board.as_ref().borrow_mut().select_card(column_index, card_index);
+            let (column_index, card_index) = this.board.as_ref().borrow_mut().remove_card(column_index, card_index)
+                .unwrap_or_else(|e| {
+                    this.logger.log(format!("Failed to remove card: {}", e));
+                    (column_index, card_index)
+                });
+            this.board.as_ref().borrow_mut().select_card(column_index, card_index)
+                .unwrap_or_else(|e| {
+                    this.logger.log(format!("Failed to select card: {}", e));
+                });
             (column_index, card_index)
         });
     }
@@ -194,11 +216,17 @@ impl App {
         F: FnMut(&mut Self) -> (usize, usize),
     {
         if let Some((column_index, card_index)) = self.selector.get() {
-            self.board.as_ref().borrow_mut().deselect_card(column_index, card_index);
+            self.board.as_ref().borrow_mut().deselect_card(column_index, card_index)
+                .unwrap_or_else(|e| {
+                    self.logger.log(format!("Failed to deselect card: {}", e));
+                });
         }
 
         let (column_index, card_index) = action(self);
-        self.board.as_ref().borrow_mut().select_card(column_index, card_index);
+        self.board.as_ref().borrow_mut().select_card(column_index, card_index)
+            .unwrap_or_else(|e| {
+                self.logger.log(format!("Failed to select card: {}", e));
+            });
     }
 
     fn log(&mut self, msg: String) {
@@ -292,9 +320,9 @@ mod tests {
         {
             let board = app.board.as_ref().borrow();
             let card = board.card(0, 3);
-            assert!(!card.is_selected());
+            assert!(!card.unwrap().is_selected());
             let card = board.card(0, 2);
-            assert!(card.is_selected());
+            assert!(card.unwrap().is_selected());
         }
 
         app.select_next_card();
@@ -314,10 +342,10 @@ mod tests {
         let card = app.get_selected_card().unwrap();
         assert_eq!("Buy bread", card.short_description());
 
-        assert_eq!("Buy milk", app.board.as_ref().borrow().card(0, 0).short_description());
+        assert_eq!("Buy milk", app.board.as_ref().borrow().card(0, 0).unwrap().short_description());
         let card = app.insert_card(InsertPosition::Top).unwrap();
         assert_eq!("TODO", card.short_description());
-        assert_eq!("TODO", app.board.as_ref().borrow().card(0, 0).short_description());
+        assert_eq!("TODO", app.board.as_ref().borrow().card(0, 0).unwrap().short_description());
         let card = app.get_selected_card().unwrap();
         assert_eq!("TODO", card.short_description());
 

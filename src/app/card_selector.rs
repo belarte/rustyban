@@ -30,21 +30,28 @@ impl CardSelector {
 
     pub fn set(&mut self, column_index: usize, card_index: usize) {
         let board = self.board.as_ref().borrow();
-        self.selected_column = min(column_index, board.columns_count() - 1);
-        self.selected_card = if board.column(self.selected_column).is_empty() {
-            0
+        self.selected_column = min(column_index, board.columns_count().saturating_sub(1));
+        self.selected_card = if let Some(column) = board.column(self.selected_column) {
+            if column.is_empty() {
+                0
+            } else {
+                min(card_index, column.size().saturating_sub(1))
+            }
         } else {
-            min(card_index, board.column(self.selected_column).size() - 1)
+            0
         }
     }
 
     pub fn get_selected_card(&self) -> Option<Card> {
         let board = self.board.as_ref().borrow();
-        if self.selection_enabled && !board.column(self.selected_column).is_empty() {
-            Some(board.card(self.selected_column, self.selected_card).clone())
-        } else {
-            None
+        if self.selection_enabled {
+            if let Some(column) = board.column(self.selected_column) {
+                if !column.is_empty() {
+                    return board.card(self.selected_column, self.selected_card).cloned();
+                }
+            }
         }
+        None
     }
 
     pub fn select_next_column(&mut self) -> (usize, usize) {
@@ -92,13 +99,14 @@ impl CardSelector {
 
     fn get_card_index(&self, index: usize) -> usize {
         let board = self.board.as_ref().borrow();
-        let column = board.column(self.selected_column);
-
-        if column.is_empty() {
-            return 0;
+        if let Some(column) = board.column(self.selected_column) {
+            if column.is_empty() {
+                return 0;
+            }
+            min(index, column.size().saturating_sub(1))
+        } else {
+            0
         }
-
-        min(index, column.size() - 1)
     }
 
     fn next_card_index(&self) -> usize {

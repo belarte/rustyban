@@ -1,6 +1,6 @@
 use std::{
     fs::File,
-    io::{Read, Result, Write},
+    io::{Read, Write},
 };
 
 use ratatui::{
@@ -11,6 +11,7 @@ use ratatui::{
 use serde::{Deserialize, Serialize};
 
 use crate::board::{Card, Column};
+use crate::{Result, RustybanError};
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Board {
@@ -71,53 +72,93 @@ impl Board {
     }
 
     pub fn to_file(&self, file_name: &str) -> Result<()> {
-        let content = self.to_json_string().expect("Cannot write file");
+        let content = self.to_json_string()?;
 
-        let file = File::create(file_name);
-        match file {
-            Ok(mut file) => file.write_all(content.as_bytes()),
-            Err(e) => Err(e),
-        }
+        let mut file = File::create(file_name)
+            .map_err(|e| RustybanError::Io(e))?;
+        file.write_all(content.as_bytes())
+            .map_err(|e| RustybanError::Io(e))?;
+        
+        Ok(())
     }
 
     fn to_json_string(&self) -> Result<String> {
-        match serde_json::to_string_pretty(&self) {
-            Ok(res) => Ok(res),
-            Err(e) => Err(e.into()),
-        }
+        serde_json::to_string_pretty(&self)
+            .map_err(|e| RustybanError::Serialization(e))
     }
 
-    pub fn column(&self, index: usize) -> &Column {
-        &self.columns[index]
+    /// Get a column by index, returning None if out of bounds
+    pub fn column(&self, index: usize) -> Option<&Column> {
+        self.columns.get(index)
     }
 
-    pub fn card(&self, column_index: usize, card_index: usize) -> &Card {
-        self.columns[column_index].get_card(card_index)
+    /// Get a card by column and card index, returning None if out of bounds
+    pub fn card(&self, column_index: usize, card_index: usize) -> Option<&Card> {
+        self.columns.get(column_index)?.card(card_index)
     }
 
     pub fn columns_count(&self) -> usize {
         self.columns.len()
     }
 
-    pub fn insert_card(&mut self, column_index: usize, card_index: usize, card: Card) {
+    /// Insert a card with bounds checking
+    pub fn insert_card(&mut self, column_index: usize, card_index: usize, card: Card) -> Result<()> {
+        if column_index >= self.columns.len() {
+            return Err(RustybanError::IndexOutOfBounds { 
+                index: column_index, 
+                max: self.columns.len().saturating_sub(1) 
+            });
+        }
         self.columns[column_index].insert_card(card, card_index);
+        Ok(())
     }
 
-    pub fn remove_card(&mut self, column_index: usize, card_index: usize) -> (usize, usize) {
+    /// Remove a card with bounds checking
+    pub fn remove_card(&mut self, column_index: usize, card_index: usize) -> Result<(usize, usize)> {
+        if column_index >= self.columns.len() {
+            return Err(RustybanError::IndexOutOfBounds { 
+                index: column_index, 
+                max: self.columns.len().saturating_sub(1) 
+            });
+        }
         let card_index = self.columns[column_index].remove_card(card_index);
-        (column_index, card_index)
+        Ok((column_index, card_index))
     }
 
-    pub fn select_card(&mut self, column_index: usize, card_index: usize) {
+    /// Select a card with bounds checking
+    pub fn select_card(&mut self, column_index: usize, card_index: usize) -> Result<()> {
+        if column_index >= self.columns.len() {
+            return Err(RustybanError::IndexOutOfBounds { 
+                index: column_index, 
+                max: self.columns.len().saturating_sub(1) 
+            });
+        }
         self.columns[column_index].select_card(card_index);
+        Ok(())
     }
 
-    pub fn deselect_card(&mut self, column_index: usize, card_index: usize) {
+    /// Deselect a card with bounds checking
+    pub fn deselect_card(&mut self, column_index: usize, card_index: usize) -> Result<()> {
+        if column_index >= self.columns.len() {
+            return Err(RustybanError::IndexOutOfBounds { 
+                index: column_index, 
+                max: self.columns.len().saturating_sub(1) 
+            });
+        }
         self.columns[column_index].deselect_card(card_index);
+        Ok(())
     }
 
-    pub fn update_card(&mut self, column_index: usize, card_index: usize, card: Card) {
+    /// Update a card with bounds checking
+    pub fn update_card(&mut self, column_index: usize, card_index: usize, card: Card) -> Result<()> {
+        if column_index >= self.columns.len() {
+            return Err(RustybanError::IndexOutOfBounds { 
+                index: column_index, 
+                max: self.columns.len().saturating_sub(1) 
+            });
+        }
         self.columns[column_index].update_card(card_index, card);
+        Ok(())
     }
 
     pub fn increase_priority(&mut self, column_index: usize, card_index: usize) -> (usize, usize) {
@@ -135,7 +176,7 @@ impl Board {
             return (column_index, card_index);
         }
 
-        let card = self.card(column_index, card_index).clone();
+        let card = self.card(column_index, card_index).unwrap().clone();
         self.columns[column_index].remove_card(card_index);
         self.columns[column_index + 1].insert_card(card, 0);
 
@@ -147,7 +188,7 @@ impl Board {
             return (column_index, card_index);
         }
 
-        let card = self.card(column_index, card_index).clone();
+        let card = self.card(column_index, card_index).unwrap().clone();
         self.columns[column_index].remove_card(card_index);
         self.columns[column_index - 1].insert_card(card, 0);
 
@@ -184,14 +225,60 @@ mod tests {
         let board = Board::open(path)?;
 
         assert_eq!("TODO", board.columns[0].header());
-        assert_eq!("Buy milk", board.columns[0].get_card(0).short_description());
-        assert_eq!("Buy eggs", board.columns[0].get_card(1).short_description());
-        assert_eq!("Buy bread", board.columns[0].get_card(2).short_description());
+        assert_eq!("Buy milk", board.columns[0].card(0).unwrap().short_description());
+        assert_eq!("Buy eggs", board.columns[0].card(1).unwrap().short_description());
+        assert_eq!("Buy bread", board.columns[0].card(2).unwrap().short_description());
         assert_eq!("Doing", board.columns[1].header());
-        assert_eq!("Cook dinner", board.columns[1].get_card(0).short_description());
+        assert_eq!("Cook dinner", board.columns[1].card(0).unwrap().short_description());
         assert_eq!("Done!", board.columns[2].header());
-        assert_eq!("Eat dinner", board.columns[2].get_card(0).short_description());
-        assert_eq!("Wash dishes", board.columns[2].get_card(1).short_description());
+        assert_eq!("Eat dinner", board.columns[2].card(0).unwrap().short_description());
+        assert_eq!("Wash dishes", board.columns[2].card(1).unwrap().short_description());
+
+        Ok(())
+    }
+
+    #[test]
+    fn safe_access_methods() -> Result<()> {
+        let path = "res/test_board.json";
+        let board = Board::open(path)?;
+
+        // Test safe column access
+        assert!(board.column(0).is_some());
+        assert!(board.column(1).is_some());
+        assert!(board.column(2).is_some());
+        assert!(board.column(3).is_none()); // Out of bounds
+        assert!(board.column(999).is_none()); // Way out of bounds
+
+        // Test safe card access
+        assert!(board.card(0, 0).is_some());
+        assert!(board.card(0, 1).is_some());
+        assert!(board.card(0, 2).is_some());
+        assert!(board.card(0, 3).is_none()); // Out of bounds
+        assert!(board.card(3, 0).is_none()); // Column out of bounds
+        assert!(board.card(999, 999).is_none()); // Both out of bounds
+
+        Ok(())
+    }
+
+    #[test]
+    fn safe_operations_with_bounds_checking() -> Result<()> {
+        let path = "res/test_board.json";
+        let mut board = Board::open(path)?;
+
+        // Test safe operations within bounds
+        let card = Card::new("Test card", Local::now());
+        assert!(board.insert_card(0, 0, card.clone()).is_ok());
+        assert!(board.select_card(0, 0).is_ok());
+        assert!(board.update_card(0, 0, card.clone()).is_ok());
+        assert!(board.deselect_card(0, 0).is_ok());
+        assert!(board.remove_card(0, 0).is_ok());
+
+        // Test safe operations out of bounds
+        assert!(board.insert_card(999, 0, card.clone()).is_err());
+        assert!(board.select_card(999, 0).is_err());
+        assert!(board.update_card(999, 0, card.clone()).is_err());
+        assert!(board.deselect_card(999, 0).is_err());
+        assert!(board.remove_card(999, 0).is_err());
 
         Ok(())
     }
@@ -322,14 +409,14 @@ mod tests {
 
             assert_eq!(
                 old_description,
-                board.card(column_index, card_index).short_description()
+                board.card(column_index, card_index).unwrap().short_description()
             );
-            board.insert_card(column_index, card_index, new_card.clone());
+            let _ = board.insert_card(column_index, card_index, new_card.clone());
             assert_eq!(
                 old_description,
-                board.card(column_index, card_index + 1).short_description()
+                board.card(column_index, card_index + 1).unwrap().short_description()
             );
-            assert_eq!(description, board.card(column_index, card_index).short_description());
+            assert_eq!(description, board.card(column_index, card_index).unwrap().short_description());
         }
 
         Ok(())
@@ -346,8 +433,8 @@ mod tests {
         for (column_index, card_index) in cases {
             let mut board = board.clone();
 
-            board.insert_card(column_index, card_index, new_card.clone());
-            assert_eq!(description, board.card(column_index, card_index).short_description());
+            let _ = board.insert_card(column_index, card_index, new_card.clone());
+            assert_eq!(description, board.card(column_index, card_index).unwrap().short_description());
         }
 
         Ok(())
@@ -357,16 +444,16 @@ mod tests {
     fn deleting_card() -> Result<()> {
         let mut board = Board::open("res/test_board.json")?;
 
-        assert_eq!(3, board.column(0).size());
-        let position = board.remove_card(0, 1);
+        assert_eq!(3, board.column(0).unwrap().size());
+        let position = board.remove_card(0, 1).unwrap();
         assert_eq!((0, 1), position);
-        assert_eq!(2, board.column(0).size());
-        let position = board.remove_card(0, 1);
+        assert_eq!(2, board.column(0).unwrap().size());
+        let position = board.remove_card(0, 1).unwrap();
         assert_eq!((0, 0), position);
-        assert_eq!(1, board.column(0).size());
-        let position = board.remove_card(0, 0);
+        assert_eq!(1, board.column(0).unwrap().size());
+        let position = board.remove_card(0, 0).unwrap();
         assert_eq!((0, 0), position);
-        assert_eq!(0, board.column(0).size());
+        assert_eq!(0, board.column(0).unwrap().size());
 
         Ok(())
     }
