@@ -36,14 +36,14 @@ impl App {
                 Ok(board) => board,
                 Err(e) => {
                     logger.log(format!(
-                        "Cannot read file {} because {}, creating a new board",
+                        "Cannot read file '{}' because: {}. Creating a new board instead.",
                         file_name, e
                     ));
                     Board::new()
                 }
             }
         } else {
-            logger.log("No file to open, creating a new board".to_string());
+            logger.log("No file specified, creating a new board".to_string());
             Board::new()
         };
 
@@ -166,8 +166,8 @@ impl App {
     pub fn write(&mut self) {
         let board = self.board.as_ref().borrow().clone();
         match board.to_file(&self.file_name) {
-            Ok(_) => self.log(format!("Board written to {}", self.file_name)),
-            Err(e) => self.log(format!("Error writing to file: {}", e)),
+            Ok(_) => self.log(format!("Board successfully saved to '{}'", self.file_name)),
+            Err(e) => self.log(format!("Failed to save board to '{}': {}", self.file_name, e)),
         }
     }
 
