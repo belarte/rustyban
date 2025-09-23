@@ -181,7 +181,7 @@ mod tests {
     #[test]
     fn open_board() -> Result<()> {
         let path = "res/test_board.json";
-        let board = Board::open(path).expect("Cannot open board");
+        let board = Board::open(path)?;
 
         assert_eq!("TODO", board.columns[0].header());
         assert_eq!("Buy milk", board.columns[0].get_card(0).short_description());

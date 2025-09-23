@@ -131,20 +131,24 @@ impl CardSelector {
 
 #[cfg(test)]
 mod tests {
-    use std::{cell::RefCell, io::Result, rc::Rc};
+    use std::{cell::RefCell, rc::Rc};
 
     use crate::board::Board;
+    use crate::{Result, RustybanError};
 
     use super::CardSelector;
 
-    fn create_board(file_name: &str) -> Rc<RefCell<Board>> {
-        let board = Board::open(file_name).expect("cannot open file");
-        Rc::new(RefCell::new(board))
+    fn create_board(file_name: &str) -> Result<Rc<RefCell<Board>>> {
+        let board = Board::open(file_name)
+            .map_err(|e| RustybanError::InvalidOperation { 
+                message: format!("Cannot open test file '{}': {}", file_name, e) 
+            })?;
+        Ok(Rc::new(RefCell::new(board)))
     }
 
     #[test]
     fn card_selection() -> Result<()> {
-        let board = create_board("res/test_board.json");
+        let board = create_board("res/test_board.json")?;
         let mut selector = CardSelector::new(board);
 
         assert_eq!((0, 0), selector.select_next_column());
@@ -169,7 +173,7 @@ mod tests {
 
     #[test]
     fn get_the_card_index() -> Result<()> {
-        let board = create_board("res/test_board.json");
+        let board = create_board("res/test_board.json")?;
         let mut selector = CardSelector::new(board);
 
         assert_eq!(None, selector.get());
@@ -193,7 +197,7 @@ mod tests {
 
     #[test]
     fn set_the_card_index() -> Result<()> {
-        let board = create_board("res/test_board_with_empty_column.json");
+        let board = create_board("res/test_board_with_empty_column.json")?;
         let mut selector = CardSelector::new(board);
         selector.select_next_card();
 
@@ -213,7 +217,10 @@ mod tests {
             let (column_index, card_index) = input;
             selector.set(column_index, card_index);
 
-            let output = selector.get().unwrap();
+            let output = selector.get()
+                .ok_or_else(|| RustybanError::InvalidOperation { 
+                    message: "Expected selector to have a valid selection".to_string() 
+                })?;
             assert_eq!(expected, output);
         }
 
@@ -222,7 +229,7 @@ mod tests {
 
     #[test]
     fn returns_none_on_empty_board() -> Result<()> {
-        let board = create_board("res/test_board_with_empty_column.json");
+        let board = create_board("res/test_board_with_empty_column.json")?;
         let mut selector = CardSelector::new(board);
 
         selector.select_next_column();

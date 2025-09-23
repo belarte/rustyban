@@ -17,28 +17,31 @@ pub fn pretty_diff(from: DateTime<Local>, to: DateTime<Local>) -> String {
 
 #[cfg(test)]
 mod tests {
-    use std::io::Result;
-
     use chrono::{DateTime, Local, NaiveDateTime, TimeZone};
 
     use crate::utils::time;
+    use crate::{Result, RustybanError};
 
-    fn local_date_from_string(date: &str) -> DateTime<Local> {
-        let naive_datetime =
-            NaiveDateTime::parse_from_str(date, "%Y-%m-%dT%H:%M:%S").expect("Failed to parse datetime");
+    fn local_date_from_string(date: &str) -> Result<DateTime<Local>> {
+        let naive_datetime = NaiveDateTime::parse_from_str(date, "%Y-%m-%dT%H:%M:%S")
+            .map_err(|e| RustybanError::InvalidOperation { 
+                message: format!("Failed to parse datetime '{}': {}", date, e) 
+            })?;
 
-        let datetime_local: DateTime<Local> = Local
+        let datetime_local = Local
             .from_local_datetime(&naive_datetime)
             .single()
-            .expect("Failed to convert to local datetime");
+            .ok_or_else(|| RustybanError::InvalidOperation { 
+                message: format!("Failed to convert to local datetime: {}", date) 
+            })?;
 
-        datetime_local
+        Ok(datetime_local)
     }
 
     #[test]
     fn format() -> Result<()> {
         let expected = "2024-12-16 15:30".to_string();
-        let result = time::format(&local_date_from_string("2024-12-16T15:30:42"));
+        let result = time::format(&local_date_from_string("2024-12-16T15:30:42")?);
 
         assert_eq!(expected, result);
 
@@ -47,11 +50,11 @@ mod tests {
 
     #[test]
     fn diff_pretty() -> Result<()> {
-        let t4 = local_date_from_string("2024-12-06T15:30:42");
-        let t3 = local_date_from_string("2024-12-15T15:31:42");
-        let t2 = local_date_from_string("2024-12-16T14:31:42");
-        let t1 = local_date_from_string("2024-12-16T15:29:44");
-        let t0 = local_date_from_string("2024-12-16T15:30:42");
+        let t4 = local_date_from_string("2024-12-06T15:30:42")?;
+        let t3 = local_date_from_string("2024-12-15T15:31:42")?;
+        let t2 = local_date_from_string("2024-12-16T14:31:42")?;
+        let t1 = local_date_from_string("2024-12-16T15:29:44")?;
+        let t0 = local_date_from_string("2024-12-16T15:30:42")?;
 
         assert_eq!("58 seconds", time::pretty_diff(t1, t0));
         assert_eq!("59 minutes", time::pretty_diff(t2, t0));
