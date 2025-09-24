@@ -9,9 +9,9 @@ use ratatui::{
     widgets::Widget,
 };
 
-use crate::app::Logger;
-use crate::board::Board;
-use crate::{app::CardSelector, board::Card};
+use crate::engine::logger::Logger;
+use crate::core::Board;
+use crate::{engine::card_selector::CardSelector, core::Card};
 
 #[derive(Debug)]
 pub struct App {
@@ -265,7 +265,7 @@ impl Widget for &App {
 mod tests {
     use std::io::Result;
 
-    use crate::app::app::InsertPosition;
+    use crate::engine::app::InsertPosition;
 
     use super::App;
 

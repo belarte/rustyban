@@ -3,8 +3,8 @@ use std::io::Result;
 use crossterm::event::{self, Event, KeyEventKind};
 use ratatui::{DefaultTerminal, Frame};
 
-use crate::app::App;
-use crate::app::AppState;
+use crate::engine::app::App;
+use crate::engine::app_state::AppState;
 
 #[derive(Debug)]
 pub struct AppRunner<'a> {

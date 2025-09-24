@@ -1,6 +1,6 @@
 use std::{cell::RefCell, cmp::min, rc::Rc};
 
-use crate::board::{Board, Card};
+use crate::core::{Board, Card};
 
 #[derive(Debug, Default)]
 pub struct CardSelector {
@@ -141,7 +141,7 @@ impl CardSelector {
 mod tests {
     use std::{cell::RefCell, rc::Rc};
 
-    use crate::board::Board;
+    use crate::core::Board;
     use crate::{Result, RustybanError};
 
     use super::CardSelector;

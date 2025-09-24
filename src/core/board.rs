@@ -10,8 +10,9 @@ use ratatui::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::board::{Card, Column};
-use crate::{Result, RustybanError};
+use crate::core::card::Card;
+use crate::core::column::Column;
+use crate::core::{Result, RustybanError};
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Board {
@@ -30,7 +31,7 @@ impl Default for Board {
 ///
 /// ```
 /// use chrono::Local;
-/// use rustyban::board::{Board, Card};
+/// use rustyban::{Board, Card};
 ///
 /// let mut board = Board::new();
 ///

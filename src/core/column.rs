@@ -9,7 +9,7 @@ use ratatui::{
 };
 use serde::{Deserialize, Serialize};
 
-use crate::board::Card;
+use crate::core::card::Card;
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Column {
@@ -122,7 +122,7 @@ mod tests {
 
     use chrono::Local;
 
-    use crate::board::card::Card;
+    use crate::core::card::Card;
 
     use super::Column;
 

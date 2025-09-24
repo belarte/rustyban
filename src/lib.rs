@@ -1,7 +1,16 @@
-mod app;
-pub mod board; // Public because of documentation tests
-mod error;
-mod utils;
+// Core data structures and business logic
+mod core;
 
-pub use app::AppRunner;
-pub use error::{RustybanError, Result};
+// UI components and interface
+mod ui;
+
+// Business logic and operations
+mod engine;
+
+// Utilities
+pub(crate) mod utils;
+
+// Public API - what users need
+pub use core::{Board, Card, Column, RustybanError, Result};
+pub use engine::App;
+pub use ui::AppRunner;

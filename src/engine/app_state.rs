@@ -1,12 +1,12 @@
 use crossterm::event::KeyEvent;
 use ratatui::Frame;
 
-use super::{
-    app::App,
-    card_editor::CardEditor,
-    event_handler::{edit, normal, save},
-    help::Help,
-    save_to_file::Save,
+use crate::{
+    engine::app::App,
+    ui::card_editor::CardEditor,
+    ui::event_handlers::{edit, normal, save},
+    ui::help::Help,
+    engine::save_to_file::Save,
 };
 
 #[derive(Debug, PartialEq, Eq)]
@@ -61,7 +61,7 @@ mod tests {
 
     use crossterm::event::KeyCode;
 
-    use crate::app::app_state::State;
+    use crate::engine::app_state::State;
 
     use super::*;
 

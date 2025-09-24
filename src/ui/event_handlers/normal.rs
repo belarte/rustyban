@@ -1,10 +1,10 @@
 use crossterm::event::{KeyCode, KeyEvent};
 
-use crate::app::{
-    app::{App, InsertPosition},
-    app_state::State,
-    card_editor::CardEditor,
-    save_to_file::Save,
+use crate::{
+    engine::app::{App, InsertPosition},
+    engine::app_state::State,
+    ui::card_editor::CardEditor,
+    engine::save_to_file::Save,
 };
 
 pub fn handler<'a>(app: &mut App, key_event: KeyEvent) -> State<'a> {
@@ -117,7 +117,7 @@ mod tests {
 
     use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 
-    use crate::app::{app::App, app_state::State, event_handler::normal::handler};
+    use crate::{engine::app::App, engine::app_state::State, ui::event_handlers::normal::handler};
 
     fn build_event(c: char) -> KeyEvent {
         KeyEvent::new(KeyCode::Char(c), KeyModifiers::empty())

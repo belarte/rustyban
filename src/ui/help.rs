@@ -10,7 +10,7 @@ use ratatui::{
     },
 };
 
-use crate::app::widget_utils::centered_popup_area;
+use crate::ui::widget_utils::centered_popup_area;
 
 pub struct Help;
 

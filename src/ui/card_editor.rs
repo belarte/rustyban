@@ -11,9 +11,9 @@ use ratatui::{
 };
 use tui_textarea::Input;
 
-use crate::app::widget_utils::centered_popup_area;
-use crate::board::Card;
-use crate::{app::text_widget::TextWidget, utils::time};
+use crate::ui::widget_utils::centered_popup_area;
+use crate::core::Card;
+use crate::{ui::text_widget::TextWidget, utils::time};
 
 #[derive(Debug, Clone)]
 pub struct CardEditor {
