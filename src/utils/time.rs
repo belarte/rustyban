@@ -40,7 +40,7 @@ mod tests {
 
     #[test]
     fn format() -> Result<()> {
-        let expected = "2024-12-16 15:30".to_string();
+        let expected = "2024-12-16 15:30";
         let result = time::format(&local_date_from_string("2024-12-16T15:30:42")?);
 
         assert_eq!(expected, result);
