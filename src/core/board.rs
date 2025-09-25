@@ -177,9 +177,9 @@ impl Board {
             return (column_index, card_index);
         }
 
-        let card = self.card(column_index, card_index).unwrap().clone();
-        self.columns[column_index].remove_card(card_index);
-        self.columns[column_index + 1].insert_card(card, 0);
+        if let Some(card) = self.columns[column_index].take_card(card_index) {
+            self.columns[column_index + 1].insert_card(card, 0);
+        }
 
         (column_index + 1, 0)
     }
@@ -189,9 +189,9 @@ impl Board {
             return (column_index, card_index);
         }
 
-        let card = self.card(column_index, card_index).unwrap().clone();
-        self.columns[column_index].remove_card(card_index);
-        self.columns[column_index - 1].insert_card(card, 0);
+        if let Some(card) = self.columns[column_index].take_card(card_index) {
+            self.columns[column_index - 1].insert_card(card, 0);
+        }
 
         (column_index - 1, 0)
     }

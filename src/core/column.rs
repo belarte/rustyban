@@ -60,6 +60,14 @@ impl Column {
         }
     }
 
+    pub fn take_card(&mut self, index: usize) -> Option<Card> {
+        if index < self.cards.len() {
+            Some(self.cards.remove(index))
+        } else {
+            None
+        }
+    }
+
     pub fn select_card(&mut self, card_index: usize) {
         if !self.is_empty() {
             self.cards[card_index].select();
