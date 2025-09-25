@@ -322,12 +322,10 @@ mod tests {
 
     #[test]
     fn increasing_priority() -> Result<()> {
-        let board = Board::open("res/test_board.json")?;
-
         let cases: Vec<((usize, usize), (usize, usize))> = vec![((0, 0), (0, 0)), ((0, 1), (0, 0)), ((0, 2), (0, 1))];
 
         for ((column_index, card_index), expected) in cases {
-            let mut board = board.clone();
+            let mut board = Board::open("res/test_board.json")?;
             assert_eq!(expected, board.increase_priority(column_index, card_index));
         }
 
@@ -336,12 +334,10 @@ mod tests {
 
     #[test]
     fn decreasing_priority() -> Result<()> {
-        let board = Board::open("res/test_board.json")?;
-
         let cases: Vec<((usize, usize), (usize, usize))> = vec![((0, 0), (0, 1)), ((0, 1), (0, 2)), ((0, 2), (0, 2))];
 
         for ((column_index, card_index), expected) in cases {
-            let mut board = board.clone();
+            let mut board = Board::open("res/test_board.json")?;
             assert_eq!(expected, board.decrease_priority(column_index, card_index));
         }
 
@@ -350,8 +346,6 @@ mod tests {
 
     #[test]
     fn marking_card_done() -> Result<()> {
-        let board = Board::open("res/test_board.json")?;
-
         let cases: Vec<((usize, usize), (usize, usize))> = vec![
             ((0, 0), (1, 0)),
             ((0, 1), (1, 0)),
@@ -362,7 +356,7 @@ mod tests {
         ];
 
         for ((column_index, card_index), expected) in cases {
-            let mut board = board.clone();
+            let mut board = Board::open("res/test_board.json")?;
             assert_eq!(expected, board.mark_card_done(column_index, card_index));
         }
 
@@ -371,8 +365,6 @@ mod tests {
 
     #[test]
     fn marking_card_undone() -> Result<()> {
-        let board = Board::open("res/test_board.json")?;
-
         let cases: Vec<((usize, usize), (usize, usize))> = vec![
             ((0, 0), (0, 0)),
             ((0, 1), (0, 1)),
@@ -383,7 +375,7 @@ mod tests {
         ];
 
         for ((column_index, card_index), expected) in cases {
-            let mut board = board.clone();
+            let mut board = Board::open("res/test_board.json")?;
             assert_eq!(expected, board.mark_card_undone(column_index, card_index));
         }
 
@@ -392,7 +384,6 @@ mod tests {
 
     #[test]
     fn inserting_card() -> Result<()> {
-        let board = Board::open("res/test_board.json")?;
         let description = "new description";
         let new_card = Card::new(description, Local::now());
 
@@ -406,7 +397,7 @@ mod tests {
         ];
 
         for (column_index, card_index, old_description) in cases {
-            let mut board = board.clone();
+            let mut board = Board::open("res/test_board.json")?;
 
             assert_eq!(
                 old_description,
@@ -425,14 +416,13 @@ mod tests {
 
     #[test]
     fn appending_card() -> Result<()> {
-        let board = Board::open("res/test_board.json")?;
         let description = "new description";
         let new_card = Card::new(description, Local::now());
 
         let cases: Vec<(usize, usize)> = vec![(0, 3), (1, 1), (2, 2)];
 
         for (column_index, card_index) in cases {
-            let mut board = board.clone();
+            let mut board = Board::open("res/test_board.json")?;
 
             let _ = board.insert_card(column_index, card_index, new_card.clone());
             assert_eq!(description, board.card(column_index, card_index).unwrap().short_description());
