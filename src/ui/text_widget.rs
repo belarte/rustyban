@@ -16,13 +16,13 @@ pub struct TextWidget {
 }
 
 impl TextWidget {
-    pub fn new(label: String, text: String, constraint: Constraint, selected: bool) -> Self {
-        let vec: Vec<String> = text.split('\n').map(String::from).collect();
+    pub fn new(label: &str, text: &str, constraint: Constraint, selected: bool) -> Self {
+        let vec: Vec<String> = text.split('\n').map(|s| s.to_string()).collect();
         let mut text_area = TextArea::new(vec);
         text_area.move_cursor(tui_textarea::CursorMove::End);
 
         Self {
-            label,
+            label: label.to_string(),
             text_area,
             constraint,
             selected,

@@ -34,14 +34,14 @@ impl CardEditor {
     pub fn new(card: Card) -> Self {
         let widgets = vec![
             TextWidget::new(
-                "Short description".into(),
-                card.short_description().to_string(),
+                "Short description",
+                card.short_description(),
                 Constraint::Length(3),
                 true,
             ),
             TextWidget::new(
-                "Long description".into(),
-                card.long_description().to_string(),
+                "Long description",
+                card.long_description(),
                 Constraint::Length(10),
                 false,
             ),
