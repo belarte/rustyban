@@ -125,7 +125,7 @@ mod tests {
 
     #[test]
     fn exit() -> Result<()> {
-        let mut app = App::new("res/test_board.json".to_string());
+        let mut app = App::new("res/test_board.json");
         let state = handler(&mut app, build_event('q'));
         assert_eq!(State::Quit, state);
 
@@ -134,7 +134,7 @@ mod tests {
 
     #[test]
     fn card_navigation() -> Result<()> {
-        let mut app = App::new("res/test_board.json".to_string());
+        let mut app = App::new("res/test_board.json");
 
         let keys = vec!['h', 'j', 'k', 'l', 'H', 'J', 'K', 'L'];
 
@@ -148,7 +148,7 @@ mod tests {
 
     #[test]
     fn switch_to_edit_mode() -> Result<()> {
-        let mut app = App::new("res/test_board.json".to_string());
+        let mut app = App::new("res/test_board.json");
         app.select_next_card();
 
         let keys = vec!['e', 'i'];
@@ -163,7 +163,7 @@ mod tests {
 
     #[test]
     fn edit_card_does_nothing_when_selection_is_disabled() -> Result<()> {
-        let mut app = App::new("res/test_board.json".to_string());
+        let mut app = App::new("res/test_board.json");
 
         let keys = vec!['e', 'i'];
 
@@ -177,7 +177,7 @@ mod tests {
 
     #[test]
     fn help() -> Result<()> {
-        let mut app = App::new("res/test_board.json".to_string());
+        let mut app = App::new("res/test_board.json");
         let state = handler(&mut app, build_event('?'));
         assert_eq!(State::Help, state);
 

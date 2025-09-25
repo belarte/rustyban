@@ -29,7 +29,7 @@ pub enum InsertPosition {
 }
 
 impl App {
-    pub fn new(file_name: String) -> Self {
+    pub fn new(file_name: &str) -> Self {
         let mut logger = Logger::new();
         let board = if !file_name.is_empty() {
             match Board::open(&file_name) {
@@ -51,7 +51,7 @@ impl App {
         let selector = CardSelector::new(Rc::clone(&board));
 
         App {
-            file_name,
+            file_name: file_name.to_string(),
             logger,
             board,
             selector,
@@ -271,7 +271,7 @@ mod tests {
 
     #[test]
     fn mark_done_and_undone() -> Result<()> {
-        let mut app = App::new("res/test_board.json".to_string());
+        let mut app = App::new("res/test_board.json");
 
         app.select_next_card();
         app.select_next_card();
@@ -297,7 +297,7 @@ mod tests {
 
     #[test]
     fn insertion_does_nothing_when_no_card_selected() -> Result<()> {
-        let mut app = App::new("res/test_board.json".to_string());
+        let mut app = App::new("res/test_board.json");
 
         assert_eq!(None, app.insert_card(InsertPosition::Current));
 
@@ -306,7 +306,7 @@ mod tests {
 
     #[test]
     fn insertion_at_current_position() -> Result<()> {
-        let mut app = App::new("res/test_board.json".to_string());
+        let mut app = App::new("res/test_board.json");
 
         app.select_next_card();
         app.select_next_card();
@@ -334,7 +334,7 @@ mod tests {
 
     #[test]
     fn insertion_at_top() -> Result<()> {
-        let mut app = App::new("res/test_board.json".to_string());
+        let mut app = App::new("res/test_board.json");
 
         app.select_next_card();
         app.select_next_card();
@@ -354,7 +354,7 @@ mod tests {
 
     #[test]
     fn deletion() -> Result<()> {
-        let mut app = App::new("res/test_board.json".to_string());
+        let mut app = App::new("res/test_board.json");
 
         app.select_next_column();
         app.select_next_column();

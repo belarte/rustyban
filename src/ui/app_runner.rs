@@ -13,7 +13,7 @@ pub struct AppRunner<'a> {
 }
 
 impl<'a> AppRunner<'a> {
-    pub fn new(file_name: String) -> AppRunner<'a> {
+    pub fn new(file_name: &str) -> AppRunner<'a> {
         Self {
             app: App::new(file_name),
             state: AppState::new(),

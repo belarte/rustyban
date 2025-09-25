@@ -3,10 +3,7 @@ use rustyban::AppRunner;
 
 fn main() -> Result<()> {
     let args: Vec<String> = std::env::args().collect();
-    let file_name = match args.get(1) {
-        Some(name) => name.clone(),
-        None => String::new(),
-    };
+    let file_name = args.get(1).map(|s| s.as_str()).unwrap_or("");
 
     let mut terminal = ratatui::init();
     let app_result = AppRunner::new(file_name)
