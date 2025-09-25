@@ -27,7 +27,7 @@ impl Logger {
         }
     }
 
-    pub fn log(&mut self, msg: String) {
+    pub fn log(&mut self, msg: &str) {
         self.counter += 1;
         self.message = format!("[{}] {}", self.counter, msg)
     }
@@ -58,13 +58,13 @@ mod tests {
     fn logger() -> Result<(), Box<dyn std::error::Error>> {
         let mut logger = Logger::new();
 
-        logger.log("Hello".into());
+        logger.log("Hello");
         assert_eq!("[1] Hello", logger.show());
 
-        logger.log("Hello again".into());
+        logger.log("Hello again");
         assert_eq!("[2] Hello again", logger.show());
 
-        logger.log("One more time for the road".into());
+        logger.log("One more time for the road");
         assert_eq!("[3] One more time for the road", logger.show());
 
         Ok(())

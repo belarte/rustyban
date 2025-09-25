@@ -35,7 +35,7 @@ impl App {
             match Board::open(&file_name) {
                 Ok(board) => board,
                 Err(e) => {
-                    logger.log(format!(
+                    logger.log(&format!(
                         "Cannot read file '{}' because: {}. Creating a new board instead.",
                         file_name, e
                     ));
@@ -43,7 +43,7 @@ impl App {
                 }
             }
         } else {
-            logger.log("No file specified, creating a new board".to_string());
+            logger.log("No file specified, creating a new board");
             Board::new()
         };
 
@@ -79,7 +79,7 @@ impl App {
             let mut board = self.board.as_ref().borrow_mut();
             board.deselect_card(column_index, card_index)
                 .unwrap_or_else(|e| {
-                    self.logger.log(format!("Failed to deselect card: {}", e));
+                    self.logger.log(&format!("Failed to deselect card: {}", e));
                 });
         }
 
@@ -97,7 +97,7 @@ impl App {
                 .borrow_mut()
                 .update_card(column_index, card_index, card.clone())
                 .unwrap_or_else(|e| {
-                    this.logger.log(format!("Failed to update card: {}", e));
+                    this.logger.log(&format!("Failed to update card: {}", e));
                 });
             (column_index, card_index)
         });
@@ -107,7 +107,7 @@ impl App {
         self.with_selected_card(|this, column_index, card_index| {
             this.board.as_ref().borrow_mut().deselect_card(column_index, card_index)
                 .unwrap_or_else(|e| {
-                    this.logger.log(format!("Failed to deselect card: {}", e));
+                    this.logger.log(&format!("Failed to deselect card: {}", e));
                 });
 
             let card_index = match position {
@@ -122,11 +122,11 @@ impl App {
                 .borrow_mut()
                 .insert_card(column_index, card_index, Card::new("TODO", Local::now()))
                 .unwrap_or_else(|e| {
-                    this.logger.log(format!("Failed to insert card: {}", e));
+                    this.logger.log(&format!("Failed to insert card: {}", e));
                 });
             this.board.as_ref().borrow_mut().select_card(column_index, card_index)
                 .unwrap_or_else(|e| {
-                    this.logger.log(format!("Failed to select card: {}", e));
+                    this.logger.log(&format!("Failed to select card: {}", e));
                 });
             (column_index, card_index)
         });
@@ -138,12 +138,12 @@ impl App {
         self.with_selected_card(|this, column_index, card_index| {
             let (column_index, card_index) = this.board.as_ref().borrow_mut().remove_card(column_index, card_index)
                 .unwrap_or_else(|e| {
-                    this.logger.log(format!("Failed to remove card: {}", e));
+                    this.logger.log(&format!("Failed to remove card: {}", e));
                     (column_index, card_index)
                 });
             this.board.as_ref().borrow_mut().select_card(column_index, card_index)
                 .unwrap_or_else(|e| {
-                    this.logger.log(format!("Failed to select card: {}", e));
+                    this.logger.log(&format!("Failed to select card: {}", e));
                 });
             (column_index, card_index)
         });
@@ -188,8 +188,8 @@ impl App {
     pub fn write(&mut self) {
         let board = self.board.as_ref().borrow().clone();
         match board.to_file(&self.file_name) {
-            Ok(_) => self.log(format!("Board successfully saved to '{}'", self.file_name)),
-            Err(e) => self.log(format!("Failed to save board to '{}': {}", self.file_name, e)),
+            Ok(_) => self.log(&format!("Board successfully saved to '{}'", self.file_name)),
+            Err(e) => self.log(&format!("Failed to save board to '{}': {}", self.file_name, e)),
         }
     }
 
@@ -207,7 +207,7 @@ impl App {
                 let (column_index, card_index) = action(self, column_index, card_index);
                 self.selector.set(column_index, card_index);
             }
-            None => self.log("No card selected".to_string()),
+            None => self.log("No card selected"),
         }
     }
 
@@ -218,18 +218,18 @@ impl App {
         if let Some((column_index, card_index)) = self.selector.get() {
             self.board.as_ref().borrow_mut().deselect_card(column_index, card_index)
                 .unwrap_or_else(|e| {
-                    self.logger.log(format!("Failed to deselect card: {}", e));
+                    self.logger.log(&format!("Failed to deselect card: {}", e));
                 });
         }
 
         let (column_index, card_index) = action(self);
         self.board.as_ref().borrow_mut().select_card(column_index, card_index)
             .unwrap_or_else(|e| {
-                self.logger.log(format!("Failed to select card: {}", e));
+                self.logger.log(&format!("Failed to select card: {}", e));
             });
     }
 
-    fn log(&mut self, msg: String) {
+    fn log(&mut self, msg: &str) {
         self.logger.log(msg);
     }
 }
