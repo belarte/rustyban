@@ -76,16 +76,16 @@ impl Board {
         let content = self.to_json_string()?;
 
         let mut file = File::create(file_name)
-            .map_err(|e| RustybanError::Io(e))?;
+            .map_err(RustybanError::Io)?;
         file.write_all(content.as_bytes())
-            .map_err(|e| RustybanError::Io(e))?;
+            .map_err(RustybanError::Io)?;
         
         Ok(())
     }
 
     fn to_json_string(&self) -> Result<String> {
         serde_json::to_string_pretty(&self)
-            .map_err(|e| RustybanError::Serialization(e))
+            .map_err(RustybanError::Serialization)
     }
 
     /// Get a column by index, returning None if out of bounds

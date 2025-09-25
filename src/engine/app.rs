@@ -32,7 +32,7 @@ impl App {
     pub fn new(file_name: &str) -> Self {
         let mut logger = Logger::new();
         let board = if !file_name.is_empty() {
-            match Board::open(&file_name) {
+            match Board::open(file_name) {
                 Ok(board) => board,
                 Err(e) => {
                     logger.log(&format!(
