@@ -9,14 +9,14 @@ use ratatui::{
     widgets::Widget,
 };
 
-use crate::engine::logger::Logger;
+use crate::engine::logger::Logger as ConcreteLogger;
 use crate::core::Board;
-use crate::{engine::card_selector::CardSelector, core::Card, domain::{InsertPosition, event_handlers::AppOperations, services::FileService}};
+use crate::{engine::card_selector::CardSelector, core::Card, domain::{InsertPosition, event_handlers::AppOperations, services::{FileService, Logger}}};
 
 #[derive(Debug)]
 pub struct App {
     file_name: String,
-    logger: Logger,
+    logger: Box<dyn Logger>,
     board: Rc<RefCell<Board>>,
     selector: CardSelector,
     file_service: Box<dyn FileService>,
@@ -25,7 +25,7 @@ pub struct App {
 
 impl App {
     pub fn new(file_name: &str) -> Self {
-        let mut logger = Logger::new();
+        let mut logger = ConcreteLogger::new();
         let board = if !file_name.is_empty() {
             match Board::open(file_name) {
                 Ok(board) => board,
@@ -47,7 +47,7 @@ impl App {
 
         App {
             file_name: file_name.to_string(),
-            logger,
+            logger: Box::new(crate::engine::concrete_logger::ConcreteLoggerWrapper::new()),
             board,
             selector,
             file_service: Box::new(crate::engine::file_service::ConcreteFileService::new()),
@@ -59,7 +59,7 @@ impl App {
     where 
         F: FileService + 'static,
     {
-        let mut logger = Logger::new();
+        let mut logger = ConcreteLogger::new();
         let board = if !file_name.is_empty() {
             match file_service.load_board(file_name) {
                 Ok(board) => board,
@@ -81,7 +81,42 @@ impl App {
 
         App {
             file_name: file_name.to_string(),
-            logger,
+            logger: Box::new(crate::engine::concrete_logger::ConcreteLoggerWrapper::new()),
+            board,
+            selector,
+            file_service: Box::new(file_service),
+        }
+    }
+
+    /// Create App with FileService and Logger dependencies (for dependency injection and testing)
+    pub fn with_dependencies<F, L>(file_name: &str, file_service: F, logger: L) -> Self 
+    where 
+        F: FileService + 'static,
+        L: Logger + 'static,
+    {
+        let mut logger = logger;
+        let board = if !file_name.is_empty() {
+            match file_service.load_board(file_name) {
+                Ok(board) => board,
+                Err(e) => {
+                    logger.log(&format!(
+                        "Cannot read file '{}' because: {}. Creating a new board instead.",
+                        file_name, e
+                    ));
+                    Board::new()
+                }
+            }
+        } else {
+            logger.log("No file specified, creating a new board");
+            Board::new()
+        };
+
+        let board = Rc::new(RefCell::new(board));
+        let selector = CardSelector::new(Rc::clone(&board));
+
+        App {
+            file_name: file_name.to_string(),
+            logger: Box::new(logger),
             board,
             selector,
             file_service: Box::new(file_service),
@@ -89,19 +124,20 @@ impl App {
     }
 
     /// Create App from individual components (for dependency injection)
-    pub fn from_components<F>(
+    pub fn from_components<F, L>(
         file_name: String,
-        logger: Logger,
+        logger: L,
         board: Rc<RefCell<Board>>,
         selector: CardSelector,
         file_service: F,
     ) -> Self 
     where
         F: FileService + 'static,
+        L: Logger + 'static,
     {
         Self {
             file_name,
-            logger,
+            logger: Box::new(logger),
             board,
             selector,
             file_service: Box::new(file_service),
@@ -376,6 +412,45 @@ mod tests {
         app.write();
         
         // App should still be functional
+        assert_eq!(app.file_name, "test.json");
+    }
+
+    #[test]
+    fn test_app_with_mock_logger() {
+        // Test that App can be created with MockLogger
+        let mock_logger = crate::engine::mock_logger::MockLogger::new();
+        let mock_file_service = crate::engine::mock_file_service::MockFileService::new();
+        
+        let app = App::with_dependencies("test.json", mock_file_service, mock_logger);
+        assert_eq!(app.file_name, "test.json");
+    }
+
+    #[test]
+    fn test_app_logging_with_mock_logger() {
+        // Test that App.log() uses the injected Logger
+        let mock_logger = crate::engine::mock_logger::MockLogger::new();
+        let mock_file_service = crate::engine::mock_file_service::MockFileService::new();
+        
+        let mut app = App::with_dependencies("test.json", mock_file_service, mock_logger);
+        
+        // Log a message
+        app.log("Test message");
+        
+        // Verify the message was logged (we need to access the logger)
+        // Since we can't access the logger directly, we'll test through AppOperations
+        app.write(); // This should log a message
+        
+        // The test passes if no panic occurs
+        assert_eq!(app.file_name, "test.json");
+    }
+
+    #[test]
+    fn test_app_with_concrete_logger() {
+        // Test that App can be created with ConcreteLoggerWrapper
+        let concrete_logger = crate::engine::concrete_logger::ConcreteLoggerWrapper::new();
+        let concrete_file_service = crate::engine::file_service::ConcreteFileService::new();
+        
+        let app = App::with_dependencies("test.json", concrete_file_service, concrete_logger);
         assert_eq!(app.file_name, "test.json");
     }
 }

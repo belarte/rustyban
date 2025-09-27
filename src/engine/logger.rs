@@ -7,7 +7,7 @@ use ratatui::{
     widgets::{block::Title, Block, Paragraph, Widget},
 };
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Logger {
     counter: u32,
     message: String,
