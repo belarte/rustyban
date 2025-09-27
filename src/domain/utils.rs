@@ -1,5 +1,6 @@
 use ratatui::layout::{Constraint, Flex, Layout, Rect};
 
+/// Create a centered popup area within the given bounds
 pub fn centered_popup_area(area: Rect, horizontal: Constraint, vertical: Constraint) -> Rect {
     let vertical = Layout::vertical([vertical]).flex(Flex::Center);
     let horizontal = Layout::horizontal([horizontal]).flex(Flex::Center);
@@ -10,14 +11,11 @@ pub fn centered_popup_area(area: Rect, horizontal: Constraint, vertical: Constra
 
 #[cfg(test)]
 mod tests {
-    use std::io::Result;
-
+    use super::centered_popup_area;
     use ratatui::layout::{Constraint, Rect};
 
-    use super::centered_popup_area;
-
     #[test]
-    fn popup_area() -> Result<()> {
+    fn popup_area() {
         let base_area = Rect::new(16, 32, 64, 128);
 
         let area = centered_popup_area(base_area, Constraint::Length(64), Constraint::Length(128));
@@ -31,7 +29,5 @@ mod tests {
 
         let area = centered_popup_area(base_area, Constraint::Percentage(50), Constraint::Percentage(50));
         assert_eq!(area, Rect::new(32, 64, 32, 64));
-
-        Ok(())
     }
 }

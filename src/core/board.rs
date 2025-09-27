@@ -13,6 +13,7 @@ use serde::{Deserialize, Serialize};
 use crate::core::card::Card;
 use crate::core::column::Column;
 use crate::core::{Result, RustybanError};
+use crate::domain::constants::layout;
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Board {
@@ -200,9 +201,9 @@ impl Board {
 impl Widget for &Board {
     fn render(self, area: Rect, buf: &mut Buffer) {
         let [left, center, right] = Layout::horizontal([
-            Constraint::Percentage(33),
-            Constraint::Percentage(34),
-            Constraint::Percentage(33),
+            Constraint::Percentage(layout::LEFT_COLUMN_WIDTH),
+            Constraint::Percentage(layout::CENTER_COLUMN_WIDTH),
+            Constraint::Percentage(layout::RIGHT_COLUMN_WIDTH),
         ])
         .areas(area);
 

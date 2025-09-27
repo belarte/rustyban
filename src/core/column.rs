@@ -10,6 +10,7 @@ use ratatui::{
 use serde::{Deserialize, Serialize};
 
 use crate::core::card::Card;
+use crate::domain::constants::layout;
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Column {
@@ -115,7 +116,7 @@ impl Widget for &Column {
         let block = Block::bordered().title(title).border_set(border::THICK);
 
         let inner_area = block.inner(area);
-        let areas = Layout::vertical([Constraint::Max(4); 8]).split(inner_area);
+        let areas = Layout::vertical([Constraint::Max(layout::MAX_CARD_HEIGHT); layout::MAX_CARDS_PER_COLUMN]).split(inner_area);
         self.cards.iter().enumerate().for_each(|(i, card)| {
             card.render(areas[i], buf);
         });

@@ -1,3 +1,6 @@
+// Domain types, constants, and traits
+mod domain;
+
 // Core data structures and business logic
 mod core;
 

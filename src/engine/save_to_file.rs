@@ -7,7 +7,7 @@ use ratatui::{
 };
 use tui_textarea::{Input, TextArea};
 
-use crate::ui::widget_utils::centered_popup_area;
+use crate::domain::centered_popup_area;
 
 #[derive(Debug, Clone)]
 pub struct Save<'a> {

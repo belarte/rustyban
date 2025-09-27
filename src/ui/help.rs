@@ -1,6 +1,6 @@
 use ratatui::{
     buffer::Buffer,
-    layout::{Alignment, Constraint, Rect},
+    layout::{Alignment, Rect},
     style::Stylize,
     symbols::border,
     text::{Line, Text},
@@ -10,13 +10,14 @@ use ratatui::{
     },
 };
 
-use crate::ui::widget_utils::centered_popup_area;
+use crate::domain::centered_popup_area;
+use crate::domain::constants::popup;
 
 pub struct Help;
 
 impl Widget for Help {
     fn render(self, area: Rect, buf: &mut Buffer) {
-        let area = centered_popup_area(area, Constraint::Length(60), Constraint::Length(20));
+        let area = centered_popup_area(area, popup::HELP_POPUP_WIDTH, popup::HELP_POPUP_HEIGHT);
         Clear.render(area, buf);
 
         let title = Title::from(" Help ".bold());

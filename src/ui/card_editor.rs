@@ -11,9 +11,9 @@ use ratatui::{
 };
 use tui_textarea::Input;
 
-use crate::ui::widget_utils::centered_popup_area;
+use crate::domain::centered_popup_area;
 use crate::core::Card;
-use crate::{ui::text_widget::TextWidget, utils::time};
+use crate::{ui::text_widget::TextWidget, utils::time, domain::constants::popup};
 
 #[derive(Debug, Clone)]
 pub struct CardEditor {
@@ -42,7 +42,7 @@ impl CardEditor {
             TextWidget::new(
                 "Long description",
                 card.long_description(),
-                Constraint::Length(10),
+                popup::CARD_EDITOR_WIDTH,
                 false,
             ),
         ];
