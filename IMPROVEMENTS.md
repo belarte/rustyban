@@ -6,7 +6,7 @@ This document provides a comprehensive analysis of the `rustyban` project, focus
 ## Todo List
 
 - [x] **1. Module Structure and Visibility** - Create clear public API surface and organize modules
-- [ ] **2. Circular Dependencies and Module Coupling** - Extract common types and use dependency injection
+- [x] **2. Circular Dependencies and Module Coupling** - Extract common types and use dependency injection
 - [ ] **3. File Organization** - Split large files into smaller, focused modules
 - [x] **4. Error Handling** - Implement custom error types with `thiserror` and `anyhow`, add consistent error handling throughout the codebase
 - [x] **5. String Handling** - Optimize string operations and reduce allocations
