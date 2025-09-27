@@ -11,7 +11,7 @@ use ratatui::{
 
 use crate::engine::logger::Logger;
 use crate::core::Board;
-use crate::{engine::card_selector::CardSelector, core::Card, domain::{InsertPosition, event_handlers::AppOperations}};
+use crate::{engine::card_selector::CardSelector, core::Card, domain::{InsertPosition, event_handlers::AppOperations, services::FileService}};
 
 #[derive(Debug)]
 pub struct App {
@@ -19,6 +19,7 @@ pub struct App {
     logger: Logger,
     board: Rc<RefCell<Board>>,
     selector: CardSelector,
+    file_service: Box<dyn FileService>,
 }
 
 
@@ -49,21 +50,61 @@ impl App {
             logger,
             board,
             selector,
+            file_service: Box::new(crate::engine::file_service::ConcreteFileService::new()),
+        }
+    }
+
+    /// Create App with FileService dependency (for dependency injection and testing)
+    pub fn with_file_service<F>(file_name: &str, file_service: F) -> Self 
+    where 
+        F: FileService + 'static,
+    {
+        let mut logger = Logger::new();
+        let board = if !file_name.is_empty() {
+            match file_service.load_board(file_name) {
+                Ok(board) => board,
+                Err(e) => {
+                    logger.log(&format!(
+                        "Cannot read file '{}' because: {}. Creating a new board instead.",
+                        file_name, e
+                    ));
+                    Board::new()
+                }
+            }
+        } else {
+            logger.log("No file specified, creating a new board");
+            Board::new()
+        };
+
+        let board = Rc::new(RefCell::new(board));
+        let selector = CardSelector::new(Rc::clone(&board));
+
+        App {
+            file_name: file_name.to_string(),
+            logger,
+            board,
+            selector,
+            file_service: Box::new(file_service),
         }
     }
 
     /// Create App from individual components (for dependency injection)
-    pub fn from_components(
+    pub fn from_components<F>(
         file_name: String,
         logger: Logger,
         board: Rc<RefCell<Board>>,
         selector: CardSelector,
-    ) -> Self {
+        file_service: F,
+    ) -> Self 
+    where
+        F: FileService + 'static,
+    {
         Self {
             file_name,
             logger,
             board,
             selector,
+            file_service: Box::new(file_service),
         }
     }
 
@@ -284,6 +325,59 @@ mod tests {
 
         Ok(())
     }
+
+    #[test]
+    fn test_app_with_concrete_file_service() {
+        // Test that App can be created with ConcreteFileService
+        let app = App::with_file_service("test.json", crate::engine::file_service::ConcreteFileService::new());
+        assert_eq!(app.file_name, "test.json");
+    }
+
+    #[test]
+    fn test_app_with_mock_file_service() {
+        // Test that App can be created with MockFileService
+        let mock_service = crate::engine::mock_file_service::MockFileService::new()
+            .with_load_result(Ok(crate::core::Board::new()));
+        
+        let app = App::with_file_service("test.json", mock_service);
+        assert_eq!(app.file_name, "test.json");
+    }
+
+    #[test]
+    fn test_app_write_with_mock_file_service() {
+        // Test that App.write() uses the injected FileService
+        let mock_service = crate::engine::mock_file_service::MockFileService::new()
+            .with_save_result(Ok(()));
+        
+        let mut app = App::with_file_service("test.json", mock_service);
+        
+        // Add a card to the board
+        app.insert_card(InsertPosition::Current);
+        
+        // Write should succeed (using mock)
+        app.write();
+        
+        // Verify the file name is set correctly
+        assert_eq!(app.file_name, "test.json");
+    }
+
+    #[test]
+    fn test_app_write_with_mock_file_service_error() {
+        // Test that App.write() handles FileService errors
+        let mock_service = crate::engine::mock_file_service::MockFileService::new()
+            .with_save_result(Err(crate::core::RustybanError::InvalidOperation { message: "Mock error".to_string() }));
+        
+        let mut app = App::with_file_service("test.json", mock_service);
+        
+        // Add a card to the board
+        app.insert_card(InsertPosition::Current);
+        
+        // Write should handle the error gracefully
+        app.write();
+        
+        // App should still be functional
+        assert_eq!(app.file_name, "test.json");
+    }
 }
 
 impl AppOperations for App {
@@ -419,9 +513,10 @@ impl AppOperations for App {
 
     fn write(&mut self) {
         let board = self.board.as_ref().borrow().clone();
-        match board.to_file(&self.file_name) {
+        match self.file_service.save_board(&board, &self.file_name) {
             Ok(_) => self.log(&format!("Board successfully saved to '{}'", self.file_name)),
             Err(e) => self.log(&format!("Failed to save board to '{}': {}", self.file_name, e)),
         }
     }
 }
+

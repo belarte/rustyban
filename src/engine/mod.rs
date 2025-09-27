@@ -3,6 +3,8 @@ pub mod app_state;
 pub mod card_selector;
 pub mod save_to_file;
 pub mod logger;
+pub mod file_service;
+pub mod mock_file_service;
 
 // Re-export commonly used types
 pub use app::App;
