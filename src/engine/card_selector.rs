@@ -1,6 +1,7 @@
 use std::{cell::RefCell, cmp::min, rc::Rc};
 
 use crate::core::{Board, Card};
+use crate::domain::services::CardSelector as CardSelectorTrait;
 
 #[derive(Debug, Default)]
 pub struct CardSelector {
@@ -18,70 +19,6 @@ impl CardSelector {
             selection_enabled: false,
             board,
         }
-    }
-
-    pub fn get(&self) -> Option<(usize, usize)> {
-        if self.selection_enabled {
-            Some((self.selected_column, self.selected_card))
-        } else {
-            None
-        }
-    }
-
-    pub fn set(&mut self, column_index: usize, card_index: usize) {
-        let board = self.board.as_ref().borrow();
-        self.selected_column = min(column_index, board.columns_count().saturating_sub(1));
-        self.selected_card = if let Some(column) = board.column(self.selected_column) {
-            if column.is_empty() {
-                0
-            } else {
-                min(card_index, column.size().saturating_sub(1))
-            }
-        } else {
-            0
-        }
-    }
-
-    pub fn get_selected_card(&self) -> Option<Card> {
-        let board = self.board.as_ref().borrow();
-        if self.selection_enabled {
-            if let Some(column) = board.column(self.selected_column) {
-                if !column.is_empty() {
-                    return board.card(self.selected_column, self.selected_card).cloned();
-                }
-            }
-        }
-        None
-    }
-
-    pub fn select_next_column(&mut self) -> (usize, usize) {
-        self.select(|this| {
-            this.selected_column = this.next_column_index(this.selected_column);
-            this.selected_card = this.get_card_index(this.selected_card);
-        })
-    }
-
-    pub fn select_prev_column(&mut self) -> (usize, usize) {
-        self.select(|this| {
-            this.selected_column = this.prev_column_index(this.selected_column);
-            this.selected_card = this.get_card_index(this.selected_card);
-        })
-    }
-
-    pub fn select_next_card(&mut self) -> (usize, usize) {
-        self.select(|this| {
-            this.selected_card = this.next_card_index();
-        })
-    }
-
-    pub fn select_prev_card(&mut self) -> (usize, usize) {
-        self.select(|this| {
-            this.selected_card = this.prev_card_index();
-        })
-    }
-
-    pub fn disable_selection(&mut self) {
-        self.selection_enabled = false;
     }
 
     fn select<F>(&mut self, update_selection: F) -> (usize, usize)
@@ -137,12 +74,83 @@ impl CardSelector {
     }
 }
 
+impl CardSelectorTrait for CardSelector {
+    fn get(&self) -> Option<(usize, usize)> {
+        if self.selection_enabled {
+            Some((self.selected_column, self.selected_card))
+        } else {
+            None
+        }
+    }
+    
+    fn set(&mut self, column_index: usize, card_index: usize) {
+        let board = self.board.as_ref().borrow();
+        self.selected_column = min(column_index, board.columns_count().saturating_sub(1));
+        self.selected_card = if let Some(column) = board.column(self.selected_column) {
+            if column.is_empty() {
+                0
+            } else {
+                min(card_index, column.size().saturating_sub(1))
+            }
+        } else {
+            0
+        };
+    }
+    
+    fn get_selected_card(&self) -> Option<Card> {
+        let board = self.board.as_ref().borrow();
+        if self.selection_enabled {
+            if let Some(column) = board.column(self.selected_column) {
+                if !column.is_empty() {
+                    return board.card(self.selected_column, self.selected_card).cloned();
+                }
+            }
+        }
+        None
+    }
+    
+    fn select_next_column(&mut self) -> (usize, usize) {
+        self.select(|this| {
+            this.selected_column = this.next_column_index(this.selected_column);
+            this.selected_card = this.get_card_index(this.selected_card);
+        })
+    }
+    
+    fn select_prev_column(&mut self) -> (usize, usize) {
+        self.select(|this| {
+            this.selected_column = this.prev_column_index(this.selected_column);
+            this.selected_card = this.get_card_index(this.selected_card);
+        })
+    }
+    
+    fn select_next_card(&mut self) -> (usize, usize) {
+        self.select(|this| {
+            this.selected_card = this.next_card_index();
+        })
+    }
+    
+    fn select_prev_card(&mut self) -> (usize, usize) {
+        self.select(|this| {
+            this.selected_card = this.prev_card_index();
+        })
+    }
+    
+    fn disable_selection(&mut self) {
+        self.selection_enabled = false;
+    }
+    
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use std::{cell::RefCell, rc::Rc};
 
     use crate::core::Board;
     use crate::{Result, RustybanError};
+    use crate::domain::services::CardSelector as CardSelectorTrait;
 
     use super::CardSelector;
 

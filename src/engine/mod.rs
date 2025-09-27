@@ -7,6 +7,7 @@ pub mod file_service;
 pub mod mock_file_service;
 pub mod concrete_logger;
 pub mod mock_logger;
+pub mod mock_card_selector;
 
 // Re-export commonly used types
 pub use app::App;

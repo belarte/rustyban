@@ -10,6 +10,7 @@ pub trait FileService: std::fmt::Debug {
 }
 
 use ratatui::{buffer::Buffer, layout::Rect};
+use crate::core::Card;
 
 /// Trait for logging operations - enables dependency injection and testing
 /// Note: This trait includes UI rendering concerns for simplicity.
@@ -21,4 +22,35 @@ pub trait Logger: std::fmt::Debug {
     /// Render the logger to the terminal
     /// Does nothing if the logger doesn't support rendering
     fn render(&self, area: Rect, buf: &mut Buffer);
+}
+
+/// Trait for card selection operations - enables dependency injection and testing
+pub trait CardSelector: std::fmt::Debug {
+    /// Get the current selection as (column_index, card_index)
+    /// Returns None if selection is disabled
+    fn get(&self) -> Option<(usize, usize)>;
+    
+    /// Set the selection to specific column and card indices
+    fn set(&mut self, column_index: usize, card_index: usize);
+    
+    /// Get the currently selected card
+    fn get_selected_card(&self) -> Option<Card>;
+    
+    /// Select the next column and return the new position
+    fn select_next_column(&mut self) -> (usize, usize);
+    
+    /// Select the previous column and return the new position
+    fn select_prev_column(&mut self) -> (usize, usize);
+    
+    /// Select the next card and return the new position
+    fn select_next_card(&mut self) -> (usize, usize);
+    
+    /// Select the previous card and return the new position
+    fn select_prev_card(&mut self) -> (usize, usize);
+    
+    /// Disable selection
+    fn disable_selection(&mut self);
+    
+    /// Get a reference to the concrete type (for testing)
+    fn as_any(&self) -> &dyn std::any::Any;
 }

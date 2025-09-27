@@ -10,15 +10,16 @@ use ratatui::{
 };
 
 use crate::engine::logger::Logger as ConcreteLogger;
+use crate::engine::card_selector::CardSelector as ConcreteCardSelector;
 use crate::core::Board;
-use crate::{engine::card_selector::CardSelector, core::Card, domain::{InsertPosition, event_handlers::AppOperations, services::{FileService, Logger}}};
+use crate::{core::Card, domain::{InsertPosition, event_handlers::AppOperations, services::{FileService, Logger, CardSelector}}};
 
 #[derive(Debug)]
 pub struct App {
     file_name: String,
     logger: Box<dyn Logger>,
     board: Rc<RefCell<Board>>,
-    selector: CardSelector,
+    selector: Box<dyn CardSelector>,
     file_service: Box<dyn FileService>,
 }
 
@@ -43,7 +44,7 @@ impl App {
         };
 
         let board = Rc::new(RefCell::new(board));
-        let selector = CardSelector::new(Rc::clone(&board));
+        let selector = Box::new(ConcreteCardSelector::new(Rc::clone(&board)));
 
         App {
             file_name: file_name.to_string(),
@@ -77,7 +78,7 @@ impl App {
         };
 
         let board = Rc::new(RefCell::new(board));
-        let selector = CardSelector::new(Rc::clone(&board));
+        let selector = Box::new(ConcreteCardSelector::new(Rc::clone(&board)));
 
         App {
             file_name: file_name.to_string(),
@@ -112,7 +113,7 @@ impl App {
         };
 
         let board = Rc::new(RefCell::new(board));
-        let selector = CardSelector::new(Rc::clone(&board));
+        let selector = Box::new(ConcreteCardSelector::new(Rc::clone(&board)));
 
         App {
             file_name: file_name.to_string(),
@@ -123,23 +124,64 @@ impl App {
         }
     }
 
+    /// Create App with FileService, Logger, and CardSelector dependencies
+    pub fn with_all_dependencies<F, L, C>(
+        file_name: &str,
+        file_service: F,
+        logger: L,
+        card_selector: C,
+    ) -> Self 
+    where
+        F: FileService + 'static,
+        L: Logger + 'static,
+        C: CardSelector + 'static,
+    {
+        let mut logger = logger;
+        let board = if !file_name.is_empty() {
+            match file_service.load_board(file_name) {
+                Ok(board) => board,
+                Err(e) => {
+                    logger.log(&format!(
+                        "Cannot read file '{}' because: {}. Creating a new board instead.",
+                        file_name, e
+                    ));
+                    Board::new()
+                }
+            }
+        } else {
+            logger.log("No file specified, creating a new board");
+            Board::new()
+        };
+
+        let board = Rc::new(RefCell::new(board));
+        
+        App {
+            file_name: file_name.to_string(),
+            logger: Box::new(logger),
+            board,
+            selector: Box::new(card_selector),
+            file_service: Box::new(file_service),
+        }
+    }
+
     /// Create App from individual components (for dependency injection)
-    pub fn from_components<F, L>(
+    pub fn from_components<F, L, C>(
         file_name: String,
         logger: L,
         board: Rc<RefCell<Board>>,
-        selector: CardSelector,
+        selector: C,
         file_service: F,
     ) -> Self 
     where
         F: FileService + 'static,
         L: Logger + 'static,
+        C: CardSelector + 'static,
     {
         Self {
             file_name,
             logger: Box::new(logger),
             board,
-            selector,
+            selector: Box::new(selector),
             file_service: Box::new(file_service),
         }
     }
@@ -452,6 +494,76 @@ mod tests {
         
         let app = App::with_dependencies("test.json", concrete_file_service, concrete_logger);
         assert_eq!(app.file_name, "test.json");
+    }
+
+    #[test]
+    fn test_app_with_mock_card_selector() {
+        use crate::engine::mock_card_selector::MockCardSelector;
+        use crate::engine::mock_file_service::MockFileService;
+        use crate::engine::mock_logger::MockLogger;
+        use crate::core::Card;
+        
+        let mock_card_selector = MockCardSelector::new()
+            .with_selection(1, 2)
+            .with_selected_card(Card::new("Test Card", chrono::Local::now()));
+        let mock_file_service = MockFileService::new();
+        let mock_logger = MockLogger::new();
+        
+        let app = App::with_all_dependencies("test.json", mock_file_service, mock_logger, mock_card_selector);
+        
+        // Verify the app was created successfully
+        assert_eq!(app.file_name, "test.json");
+        
+        // Verify card selector functionality
+        assert_eq!(app.selector.get(), Some((1, 2)));
+        assert!(app.selector.get_selected_card().is_some());
+    }
+
+    #[test]
+    fn test_app_card_selector_navigation() {
+        use crate::engine::mock_card_selector::MockCardSelector;
+        use crate::engine::mock_file_service::MockFileService;
+        use crate::engine::mock_logger::MockLogger;
+        
+        let mock_card_selector = MockCardSelector::new().with_selection(0, 0);
+        let mock_file_service = MockFileService::new();
+        let mock_logger = MockLogger::new();
+        
+        let mut app = App::with_all_dependencies("test.json", mock_file_service, mock_logger, mock_card_selector);
+        
+        // Test navigation methods
+        app.selector.select_next_column();
+        app.selector.select_prev_column();
+        app.selector.select_next_card();
+        app.selector.select_prev_card();
+        
+        // Verify navigation calls were made
+        if let Some(mock_selector) = app.selector.as_any().downcast_ref::<MockCardSelector>() {
+            assert!(mock_selector.has_navigation_call("select_next_column"));
+            assert!(mock_selector.has_navigation_call("select_prev_column"));
+            assert!(mock_selector.has_navigation_call("select_next_card"));
+            assert!(mock_selector.has_navigation_call("select_prev_card"));
+        }
+    }
+
+    #[test]
+    fn test_app_card_selector_selection_control() {
+        use crate::engine::mock_card_selector::MockCardSelector;
+        use crate::engine::mock_file_service::MockFileService;
+        use crate::engine::mock_logger::MockLogger;
+        
+        let mock_card_selector = MockCardSelector::new().with_selection(1, 1);
+        let mock_file_service = MockFileService::new();
+        let mock_logger = MockLogger::new();
+        
+        let mut app = App::with_all_dependencies("test.json", mock_file_service, mock_logger, mock_card_selector);
+        
+        // Test selection control
+        app.selector.set(2, 3);
+        assert_eq!(app.selector.get(), Some((2, 3)));
+        
+        app.selector.disable_selection();
+        assert_eq!(app.selector.get(), None);
     }
 }
 
