@@ -61,12 +61,14 @@ impl AppBuilder {
     }
 
     /// Set the board directly (for testing)
+    #[allow(dead_code)]
     pub fn with_board(mut self, board: Rc<RefCell<Board>>) -> Self {
         self.board = Some(board);
         self
     }
-
+    
     /// Configure whether to fail on file load errors (default: false - graceful fallback)
+    #[allow(dead_code)]
     pub fn fail_on_file_load_error(mut self, fail: bool) -> Self {
         self.fail_on_file_load_error = fail;
         self

@@ -7,6 +7,7 @@ pub struct MockLogger {
 }
 
 impl MockLogger {
+    #[allow(dead_code)]
     pub fn new() -> Self {
         Self {
             messages: Vec::new(),
@@ -14,16 +15,19 @@ impl MockLogger {
     }
     
     /// Get all logged messages
+    #[allow(dead_code)]
     pub fn get_messages(&self) -> &[String] {
         &self.messages
     }
     
     /// Clear all logged messages
+    #[allow(dead_code)]
     pub fn clear_messages(&mut self) {
         self.messages.clear();
     }
     
     /// Check if a specific message was logged
+    #[allow(dead_code)]
     pub fn has_message(&self, message: &str) -> bool {
         self.messages.iter().any(|m| m.contains(message))
     }

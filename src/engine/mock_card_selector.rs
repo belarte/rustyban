@@ -11,6 +11,7 @@ pub struct MockCardSelector {
 }
 
 impl MockCardSelector {
+    #[allow(dead_code)]
     pub fn new() -> Self {
         Self {
             selection: None,
@@ -20,25 +21,30 @@ impl MockCardSelector {
         }
     }
     
+    #[allow(dead_code)]
     pub fn with_selection(mut self, column: usize, card: usize) -> Self {
         self.selection = Some((column, card));
         self.selection_enabled = true;
         self
     }
     
+    #[allow(dead_code)]
     pub fn with_selected_card(mut self, card: Card) -> Self {
         self.selected_card = Some(card);
         self
     }
     
+    #[allow(dead_code)]
     pub fn get_navigation_calls(&self) -> &[String] {
         &self.navigation_calls
     }
     
+    #[allow(dead_code)]
     pub fn clear_navigation_calls(&mut self) {
         self.navigation_calls.clear();
     }
     
+    #[allow(dead_code)]
     pub fn has_navigation_call(&self, call: &str) -> bool {
         self.navigation_calls.iter().any(|c| c == call)
     }

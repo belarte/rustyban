@@ -9,6 +9,7 @@ pub struct MockFileService {
 }
 
 impl MockFileService {
+    #[allow(dead_code)]
     pub fn new() -> Self {
         Self {
             load_result: None,
@@ -17,12 +18,14 @@ impl MockFileService {
     }
     
     /// Configure the load result for testing
+    #[allow(dead_code)]
     pub fn with_load_result(mut self, result: Result<Board>) -> Self {
         self.load_result = Some(result);
         self
     }
     
     /// Configure the save result for testing
+    #[allow(dead_code)]
     pub fn with_save_result(mut self, result: Result<()>) -> Self {
         self.save_result = Some(result);
         self
