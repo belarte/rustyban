@@ -11,6 +11,7 @@ pub trait FileService: std::fmt::Debug {
 
 use ratatui::{buffer::Buffer, layout::Rect};
 use crate::core::Card;
+use thiserror::Error;
 
 /// Trait for logging operations - enables dependency injection and testing
 /// Note: This trait includes UI rendering concerns for simplicity.
@@ -53,4 +54,14 @@ pub trait CardSelector: std::fmt::Debug {
     
     /// Get a reference to the concrete type (for testing)
     fn as_any(&self) -> &dyn std::any::Any;
+}
+
+/// Errors that can occur during AppBuilder construction
+#[derive(Error, Debug)]
+pub enum AppBuilderError {
+    #[error("File name is required but not provided")]
+    MissingFileName,
+    
+    #[error("Failed to load board from file '{file_name}': {error}")]
+    BoardLoadError { file_name: String, error: String },
 }

@@ -9,8 +9,6 @@ use ratatui::{
     widgets::Widget,
 };
 
-use crate::engine::logger::Logger as ConcreteLogger;
-use crate::engine::card_selector::CardSelector as ConcreteCardSelector;
 use crate::core::Board;
 use crate::{core::Card, domain::{InsertPosition, event_handlers::AppOperations, services::{FileService, Logger, CardSelector}}};
 
@@ -26,33 +24,38 @@ pub struct App {
 
 impl App {
     pub fn new(file_name: &str) -> Self {
-        let mut logger = ConcreteLogger::new();
-        let board = if !file_name.is_empty() {
-            match Board::open(file_name) {
-                Ok(board) => board,
-                Err(e) => {
-                    logger.log(&format!(
-                        "Cannot read file '{}' because: {}. Creating a new board instead.",
-                        file_name, e
-                    ));
-                    Board::new()
-                }
-            }
-        } else {
-            logger.log("No file specified, creating a new board");
-            Board::new()
-        };
+        // Use the builder pattern internally for consistency
+        crate::engine::app_builder::AppBuilder::new()
+            .with_file_name(file_name)
+            .build()
+            .expect("Failed to create App with default dependencies")
+    }
 
-        let board = Rc::new(RefCell::new(board));
-        let selector = Box::new(ConcreteCardSelector::new(Rc::clone(&board)));
-
-        App {
-            file_name: file_name.to_string(),
-            logger: Box::new(crate::engine::concrete_logger::ConcreteLoggerWrapper::new()),
+    /// Private constructor for use by AppBuilder
+    pub(crate) fn from_builder(
+        file_name: String,
+        logger: Box<dyn Logger>,
+        board: Rc<RefCell<Board>>,
+        selector: Box<dyn CardSelector>,
+        file_service: Box<dyn FileService>,
+    ) -> Self {
+        Self {
+            file_name,
+            logger,
             board,
             selector,
-            file_service: Box::new(crate::engine::file_service::ConcreteFileService::new()),
+            file_service,
         }
+    }
+
+    /// Get the file name (for testing)
+    pub fn file_name(&self) -> &str {
+        &self.file_name
+    }
+
+    /// Get the card selector (for testing)
+    pub fn selector(&self) -> &dyn CardSelector {
+        self.selector.as_ref()
     }
 
     /// Create App with FileService dependency (for dependency injection and testing)
@@ -60,33 +63,11 @@ impl App {
     where 
         F: FileService + 'static,
     {
-        let mut logger = ConcreteLogger::new();
-        let board = if !file_name.is_empty() {
-            match file_service.load_board(file_name) {
-                Ok(board) => board,
-                Err(e) => {
-                    logger.log(&format!(
-                        "Cannot read file '{}' because: {}. Creating a new board instead.",
-                        file_name, e
-                    ));
-                    Board::new()
-                }
-            }
-        } else {
-            logger.log("No file specified, creating a new board");
-            Board::new()
-        };
-
-        let board = Rc::new(RefCell::new(board));
-        let selector = Box::new(ConcreteCardSelector::new(Rc::clone(&board)));
-
-        App {
-            file_name: file_name.to_string(),
-            logger: Box::new(crate::engine::concrete_logger::ConcreteLoggerWrapper::new()),
-            board,
-            selector,
-            file_service: Box::new(file_service),
-        }
+        crate::engine::app_builder::AppBuilder::new()
+            .with_file_name(file_name)
+            .with_file_service(file_service)
+            .build()
+            .expect("Failed to create App with FileService dependency")
     }
 
     /// Create App with FileService and Logger dependencies (for dependency injection and testing)
@@ -95,33 +76,12 @@ impl App {
         F: FileService + 'static,
         L: Logger + 'static,
     {
-        let mut logger = logger;
-        let board = if !file_name.is_empty() {
-            match file_service.load_board(file_name) {
-                Ok(board) => board,
-                Err(e) => {
-                    logger.log(&format!(
-                        "Cannot read file '{}' because: {}. Creating a new board instead.",
-                        file_name, e
-                    ));
-                    Board::new()
-                }
-            }
-        } else {
-            logger.log("No file specified, creating a new board");
-            Board::new()
-        };
-
-        let board = Rc::new(RefCell::new(board));
-        let selector = Box::new(ConcreteCardSelector::new(Rc::clone(&board)));
-
-        App {
-            file_name: file_name.to_string(),
-            logger: Box::new(logger),
-            board,
-            selector,
-            file_service: Box::new(file_service),
-        }
+        crate::engine::app_builder::AppBuilder::new()
+            .with_file_name(file_name)
+            .with_file_service(file_service)
+            .with_logger(logger)
+            .build()
+            .expect("Failed to create App with FileService and Logger dependencies")
     }
 
     /// Create App with FileService, Logger, and CardSelector dependencies
@@ -136,32 +96,13 @@ impl App {
         L: Logger + 'static,
         C: CardSelector + 'static,
     {
-        let mut logger = logger;
-        let board = if !file_name.is_empty() {
-            match file_service.load_board(file_name) {
-                Ok(board) => board,
-                Err(e) => {
-                    logger.log(&format!(
-                        "Cannot read file '{}' because: {}. Creating a new board instead.",
-                        file_name, e
-                    ));
-                    Board::new()
-                }
-            }
-        } else {
-            logger.log("No file specified, creating a new board");
-            Board::new()
-        };
-
-        let board = Rc::new(RefCell::new(board));
-        
-        App {
-            file_name: file_name.to_string(),
-            logger: Box::new(logger),
-            board,
-            selector: Box::new(card_selector),
-            file_service: Box::new(file_service),
-        }
+        crate::engine::app_builder::AppBuilder::new()
+            .with_file_name(file_name)
+            .with_file_service(file_service)
+            .with_logger(logger)
+            .with_card_selector(card_selector)
+            .build()
+            .expect("Failed to create App with all dependencies")
     }
 
     /// Create App from individual components (for dependency injection)
@@ -407,8 +348,8 @@ mod tests {
     #[test]
     fn test_app_with_concrete_file_service() {
         // Test that App can be created with ConcreteFileService
-        let app = App::with_file_service("test.json", crate::engine::file_service::ConcreteFileService::new());
-        assert_eq!(app.file_name, "test.json");
+        let app = App::with_file_service("res/dummy.json", crate::engine::file_service::ConcreteFileService::new());
+        assert_eq!(app.file_name, "res/dummy.json");
     }
 
     #[test]
@@ -417,8 +358,8 @@ mod tests {
         let mock_service = crate::engine::mock_file_service::MockFileService::new()
             .with_load_result(Ok(crate::core::Board::new()));
         
-        let app = App::with_file_service("test.json", mock_service);
-        assert_eq!(app.file_name, "test.json");
+        let app = App::with_file_service("res/dummy.json", mock_service);
+        assert_eq!(app.file_name, "res/dummy.json");
     }
 
     #[test]
@@ -427,7 +368,7 @@ mod tests {
         let mock_service = crate::engine::mock_file_service::MockFileService::new()
             .with_save_result(Ok(()));
         
-        let mut app = App::with_file_service("test.json", mock_service);
+        let mut app = App::with_file_service("res/dummy.json", mock_service);
         
         // Add a card to the board
         app.insert_card(InsertPosition::Current);
@@ -436,7 +377,7 @@ mod tests {
         app.write();
         
         // Verify the file name is set correctly
-        assert_eq!(app.file_name, "test.json");
+        assert_eq!(app.file_name, "res/dummy.json");
     }
 
     #[test]
@@ -445,7 +386,7 @@ mod tests {
         let mock_service = crate::engine::mock_file_service::MockFileService::new()
             .with_save_result(Err(crate::core::RustybanError::InvalidOperation { message: "Mock error".to_string() }));
         
-        let mut app = App::with_file_service("test.json", mock_service);
+        let mut app = App::with_file_service("res/dummy.json", mock_service);
         
         // Add a card to the board
         app.insert_card(InsertPosition::Current);
@@ -454,7 +395,7 @@ mod tests {
         app.write();
         
         // App should still be functional
-        assert_eq!(app.file_name, "test.json");
+        assert_eq!(app.file_name, "res/dummy.json");
     }
 
     #[test]
@@ -463,8 +404,8 @@ mod tests {
         let mock_logger = crate::engine::mock_logger::MockLogger::new();
         let mock_file_service = crate::engine::mock_file_service::MockFileService::new();
         
-        let app = App::with_dependencies("test.json", mock_file_service, mock_logger);
-        assert_eq!(app.file_name, "test.json");
+        let app = App::with_dependencies("res/dummy.json", mock_file_service, mock_logger);
+        assert_eq!(app.file_name, "res/dummy.json");
     }
 
     #[test]
@@ -473,7 +414,7 @@ mod tests {
         let mock_logger = crate::engine::mock_logger::MockLogger::new();
         let mock_file_service = crate::engine::mock_file_service::MockFileService::new();
         
-        let mut app = App::with_dependencies("test.json", mock_file_service, mock_logger);
+        let mut app = App::with_dependencies("res/dummy.json", mock_file_service, mock_logger);
         
         // Log a message
         app.log("Test message");
@@ -483,7 +424,7 @@ mod tests {
         app.write(); // This should log a message
         
         // The test passes if no panic occurs
-        assert_eq!(app.file_name, "test.json");
+        assert_eq!(app.file_name, "res/dummy.json");
     }
 
     #[test]
@@ -492,8 +433,8 @@ mod tests {
         let concrete_logger = crate::engine::concrete_logger::ConcreteLoggerWrapper::new();
         let concrete_file_service = crate::engine::file_service::ConcreteFileService::new();
         
-        let app = App::with_dependencies("test.json", concrete_file_service, concrete_logger);
-        assert_eq!(app.file_name, "test.json");
+        let app = App::with_dependencies("res/dummy.json", concrete_file_service, concrete_logger);
+        assert_eq!(app.file_name, "res/dummy.json");
     }
 
     #[test]
@@ -509,10 +450,10 @@ mod tests {
         let mock_file_service = MockFileService::new();
         let mock_logger = MockLogger::new();
         
-        let app = App::with_all_dependencies("test.json", mock_file_service, mock_logger, mock_card_selector);
+        let app = App::with_all_dependencies("res/dummy.json", mock_file_service, mock_logger, mock_card_selector);
         
         // Verify the app was created successfully
-        assert_eq!(app.file_name, "test.json");
+        assert_eq!(app.file_name, "res/dummy.json");
         
         // Verify card selector functionality
         assert_eq!(app.selector.get(), Some((1, 2)));
@@ -529,7 +470,7 @@ mod tests {
         let mock_file_service = MockFileService::new();
         let mock_logger = MockLogger::new();
         
-        let mut app = App::with_all_dependencies("test.json", mock_file_service, mock_logger, mock_card_selector);
+        let mut app = App::with_all_dependencies("res/dummy.json", mock_file_service, mock_logger, mock_card_selector);
         
         // Test navigation methods
         app.selector.select_next_column();
@@ -556,7 +497,7 @@ mod tests {
         let mock_file_service = MockFileService::new();
         let mock_logger = MockLogger::new();
         
-        let mut app = App::with_all_dependencies("test.json", mock_file_service, mock_logger, mock_card_selector);
+        let mut app = App::with_all_dependencies("res/dummy.json", mock_file_service, mock_logger, mock_card_selector);
         
         // Test selection control
         app.selector.set(2, 3);
