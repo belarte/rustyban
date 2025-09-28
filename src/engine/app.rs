@@ -1,4 +1,4 @@
-use std::{cell::RefCell, rc::Rc};
+use std::{borrow::Cow, cell::RefCell, rc::Rc};
 
 use chrono::Local;
 use ratatui::{
@@ -133,7 +133,7 @@ impl App {
             this.board
                 .as_ref()
                 .borrow_mut()
-                .update_card(column_index, card_index, card.clone())
+                .update_card(column_index, card_index, Cow::Borrowed(&card))
                 .unwrap_or_else(|e| {
                     this.logger.log(&format!("Failed to update card: {}", e));
                 });
@@ -158,7 +158,7 @@ impl App {
             this.board
                 .as_ref()
                 .borrow_mut()
-                .insert_card(column_index, card_index, Card::new("TODO", Local::now()))
+                .insert_card(column_index, card_index, Cow::Owned(Card::new("TODO", Local::now())))
                 .unwrap_or_else(|e| {
                     this.logger.log(&format!("Failed to insert card: {}", e));
                 });
@@ -511,7 +511,7 @@ impl AppOperations for App {
             this.board
                 .as_ref()
                 .borrow_mut()
-                .update_card(column_index, card_index, card.clone())
+                .update_card(column_index, card_index, Cow::Borrowed(&card))
                 .unwrap_or_else(|e| {
                     this.logger.log(&format!("Failed to update card: {}", e));
                 });
@@ -569,7 +569,7 @@ impl AppOperations for App {
             self.board
                 .as_ref()
                 .borrow_mut()
-                .insert_card(column_index, card_index, card.clone())
+                .insert_card(column_index, card_index, Cow::Borrowed(&card))
                 .unwrap_or_else(|e| {
                     self.logger.log(&format!("Failed to insert card: {}", e));
                 });

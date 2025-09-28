@@ -1,4 +1,5 @@
 use std::{
+    borrow::Cow,
     fs::File,
     io::{Read, Write},
 };
@@ -33,6 +34,7 @@ impl Default for Board {
 /// ```
 /// use chrono::Local;
 /// use rustyban::{Board, Card};
+/// use std::borrow::Cow;
 ///
 /// let mut board = Board::new();
 ///
@@ -41,9 +43,9 @@ impl Default for Board {
 /// let card2 = Card::new("Card 2", now);
 /// let card3 = Card::new("Card 3", now);
 ///
-/// board.insert_card(0, 0, card1);
-/// board.insert_card(0, 0, card2);
-/// board.insert_card(0, 0, card3);
+/// board.insert_card(0, 0, Cow::Owned(card1));
+/// board.insert_card(0, 0, Cow::Owned(card2));
+/// board.insert_card(0, 0, Cow::Owned(card3));
 ///
 /// let res = board.mark_card_done(0, 1);
 /// assert_eq!((1, 0), res);
@@ -104,14 +106,14 @@ impl Board {
     }
 
     /// Insert a card with bounds checking
-    pub fn insert_card(&mut self, column_index: usize, card_index: usize, card: Card) -> Result<()> {
+    pub fn insert_card(&mut self, column_index: usize, card_index: usize, card: Cow<Card>) -> Result<()> {
         if column_index >= self.columns.len() {
             return Err(RustybanError::IndexOutOfBounds { 
                 index: column_index, 
                 max: self.columns.len().saturating_sub(1) 
             });
         }
-        self.columns[column_index].insert_card(card, card_index);
+        self.columns[column_index].insert_card(card.into_owned(), card_index);
         Ok(())
     }
 
@@ -152,14 +154,14 @@ impl Board {
     }
 
     /// Update a card with bounds checking
-    pub fn update_card(&mut self, column_index: usize, card_index: usize, card: Card) -> Result<()> {
+    pub fn update_card(&mut self, column_index: usize, card_index: usize, card: Cow<Card>) -> Result<()> {
         if column_index >= self.columns.len() {
             return Err(RustybanError::IndexOutOfBounds { 
                 index: column_index, 
                 max: self.columns.len().saturating_sub(1) 
             });
         }
-        self.columns[column_index].update_card(card_index, card);
+        self.columns[column_index].update_card(card_index, card.into_owned());
         Ok(())
     }
 
@@ -269,16 +271,16 @@ mod tests {
 
         // Test safe operations within bounds
         let card = Card::new("Test card", Local::now());
-        assert!(board.insert_card(0, 0, card.clone()).is_ok());
+        assert!(board.insert_card(0, 0, Cow::Borrowed(&card)).is_ok());
         assert!(board.select_card(0, 0).is_ok());
-        assert!(board.update_card(0, 0, card.clone()).is_ok());
+        assert!(board.update_card(0, 0, Cow::Borrowed(&card)).is_ok());
         assert!(board.deselect_card(0, 0).is_ok());
         assert!(board.remove_card(0, 0).is_ok());
 
         // Test safe operations out of bounds
-        assert!(board.insert_card(999, 0, card.clone()).is_err());
+        assert!(board.insert_card(999, 0, Cow::Borrowed(&card)).is_err());
         assert!(board.select_card(999, 0).is_err());
-        assert!(board.update_card(999, 0, card.clone()).is_err());
+        assert!(board.update_card(999, 0, Cow::Borrowed(&card)).is_err());
         assert!(board.deselect_card(999, 0).is_err());
         assert!(board.remove_card(999, 0).is_err());
 
@@ -404,7 +406,7 @@ mod tests {
                 old_description,
                 board.card(column_index, card_index).unwrap().short_description()
             );
-            let _ = board.insert_card(column_index, card_index, new_card.clone());
+            let _ = board.insert_card(column_index, card_index, Cow::Borrowed(&new_card));
             assert_eq!(
                 old_description,
                 board.card(column_index, card_index + 1).unwrap().short_description()
@@ -425,7 +427,7 @@ mod tests {
         for (column_index, card_index) in cases {
             let mut board = Board::open("res/test_board.json")?;
 
-            let _ = board.insert_card(column_index, card_index, new_card.clone());
+            let _ = board.insert_card(column_index, card_index, Cow::Borrowed(&new_card));
             assert_eq!(description, board.card(column_index, card_index).unwrap().short_description());
         }
 
