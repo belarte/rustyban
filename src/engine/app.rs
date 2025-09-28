@@ -637,8 +637,12 @@ impl AppOperations for App {
     }
 
     fn write(&mut self) {
-        let board = self.board.as_ref().borrow().clone();
-        match self.file_service.save_board(&board, &self.file_name) {
+        let result = {
+            let board = self.board.as_ref().borrow();
+            self.file_service.save_board(&board, &self.file_name)
+        };
+        
+        match result {
             Ok(_) => self.log(&format!("Board successfully saved to '{}'", self.file_name)),
             Err(e) => self.log(&format!("Failed to save board to '{}': {}", self.file_name, e)),
         }
