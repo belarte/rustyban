@@ -1,3 +1,5 @@
+use std::{cell::RefCell, rc::Rc};
+
 use crossterm::event::{KeyCode, KeyEvent};
 
 use crate::{
@@ -39,7 +41,7 @@ pub fn handler<'a>(app: &mut App, key_event: KeyEvent) -> State<'a> {
             app.write();
             State::Normal
         }
-        KeyCode::Char('W') => State::Save { save: Save::new() },
+        KeyCode::Char('W') => State::Save { save: Rc::new(RefCell::new(Save::new())) },
         KeyCode::Char('q') => State::Quit,
         KeyCode::Char('?') => State::Help,
         _ => State::Normal,
@@ -106,7 +108,7 @@ fn card_edition<'a>(app: &mut App, operation: Edition) -> State<'a> {
 
     match card {
         Some(card) => State::Edit {
-            editor: CardEditor::new(card),
+            editor: Rc::new(RefCell::new(CardEditor::new(card))),
         },
         None => State::Normal,
     }
@@ -129,7 +131,7 @@ mod tests {
     fn exit() -> Result<()> {
         let mut app = App::new("res/test_board.json");
         let state = handler(&mut app, build_event('q'));
-        assert_eq!(State::Quit, state);
+        assert!(matches!(state, State::Quit));
 
         Ok(())
     }
@@ -142,7 +144,7 @@ mod tests {
 
         for key in keys {
             let state = handler(&mut app, build_event(key));
-            assert_eq!(State::Normal, state);
+            assert!(matches!(state, State::Normal));
         }
 
         Ok(())
@@ -171,7 +173,7 @@ mod tests {
 
         for key in keys {
             let state = handler(&mut app, build_event(key));
-            assert_eq!(State::Normal, state);
+            assert!(matches!(state, State::Normal));
         }
 
         Ok(())
@@ -181,7 +183,7 @@ mod tests {
     fn help() -> Result<()> {
         let mut app = App::new("res/test_board.json");
         let state = handler(&mut app, build_event('?'));
-        assert_eq!(State::Help, state);
+        assert!(matches!(state, State::Help));
 
         Ok(())
     }

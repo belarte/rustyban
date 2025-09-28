@@ -1,3 +1,5 @@
+use std::{cell::RefCell, rc::Rc};
+
 use crossterm::event::KeyEvent;
 use ratatui::Frame;
 
@@ -9,11 +11,11 @@ use crate::{
     engine::save_to_file::Save,
 };
 
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq)]
 pub enum State<'a> {
     Normal,
-    Save { save: Save<'a> },
-    Edit { editor: CardEditor },
+    Save { save: Rc<RefCell<Save<'a>>> },
+    Edit { editor: Rc<RefCell<CardEditor>> },
     Help,
     Quit,
 }
@@ -47,8 +49,14 @@ impl<'a> AppState<'a> {
 
         match &self.state {
             State::Normal => {}
-            State::Save { save } => frame.render_widget(save, frame.area()),
-            State::Edit { editor } => frame.render_widget(editor, frame.area()),
+            State::Save { save } => {
+                let save_widget = save.borrow();
+                frame.render_widget(&*save_widget, frame.area());
+            }
+            State::Edit { editor } => {
+                let editor_widget = editor.borrow();
+                frame.render_widget(&*editor_widget, frame.area());
+            }
             State::Help => frame.render_widget(Help, frame.area()),
             State::Quit => {}
         }
@@ -73,7 +81,7 @@ mod tests {
         assert!(state.should_continue());
         state.handle_events(&mut app, KeyCode::Char('q').into());
         assert!(!state.should_continue());
-        assert_eq!(State::Quit, state.state);
+        assert!(matches!(state.state, State::Quit));
 
         Ok(())
     }
@@ -82,13 +90,13 @@ mod tests {
     fn toggle_help_popup() -> Result<()> {
         let mut app = App::new("".into());
         let mut state = AppState::new();
-        assert_eq!(State::Normal, state.state);
+        assert!(matches!(state.state, State::Normal));
 
         state.handle_events(&mut app, KeyCode::Char('?').into());
-        assert_eq!(State::Help, state.state);
+        assert!(matches!(state.state, State::Help));
 
         state.handle_events(&mut app, KeyCode::Char('q').into());
-        assert_eq!(State::Normal, state.state);
+        assert!(matches!(state.state, State::Normal));
 
         Ok(())
     }
