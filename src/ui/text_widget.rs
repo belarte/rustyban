@@ -54,8 +54,8 @@ impl Widget for &TextWidget {
             .on_dark_gray()
             .border_set(if self.selected { border::DOUBLE } else { border::PLAIN });
 
-        let mut text_area = self.text_area.clone();
-        text_area.set_block(block);
-        text_area.render(area, buf);
+        let inner_area = block.inner(area);
+        block.render(area, buf);
+        self.text_area.render(inner_area, buf);
     }
 }
