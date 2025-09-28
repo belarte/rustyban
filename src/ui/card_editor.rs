@@ -65,12 +65,14 @@ impl CardEditor {
     }
 
     pub fn get_card(&self) -> Card {
-        let mut card = self.card.clone();
         let short_description = self.widgets[0].lines().join("\n");
         let long_description = self.widgets[1].lines().join("\n");
-        card.update_short_description(&short_description);
-
+        
+        let mut card = Card::new(&short_description, *self.card.creation_date());
         card.update_long_description(&long_description);
+        if self.card.is_selected() {
+            card.select();
+        }
         card
     }
 
