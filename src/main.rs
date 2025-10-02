@@ -6,10 +6,10 @@ fn main() -> Result<()> {
     let file_name = args.get(1).map(|s| s.as_str()).unwrap_or("");
 
     let mut terminal = ratatui::init();
-    let app_result = AppRunner::new(file_name)
+    AppRunner::new(file_name)
         .run(&mut terminal)
         .context("Failed to run the application")?;
     ratatui::restore();
 
-    Ok(app_result)
+    Ok(())
 }
