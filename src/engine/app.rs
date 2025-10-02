@@ -1,13 +1,6 @@
 use std::{borrow::Cow, cell::RefCell, rc::Rc};
 
 use chrono::Local;
-use ratatui::{
-    buffer::Buffer,
-    layout::{Constraint, Layout, Rect},
-    style::Stylize,
-    text::Line,
-    widgets::Widget,
-};
 
 use crate::core::Board;
 use crate::{core::Card, domain::{InsertPosition, event_handlers::AppOperations, services::{FileService, Logger, CardSelector}}};
@@ -56,6 +49,16 @@ impl App {
     /// Get the card selector (for testing)
     pub fn selector(&self) -> &dyn CardSelector {
         self.selector.as_ref()
+    }
+
+    /// Get the board (for widget rendering)
+    pub(crate) fn board(&self) -> &Rc<RefCell<Board>> {
+        &self.board
+    }
+
+    /// Get the logger (for widget rendering)
+    pub(crate) fn logger(&self) -> &dyn Logger {
+        self.logger.as_ref()
     }
 
     /// Create App with FileService dependency (for dependency injection and testing)
@@ -214,32 +217,6 @@ impl App {
     }
 }
 
-impl Widget for &App {
-    fn render(self, area: Rect, buf: &mut Buffer) {
-        let [title_area, board_area, logger_area, instructions_area] = Layout::vertical([
-            Constraint::Length(1),
-            Constraint::Min(0),
-            Constraint::Length(3),
-            Constraint::Length(1),
-        ])
-        .areas(area);
-
-        let title = Line::from(" Welcome ".bold()).centered();
-        title.render(title_area, buf);
-
-        let instructions = Line::from(vec![
-            " Help ".into(),
-            "<?> ".blue().bold(),
-            "Quit ".into(),
-            "<q> ".blue().bold(),
-        ])
-        .centered();
-        instructions.render(instructions_area, buf);
-
-        self.board.as_ref().borrow().render(board_area, buf);
-        self.logger.render(logger_area, buf);
-    }
-}
 
 #[cfg(test)]
 mod tests {

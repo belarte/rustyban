@@ -1,4 +1,5 @@
 pub mod app;
+pub mod app_widget;
 pub mod app_state;
 pub mod card_selector;
 pub mod save_to_file;
