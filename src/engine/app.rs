@@ -5,6 +5,64 @@ use chrono::Local;
 use crate::core::Board;
 use crate::{core::Card, domain::{InsertPosition, event_handlers::AppOperations, services::{FileService, Logger, CardSelector}}};
 
+/// The main application state and business logic coordinator.
+///
+/// `App` serves as the central hub for the rustyban application, managing the Kanban board
+/// state, file operations, logging, and card selection. It coordinates between different
+/// components using dependency injection for testability and flexibility.
+///
+/// The App is designed to be used with the [`AppRunner`] for the complete terminal UI experience,
+/// but can also be used programmatically for testing or automation.
+///
+/// # Architecture
+///
+/// The App uses several injected dependencies:
+/// - **FileService**: Handles board persistence to/from JSON files
+/// - **Logger**: Manages application logging and user messages
+/// - **CardSelector**: Tracks which card is currently selected in the UI
+/// - **Board**: The core Kanban board data structure
+///
+/// # Examples
+///
+/// ## Basic Usage
+///
+/// ```rust
+/// use rustyban::App;
+///
+/// // Create a new app with default dependencies
+/// let app = App::new("my_board.json");
+/// assert_eq!(app.file_name(), "my_board.json");
+/// ```
+///
+/// ## Programmatic Board Manipulation
+///
+/// ```rust,no_run
+/// use rustyban::App;
+///
+/// # fn main() {
+/// let mut app = App::new("test.json");
+/// 
+/// // The App provides methods for board manipulation
+/// // These are typically used by the UI layer
+/// let file_name = app.file_name();
+/// println!("Working with board: {}", file_name);
+/// # }
+/// ```
+///
+/// ## With Custom Dependencies (for testing)
+///
+/// ```rust,no_run
+/// use rustyban::App;
+/// 
+/// // The App provides methods for dependency injection
+/// // This is typically used for testing with mock implementations
+/// let app = App::new("test.json");
+/// 
+/// // The app uses concrete implementations by default
+/// // but can be configured with custom dependencies via the builder pattern
+/// ```
+///
+/// [`AppRunner`]: crate::ui::AppRunner
 #[derive(Debug)]
 pub struct App {
     file_name: String,

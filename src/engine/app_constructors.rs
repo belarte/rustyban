@@ -6,6 +6,26 @@ use crate::domain::services::{FileService, Logger, CardSelector};
 use super::App;
 
 impl App {
+    /// Creates a new App instance with default dependencies.
+    ///
+    /// This constructor sets up the App with concrete implementations of all
+    /// required services: file I/O, logging, and card selection. The app will
+    /// be associated with the specified file name for persistence operations.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use rustyban::App;
+    ///
+    /// let app = App::new("my_project.json");
+    /// assert_eq!(app.file_name(), "my_project.json");
+    /// ```
+    ///
+    /// # Panics
+    ///
+    /// This method should not panic under normal circumstances, but may panic
+    /// if the internal dependency injection fails (which would indicate a
+    /// programming error in the library).
     pub fn new(file_name: &str) -> Self {
         // Use the builder pattern internally for consistency
         crate::engine::app_builder::AppBuilder::new()

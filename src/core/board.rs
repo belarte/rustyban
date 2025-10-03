@@ -27,33 +27,70 @@ impl Default for Board {
     }
 }
 
-/// Represents a Kanban board with its basic features
+/// A Kanban board containing multiple columns of cards.
+///
+/// The board represents a complete Kanban workflow with three default columns:
+/// "TODO", "Doing", and "Done!". It provides methods for managing cards across
+/// columns, including insertion, removal, movement, and persistence to JSON files.
 ///
 /// # Examples
 ///
-/// ```
-/// use chrono::Local;
+/// ## Basic Usage
+///
+/// ```rust
 /// use rustyban::{Board, Card};
+/// use chrono::Local;
 /// use std::borrow::Cow;
 ///
+/// # fn main() -> rustyban::Result<()> {
+/// // Create a new board with default columns
 /// let mut board = Board::new();
+/// assert_eq!(board.columns_count(), 3);
 ///
+/// // Add cards to the TODO column (index 0)
 /// let now = Local::now();
-/// let card1 = Card::new("Card 1", now);
-/// let card2 = Card::new("Card 2", now);
-/// let card3 = Card::new("Card 3", now);
+/// let card1 = Card::new("Implement feature", now);
+/// let card2 = Card::new("Write tests", now);
 ///
-/// board.insert_card(0, 0, Cow::Owned(card1));
-/// board.insert_card(0, 0, Cow::Owned(card2));
-/// board.insert_card(0, 0, Cow::Owned(card3));
+/// board.insert_card(0, 0, Cow::Owned(card1))?;
+/// board.insert_card(0, 1, Cow::Owned(card2))?;
 ///
-/// let res = board.mark_card_done(0, 1);
-/// assert_eq!((1, 0), res);
+/// // Move a card to the next column by marking it done
+/// let (new_col, new_idx) = board.mark_card_done(0, 0);
+/// assert_eq!(new_col, 1); // Moved to "Doing" column
+/// # Ok(())
+/// # }
+/// ```
 ///
-/// let res = board.mark_card_undone(0, 1);
-/// assert_eq!((0, 1), res);
+/// ## Persistence
+///
+/// ```rust,no_run
+/// use rustyban::Board;
+///
+/// # fn main() -> rustyban::Result<()> {
+/// // Save a board to file
+/// let board = Board::new();
+/// board.to_file("my_board.json")?;
+///
+/// // Load a board from file
+/// let loaded_board = Board::open("my_board.json")?;
+/// # Ok(())
+/// # }
 /// ```
 impl Board {
+    /// Creates a new board with three default columns: "TODO", "Doing", and "Done!".
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// use rustyban::Board;
+    ///
+    /// let board = Board::new();
+    /// assert_eq!(board.columns_count(), 3);
+    /// assert_eq!(board.column(0).unwrap().header(), "TODO");
+    /// assert_eq!(board.column(1).unwrap().header(), "Doing");
+    /// assert_eq!(board.column(2).unwrap().header(), "Done!");
+    /// ```
     pub fn new() -> Self {
         let todo = Column::new("TODO", vec![]);
         let doing = Column::new("Doing", vec![]);
@@ -64,6 +101,26 @@ impl Board {
         }
     }
 
+    /// Loads a board from a JSON file.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if:
+    /// - The file cannot be opened or read
+    /// - The file content is not valid JSON
+    /// - The JSON doesn't match the expected board structure
+    ///
+    /// # Examples
+    ///
+    /// ```rust,no_run
+    /// use rustyban::Board;
+    ///
+    /// # fn main() -> rustyban::Result<()> {
+    /// let board = Board::open("my_board.json")?;
+    /// println!("Loaded board with {} columns", board.columns_count());
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn open(file_name: &str) -> Result<Self> {
         let mut content = String::new();
         let mut file = File::open(file_name)?;
@@ -75,6 +132,32 @@ impl Board {
         }
     }
 
+    /// Saves the board to a JSON file.
+    ///
+    /// The file will be created if it doesn't exist, or overwritten if it does.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if:
+    /// - The file cannot be created or written to
+    /// - The board cannot be serialized to JSON
+    ///
+    /// # Examples
+    ///
+    /// ```rust,no_run
+    /// use rustyban::{Board, Card};
+    /// use chrono::Local;
+    /// use std::borrow::Cow;
+    ///
+    /// # fn main() -> rustyban::Result<()> {
+    /// let mut board = Board::new();
+    /// let card = Card::new("Save this board", Local::now());
+    /// board.insert_card(0, 0, Cow::Owned(card))?;
+    ///
+    /// board.to_file("my_project.json")?;
+    /// # Ok(())
+    /// # }
+    /// ```
     pub fn to_file(&self, file_name: &str) -> Result<()> {
         let content = self.to_json_string()?;
 
