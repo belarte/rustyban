@@ -3,7 +3,9 @@ use std::{cell::RefCell, rc::Rc};
 use crossterm::event::KeyEvent;
 use tui_textarea::{Input, Key};
 
-use crate::{engine::app_state::State, engine::save_to_file::Save, engine::app::App};
+use crate::{
+    domain::event_handlers::AppOperations, engine::app::App, engine::app_state::State, engine::save_to_file::Save,
+};
 
 pub fn handler<'a>(save: Rc<RefCell<Save<'a>>>, app: &mut App, key_event: KeyEvent) -> State<'a> {
     match key_event.into() {

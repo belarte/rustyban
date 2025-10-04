@@ -1,15 +1,16 @@
-use std::borrow::Cow;
 use chrono::Local;
+use std::borrow::Cow;
 
 use crate::core::Card;
-use crate::domain::{InsertPosition, event_handlers::AppOperations};
+use crate::domain::{event_handlers::AppOperations, InsertPosition};
 
 use super::App;
 
 impl AppOperations for App {
     fn update_card(&mut self, card: Card) {
         self.with_selected_card(|this, column_index, card_index| {
-            let result = this.board()
+            let result = this
+                .board()
                 .as_ref()
                 .borrow_mut()
                 .update_card(column_index, card_index, Cow::Borrowed(&card));
@@ -43,7 +44,11 @@ impl AppOperations for App {
 
     fn disable_selection(&mut self) {
         if let Some((column_index, card_index)) = self.selector().get() {
-            let result = self.board().as_ref().borrow_mut().deselect_card(column_index, card_index);
+            let result = self
+                .board()
+                .as_ref()
+                .borrow_mut()
+                .deselect_card(column_index, card_index);
             if let Err(e) = result {
                 self.log(&format!("Failed to deselect card: {}", e));
             }
@@ -57,32 +62,49 @@ impl AppOperations for App {
     }
 
     fn insert_card(&mut self, position: InsertPosition) -> Option<Card> {
-        if let Some((column_index, card_index)) = self.selector().get() {
-            let card_index = match position {
-                InsertPosition::Current => card_index,
-                InsertPosition::Next => card_index + 1,
-                InsertPosition::Top => 0,
-                InsertPosition::Bottom => self.board().as_ref().borrow().column(column_index).map(|c| c.size()).unwrap_or(0),
-            };
-
-            let card = Card::new("", Local::now());
-            let insert_result = self.board()
+        self.with_selected_card(|this, column_index, card_index| {
+            let deselect_result = this
+                .board()
                 .as_ref()
                 .borrow_mut()
-                .insert_card(column_index, card_index, Cow::Borrowed(&card));
+                .deselect_card(column_index, card_index);
+            if let Err(e) = deselect_result {
+                this.log(&format!("Failed to deselect card: {}", e));
+            }
+
+            let column_size = this
+                .board()
+                .as_ref()
+                .borrow()
+                .column(column_index)
+                .map(|c| c.size())
+                .unwrap_or(0);
+
+            let card_index = match position {
+                InsertPosition::Current => card_index.min(column_size),
+                InsertPosition::Next => (card_index + 1).min(column_size),
+                InsertPosition::Top => 0,
+                InsertPosition::Bottom => column_size,
+            };
+
+            let insert_result = this.board().as_ref().borrow_mut().insert_card(
+                column_index,
+                card_index,
+                Cow::Owned(Card::new("TODO", Local::now())),
+            );
             if let Err(e) = insert_result {
-                self.log(&format!("Failed to insert card: {}", e));
+                this.log(&format!("Failed to insert card: {}", e));
             }
 
-            let select_result = self.board().as_ref().borrow_mut().select_card(column_index, card_index);
+            let select_result = this.board().as_ref().borrow_mut().select_card(column_index, card_index);
             if let Err(e) = select_result {
-                self.log(&format!("Failed to select card: {}", e));
+                this.log(&format!("Failed to select card: {}", e));
             }
 
-            Some(card)
-        } else {
-            None
-        }
+            (column_index, card_index)
+        });
+
+        self.get_selected_card()
     }
 
     fn remove_card(&mut self) {
@@ -144,7 +166,7 @@ impl AppOperations for App {
             let board = self.board().as_ref().borrow();
             self.file_service().save_board(&board, self.file_name())
         };
-        
+
         match result {
             Ok(_) => self.log(&format!("Board successfully saved to '{}'", self.file_name())),
             Err(e) => self.log(&format!("Failed to save board to '{}': {}", self.file_name(), e)),

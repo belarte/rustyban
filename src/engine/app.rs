@@ -1,9 +1,7 @@
-use std::{borrow::Cow, cell::RefCell, rc::Rc};
-
-use chrono::Local;
+use std::{cell::RefCell, rc::Rc};
 
 use crate::core::Board;
-use crate::{core::Card, domain::{InsertPosition, event_handlers::AppOperations, services::{FileService, Logger, CardSelector}}};
+use crate::domain::services::{CardSelector, FileService, Logger};
 
 #[derive(Debug)]
 pub struct App {
@@ -13,7 +11,6 @@ pub struct App {
     selector: Box<dyn CardSelector>,
     file_service: Box<dyn FileService>,
 }
-
 
 impl App {
     /// Private constructor for use by constructor modules
@@ -69,58 +66,6 @@ impl App {
         self.file_name = file_name;
     }
 
-
-
-    pub fn update_card(&mut self, card: Card) {
-        self.with_selected_card(|this, column_index, card_index| {
-            this.board
-                .as_ref()
-                .borrow_mut()
-                .update_card(column_index, card_index, Cow::Borrowed(&card))
-                .unwrap_or_else(|e| {
-                    this.logger.log(&format!("Failed to update card: {}", e));
-                });
-            (column_index, card_index)
-        });
-    }
-
-    pub fn insert_card(&mut self, position: InsertPosition) -> Option<Card> {
-        self.with_selected_card(|this, column_index, card_index| {
-            this.board.as_ref().borrow_mut().deselect_card(column_index, card_index)
-                .unwrap_or_else(|e| {
-                    this.logger.log(&format!("Failed to deselect card: {}", e));
-                });
-
-            let card_index = match position {
-                InsertPosition::Current => card_index,
-                InsertPosition::Next => card_index + 1,
-                InsertPosition::Top => 0,
-                InsertPosition::Bottom => this.board.as_ref().borrow().column(column_index).map(|c| c.size()).unwrap_or(0),
-            };
-
-            this.board
-                .as_ref()
-                .borrow_mut()
-                .insert_card(column_index, card_index, Cow::Owned(Card::new("TODO", Local::now())))
-                .unwrap_or_else(|e| {
-                    this.logger.log(&format!("Failed to insert card: {}", e));
-                });
-            this.board.as_ref().borrow_mut().select_card(column_index, card_index)
-                .unwrap_or_else(|e| {
-                    this.logger.log(&format!("Failed to select card: {}", e));
-                });
-            (column_index, card_index)
-        });
-
-        self.get_selected_card()
-    }
-
-
-    pub fn write_to_file(&mut self, file_name: String) {
-        self.file_name = file_name;
-        self.write();
-    }
-
     pub(crate) fn with_selected_card<F>(&mut self, mut action: F)
     where
         F: FnMut(&mut Self, usize, usize) -> (usize, usize),
@@ -139,14 +84,20 @@ impl App {
         F: FnMut(&mut Self) -> (usize, usize),
     {
         if let Some((column_index, card_index)) = self.selector.get() {
-            self.board.as_ref().borrow_mut().deselect_card(column_index, card_index)
+            self.board
+                .as_ref()
+                .borrow_mut()
+                .deselect_card(column_index, card_index)
                 .unwrap_or_else(|e| {
                     self.logger.log(&format!("Failed to deselect card: {}", e));
                 });
         }
 
         let (column_index, card_index) = action(self);
-        self.board.as_ref().borrow_mut().select_card(column_index, card_index)
+        self.board
+            .as_ref()
+            .borrow_mut()
+            .select_card(column_index, card_index)
             .unwrap_or_else(|e| {
                 self.logger.log(&format!("Failed to select card: {}", e));
             });
@@ -157,13 +108,11 @@ impl App {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
-    use std::io::Result;
     use crate::domain::event_handlers::AppOperations;
-
-    use crate::engine::app::InsertPosition;
+    use crate::domain::InsertPosition;
+    use std::io::Result;
 
     use super::App;
 
@@ -240,10 +189,16 @@ mod tests {
         let card = app.get_selected_card().unwrap();
         assert_eq!("Buy bread", card.short_description());
 
-        assert_eq!("Buy milk", app.board.as_ref().borrow().card(0, 0).unwrap().short_description());
+        assert_eq!(
+            "Buy milk",
+            app.board.as_ref().borrow().card(0, 0).unwrap().short_description()
+        );
         let card = app.insert_card(InsertPosition::Top).unwrap();
         assert_eq!("TODO", card.short_description());
-        assert_eq!("TODO", app.board.as_ref().borrow().card(0, 0).unwrap().short_description());
+        assert_eq!(
+            "TODO",
+            app.board.as_ref().borrow().card(0, 0).unwrap().short_description()
+        );
         let card = app.get_selected_card().unwrap();
         assert_eq!("TODO", card.short_description());
 
@@ -265,16 +220,19 @@ mod tests {
     #[test]
     fn test_app_with_concrete_file_service() {
         // Test that App can be created with ConcreteFileService
-        let app = App::with_file_service("res/dummy.json", crate::engine::file_service::ConcreteFileService::new());
+        let app = App::with_file_service(
+            "res/dummy.json",
+            crate::engine::file_service::ConcreteFileService::new(),
+        );
         assert_eq!(app.file_name, "res/dummy.json");
     }
 
     #[test]
     fn test_app_with_mock_file_service() {
         // Test that App can be created with MockFileService
-        let mock_service = crate::engine::mock_file_service::MockFileService::new()
-            .with_load_result(Ok(crate::core::Board::new()));
-        
+        let mock_service =
+            crate::engine::mock_file_service::MockFileService::new().with_load_result(Ok(crate::core::Board::new()));
+
         let app = App::with_file_service("res/dummy.json", mock_service);
         assert_eq!(app.file_name, "res/dummy.json");
     }
@@ -282,17 +240,16 @@ mod tests {
     #[test]
     fn test_app_write_with_mock_file_service() {
         // Test that App.write() uses the injected FileService
-        let mock_service = crate::engine::mock_file_service::MockFileService::new()
-            .with_save_result(Ok(()));
-        
+        let mock_service = crate::engine::mock_file_service::MockFileService::new().with_save_result(Ok(()));
+
         let mut app = App::with_file_service("res/dummy.json", mock_service);
-        
+
         // Add a card to the board
         app.insert_card(InsertPosition::Current);
-        
+
         // Write should succeed (using mock)
         app.write();
-        
+
         // Verify the file name is set correctly
         assert_eq!(app.file_name, "res/dummy.json");
     }
@@ -300,17 +257,20 @@ mod tests {
     #[test]
     fn test_app_write_with_mock_file_service_error() {
         // Test that App.write() handles FileService errors
-        let mock_service = crate::engine::mock_file_service::MockFileService::new()
-            .with_save_result(Err(crate::core::RustybanError::InvalidOperation { message: "Mock error".to_string() }));
-        
+        let mock_service = crate::engine::mock_file_service::MockFileService::new().with_save_result(Err(
+            crate::core::RustybanError::InvalidOperation {
+                message: "Mock error".to_string(),
+            },
+        ));
+
         let mut app = App::with_file_service("res/dummy.json", mock_service);
-        
+
         // Add a card to the board
         app.insert_card(InsertPosition::Current);
-        
+
         // Write should handle the error gracefully
         app.write();
-        
+
         // App should still be functional
         assert_eq!(app.file_name, "res/dummy.json");
     }
@@ -320,7 +280,7 @@ mod tests {
         // Test that App can be created with MockLogger
         let mock_logger = crate::engine::mock_logger::MockLogger::new();
         let mock_file_service = crate::engine::mock_file_service::MockFileService::new();
-        
+
         let app = App::with_dependencies("res/dummy.json", mock_file_service, mock_logger);
         assert_eq!(app.file_name, "res/dummy.json");
     }
@@ -330,12 +290,12 @@ mod tests {
         // Test that App.log() uses the injected Logger
         let mock_logger = crate::engine::mock_logger::MockLogger::new();
         let mock_file_service = crate::engine::mock_file_service::MockFileService::new();
-        
+
         let mut app = App::with_dependencies("res/dummy.json", mock_file_service, mock_logger);
-        
+
         // Log a message
         app.log("Test message");
-        
+
         // Verify the message was logged (we need to access the logger)
         // Note: This test verifies that logging doesn't panic
         // In a more sophisticated architecture, we'd expose a way to verify logged messages
@@ -346,29 +306,29 @@ mod tests {
         // Test that App can be created with ConcreteLoggerWrapper
         let concrete_logger = crate::engine::concrete_logger::ConcreteLoggerWrapper::new();
         let concrete_file_service = crate::engine::file_service::ConcreteFileService::new();
-        
+
         let app = App::with_dependencies("res/dummy.json", concrete_file_service, concrete_logger);
         assert_eq!(app.file_name, "res/dummy.json");
     }
 
     #[test]
     fn test_app_with_mock_card_selector() {
+        use crate::core::Card;
         use crate::engine::mock_card_selector::MockCardSelector;
         use crate::engine::mock_file_service::MockFileService;
         use crate::engine::mock_logger::MockLogger;
-        use crate::core::Card;
-        
+
         let mock_card_selector = MockCardSelector::new()
             .with_selection(1, 2)
             .with_selected_card(Card::new("Test Card", chrono::Local::now()));
         let mock_file_service = MockFileService::new();
         let mock_logger = MockLogger::new();
-        
+
         let app = App::with_all_dependencies("res/dummy.json", mock_file_service, mock_logger, mock_card_selector);
-        
+
         // Verify the app was created successfully
         assert_eq!(app.file_name, "res/dummy.json");
-        
+
         // Verify card selector functionality
         assert_eq!(app.selector.get(), Some((1, 2)));
         assert!(app.selector.get_selected_card().is_some());
@@ -379,19 +339,19 @@ mod tests {
         use crate::engine::mock_card_selector::MockCardSelector;
         use crate::engine::mock_file_service::MockFileService;
         use crate::engine::mock_logger::MockLogger;
-        
+
         let mock_card_selector = MockCardSelector::new().with_selection(0, 0);
         let mock_file_service = MockFileService::new();
         let mock_logger = MockLogger::new();
-        
+
         let mut app = App::with_all_dependencies("res/dummy.json", mock_file_service, mock_logger, mock_card_selector);
-        
+
         // Test navigation methods
         app.selector.select_next_column();
         app.selector.select_prev_column();
         app.selector.select_next_card();
         app.selector.select_prev_card();
-        
+
         // Verify navigation calls were made
         if let Some(mock_selector) = app.selector.as_any().downcast_ref::<MockCardSelector>() {
             assert!(mock_selector.has_navigation_call("select_next_column"));
@@ -406,20 +366,87 @@ mod tests {
         use crate::engine::mock_card_selector::MockCardSelector;
         use crate::engine::mock_file_service::MockFileService;
         use crate::engine::mock_logger::MockLogger;
-        
+
         let mock_card_selector = MockCardSelector::new().with_selection(1, 1);
         let mock_file_service = MockFileService::new();
         let mock_logger = MockLogger::new();
-        
+
         let mut app = App::with_all_dependencies("res/dummy.json", mock_file_service, mock_logger, mock_card_selector);
-        
+
         // Test selection control
         app.selector.set(2, 3);
         assert_eq!(app.selector.get(), Some((2, 3)));
-        
+
         app.selector.disable_selection();
         assert_eq!(app.selector.get(), None);
     }
+
+    #[test]
+    fn should_insert_card_at_next_position_in_empty_column() -> Result<()> {
+        let mut app = App::new("res/test_board_with_empty_column.json");
+
+        app.select_next_column();
+        app.select_next_column();
+
+        {
+            let board = app.board.as_ref().borrow();
+            assert_eq!(0, board.column(1).unwrap().size());
+        }
+
+        let card = app.insert_card(InsertPosition::Next);
+
+        assert!(card.is_some());
+
+        let board = app.board.as_ref().borrow();
+        assert_eq!(1, board.column(1).unwrap().size());
+        assert_eq!("TODO", board.card(1, 0).unwrap().short_description());
+
+        Ok(())
+    }
+
+    #[test]
+    fn should_insert_card_at_current_position_in_empty_column() -> Result<()> {
+        let mut app = App::new("res/test_board_with_empty_column.json");
+
+        app.select_next_column();
+        app.select_next_column();
+
+        {
+            let board = app.board.as_ref().borrow();
+            assert_eq!(0, board.column(1).unwrap().size());
+        }
+
+        let card = app.insert_card(InsertPosition::Current);
+
+        assert!(card.is_some());
+
+        let board = app.board.as_ref().borrow();
+        assert_eq!(1, board.column(1).unwrap().size());
+        assert_eq!("TODO", board.card(1, 0).unwrap().short_description());
+
+        Ok(())
+    }
+
+    #[test]
+    fn should_insert_card_at_bottom_position_in_empty_column() -> Result<()> {
+        let mut app = App::new("res/test_board_with_empty_column.json");
+
+        app.select_next_column();
+        app.select_next_column();
+
+        {
+            let board = app.board.as_ref().borrow();
+            assert_eq!(0, board.column(1).unwrap().size());
+        }
+
+        let card = app.insert_card(InsertPosition::Bottom);
+
+        assert!(card.is_some());
+
+        let board = app.board.as_ref().borrow();
+        assert_eq!(1, board.column(1).unwrap().size());
+        assert_eq!("TODO", board.card(1, 0).unwrap().short_description());
+
+        Ok(())
+    }
 }
-
-
