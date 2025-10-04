@@ -82,7 +82,7 @@ impl CardSelectorTrait for CardSelector {
             None
         }
     }
-    
+
     fn set(&mut self, column_index: usize, card_index: usize) {
         let board = self.board.as_ref().borrow();
         self.selected_column = min(column_index, board.columns_count().saturating_sub(1));
@@ -96,7 +96,7 @@ impl CardSelectorTrait for CardSelector {
             0
         };
     }
-    
+
     fn get_selected_card(&self) -> Option<Card> {
         let board = self.board.as_ref().borrow();
         if self.selection_enabled {
@@ -108,37 +108,37 @@ impl CardSelectorTrait for CardSelector {
         }
         None
     }
-    
+
     fn select_next_column(&mut self) -> (usize, usize) {
         self.select(|this| {
             this.selected_column = this.next_column_index(this.selected_column);
             this.selected_card = this.get_card_index(this.selected_card);
         })
     }
-    
+
     fn select_prev_column(&mut self) -> (usize, usize) {
         self.select(|this| {
             this.selected_column = this.prev_column_index(this.selected_column);
             this.selected_card = this.get_card_index(this.selected_card);
         })
     }
-    
+
     fn select_next_card(&mut self) -> (usize, usize) {
         self.select(|this| {
             this.selected_card = this.next_card_index();
         })
     }
-    
+
     fn select_prev_card(&mut self) -> (usize, usize) {
         self.select(|this| {
             this.selected_card = this.prev_card_index();
         })
     }
-    
+
     fn disable_selection(&mut self) {
         self.selection_enabled = false;
     }
-    
+
     fn as_any(&self) -> &dyn std::any::Any {
         self
     }
@@ -149,16 +149,15 @@ mod tests {
     use std::{cell::RefCell, rc::Rc};
 
     use crate::core::Board;
-    use crate::{Result, RustybanError};
     use crate::domain::services::CardSelector as CardSelectorTrait;
+    use crate::{Result, RustybanError};
 
     use super::CardSelector;
 
     fn create_board(file_name: &str) -> Result<Rc<RefCell<Board>>> {
-        let board = Board::open(file_name)
-            .map_err(|e| RustybanError::InvalidOperation { 
-                message: format!("Cannot open test file '{}': {}", file_name, e) 
-            })?;
+        let board = Board::open(file_name).map_err(|e| RustybanError::InvalidOperation {
+            message: format!("Cannot open test file '{}': {}", file_name, e),
+        })?;
         Ok(Rc::new(RefCell::new(board)))
     }
 
@@ -233,10 +232,9 @@ mod tests {
             let (column_index, card_index) = input;
             selector.set(column_index, card_index);
 
-            let output = selector.get()
-                .ok_or_else(|| RustybanError::InvalidOperation { 
-                    message: "Expected selector to have a valid selection".to_string() 
-                })?;
+            let output = selector.get().ok_or_else(|| RustybanError::InvalidOperation {
+                message: "Expected selector to have a valid selection".to_string(),
+            })?;
             assert_eq!(expected, output);
         }
 

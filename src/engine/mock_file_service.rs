@@ -16,14 +16,14 @@ impl MockFileService {
             save_result: None,
         }
     }
-    
+
     /// Configure the load result for testing
     #[allow(dead_code)]
     pub fn with_load_result(mut self, result: Result<Board>) -> Self {
         self.load_result = Some(result);
         self
     }
-    
+
     /// Configure the save result for testing
     #[allow(dead_code)]
     pub fn with_save_result(mut self, result: Result<()>) -> Self {
@@ -37,20 +37,20 @@ impl FileService for MockFileService {
         match &self.load_result {
             Some(result) => match result {
                 Ok(board) => Ok(board.clone()),
-                Err(e) => Err(crate::core::RustybanError::InvalidOperation { 
-                    message: format!("Mock load error: {}", e) 
+                Err(e) => Err(crate::core::RustybanError::InvalidOperation {
+                    message: format!("Mock load error: {}", e),
                 }),
             },
             None => Ok(Board::new()),
         }
     }
-    
+
     fn save_board(&self, _board: &Board, _file_name: &str) -> Result<()> {
         match &self.save_result {
             Some(result) => match result {
                 Ok(()) => Ok(()),
-                Err(e) => Err(crate::core::RustybanError::InvalidOperation { 
-                    message: format!("Mock save error: {}", e) 
+                Err(e) => Err(crate::core::RustybanError::InvalidOperation {
+                    message: format!("Mock save error: {}", e),
                 }),
             },
             None => Ok(()),

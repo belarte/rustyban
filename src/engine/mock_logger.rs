@@ -9,23 +9,21 @@ pub struct MockLogger {
 impl MockLogger {
     #[allow(dead_code)]
     pub fn new() -> Self {
-        Self {
-            messages: Vec::new(),
-        }
+        Self { messages: Vec::new() }
     }
-    
+
     /// Get all logged messages
     #[allow(dead_code)]
     pub fn get_messages(&self) -> &[String] {
         &self.messages
     }
-    
+
     /// Clear all logged messages
     #[allow(dead_code)]
     pub fn clear_messages(&mut self) {
         self.messages.clear();
     }
-    
+
     /// Check if a specific message was logged
     #[allow(dead_code)]
     pub fn has_message(&self, message: &str) -> bool {
@@ -37,7 +35,7 @@ impl Logger for MockLogger {
     fn log(&mut self, message: &str) {
         self.messages.push(message.to_string());
     }
-    
+
     fn render(&self, _area: ratatui::layout::Rect, _buf: &mut ratatui::buffer::Buffer) {
         // Mock logger doesn't render anything
     }

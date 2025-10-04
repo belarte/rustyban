@@ -11,9 +11,9 @@ use ratatui::{
 };
 use tui_textarea::Input;
 
-use crate::domain::centered_popup_area;
 use crate::core::Card;
-use crate::{ui::text_widget::TextWidget, utils::time, domain::constants::popup};
+use crate::domain::centered_popup_area;
+use crate::{domain::constants::popup, ui::text_widget::TextWidget, utils::time};
 
 #[derive(Debug, Clone)]
 pub struct CardEditor {
@@ -67,7 +67,7 @@ impl CardEditor {
     pub fn get_card(&self) -> Card {
         let short_description = self.widgets[0].lines().join("\n");
         let long_description = self.widgets[1].lines().join("\n");
-        
+
         let mut card = Card::new(&short_description, *self.card.creation_date());
         card.update_long_description(&long_description);
         if self.card.is_selected() {

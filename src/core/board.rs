@@ -78,17 +78,14 @@ impl Board {
     pub fn to_file(&self, file_name: &str) -> Result<()> {
         let content = self.to_json_string()?;
 
-        let mut file = File::create(file_name)
-            .map_err(RustybanError::Io)?;
-        file.write_all(content.as_bytes())
-            .map_err(RustybanError::Io)?;
-        
+        let mut file = File::create(file_name).map_err(RustybanError::Io)?;
+        file.write_all(content.as_bytes()).map_err(RustybanError::Io)?;
+
         Ok(())
     }
 
     fn to_json_string(&self) -> Result<String> {
-        serde_json::to_string_pretty(&self)
-            .map_err(RustybanError::Serialization)
+        serde_json::to_string_pretty(&self).map_err(RustybanError::Serialization)
     }
 
     /// Get a column by index, returning None if out of bounds
@@ -108,9 +105,9 @@ impl Board {
     /// Insert a card with bounds checking
     pub fn insert_card(&mut self, column_index: usize, card_index: usize, card: Cow<Card>) -> Result<()> {
         if column_index >= self.columns.len() {
-            return Err(RustybanError::IndexOutOfBounds { 
-                index: column_index, 
-                max: self.columns.len().saturating_sub(1) 
+            return Err(RustybanError::IndexOutOfBounds {
+                index: column_index,
+                max: self.columns.len().saturating_sub(1),
             });
         }
         self.columns[column_index].insert_card(card.into_owned(), card_index);
@@ -120,9 +117,9 @@ impl Board {
     /// Remove a card with bounds checking
     pub fn remove_card(&mut self, column_index: usize, card_index: usize) -> Result<(usize, usize)> {
         if column_index >= self.columns.len() {
-            return Err(RustybanError::IndexOutOfBounds { 
-                index: column_index, 
-                max: self.columns.len().saturating_sub(1) 
+            return Err(RustybanError::IndexOutOfBounds {
+                index: column_index,
+                max: self.columns.len().saturating_sub(1),
             });
         }
         let card_index = self.columns[column_index].remove_card(card_index);
@@ -132,9 +129,9 @@ impl Board {
     /// Select a card with bounds checking
     pub fn select_card(&mut self, column_index: usize, card_index: usize) -> Result<()> {
         if column_index >= self.columns.len() {
-            return Err(RustybanError::IndexOutOfBounds { 
-                index: column_index, 
-                max: self.columns.len().saturating_sub(1) 
+            return Err(RustybanError::IndexOutOfBounds {
+                index: column_index,
+                max: self.columns.len().saturating_sub(1),
             });
         }
         self.columns[column_index].select_card(card_index);
@@ -144,9 +141,9 @@ impl Board {
     /// Deselect a card with bounds checking
     pub fn deselect_card(&mut self, column_index: usize, card_index: usize) -> Result<()> {
         if column_index >= self.columns.len() {
-            return Err(RustybanError::IndexOutOfBounds { 
-                index: column_index, 
-                max: self.columns.len().saturating_sub(1) 
+            return Err(RustybanError::IndexOutOfBounds {
+                index: column_index,
+                max: self.columns.len().saturating_sub(1),
             });
         }
         self.columns[column_index].deselect_card(card_index);
@@ -156,9 +153,9 @@ impl Board {
     /// Update a card with bounds checking
     pub fn update_card(&mut self, column_index: usize, card_index: usize, card: Cow<Card>) -> Result<()> {
         if column_index >= self.columns.len() {
-            return Err(RustybanError::IndexOutOfBounds { 
-                index: column_index, 
-                max: self.columns.len().saturating_sub(1) 
+            return Err(RustybanError::IndexOutOfBounds {
+                index: column_index,
+                max: self.columns.len().saturating_sub(1),
             });
         }
         self.columns[column_index].update_card(card_index, card.into_owned());
@@ -411,7 +408,10 @@ mod tests {
                 old_description,
                 board.card(column_index, card_index + 1).unwrap().short_description()
             );
-            assert_eq!(description, board.card(column_index, card_index).unwrap().short_description());
+            assert_eq!(
+                description,
+                board.card(column_index, card_index).unwrap().short_description()
+            );
         }
 
         Ok(())
@@ -428,7 +428,10 @@ mod tests {
             let mut board = Board::open("res/test_board.json")?;
 
             let _ = board.insert_card(column_index, card_index, Cow::Borrowed(&new_card));
-            assert_eq!(description, board.card(column_index, card_index).unwrap().short_description());
+            assert_eq!(
+                description,
+                board.card(column_index, card_index).unwrap().short_description()
+            );
         }
 
         Ok(())

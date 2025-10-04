@@ -23,17 +23,18 @@ mod tests {
     use crate::{Result, RustybanError};
 
     fn local_date_from_string(date: &str) -> Result<DateTime<Local>> {
-        let naive_datetime = NaiveDateTime::parse_from_str(date, "%Y-%m-%dT%H:%M:%S")
-            .map_err(|e| RustybanError::InvalidOperation { 
-                message: format!("Failed to parse datetime '{}': {}", date, e) 
+        let naive_datetime =
+            NaiveDateTime::parse_from_str(date, "%Y-%m-%dT%H:%M:%S").map_err(|e| RustybanError::InvalidOperation {
+                message: format!("Failed to parse datetime '{}': {}", date, e),
             })?;
 
-        let datetime_local = Local
-            .from_local_datetime(&naive_datetime)
-            .single()
-            .ok_or_else(|| RustybanError::InvalidOperation { 
-                message: format!("Failed to convert to local datetime: {}", date) 
-            })?;
+        let datetime_local =
+            Local
+                .from_local_datetime(&naive_datetime)
+                .single()
+                .ok_or_else(|| RustybanError::InvalidOperation {
+                    message: format!("Failed to convert to local datetime: {}", date),
+                })?;
 
         Ok(datetime_local)
     }

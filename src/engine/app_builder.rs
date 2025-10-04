@@ -1,7 +1,7 @@
-use std::{cell::RefCell, rc::Rc};
 use crate::core::Board;
-use crate::domain::services::{FileService, Logger, CardSelector, AppBuilderError};
+use crate::domain::services::{AppBuilderError, CardSelector, FileService, Logger};
 use crate::engine::app::App;
+use std::{cell::RefCell, rc::Rc};
 
 /// Builder for constructing App instances with dependency injection
 #[derive(Debug)]
@@ -34,27 +34,27 @@ impl AppBuilder {
     }
 
     /// Set the file service dependency
-    pub fn with_file_service<F>(mut self, file_service: F) -> Self 
-    where 
-        F: FileService + 'static 
+    pub fn with_file_service<F>(mut self, file_service: F) -> Self
+    where
+        F: FileService + 'static,
     {
         self.file_service = Some(Box::new(file_service));
         self
     }
 
     /// Set the logger dependency
-    pub fn with_logger<L>(mut self, logger: L) -> Self 
-    where 
-        L: Logger + 'static 
+    pub fn with_logger<L>(mut self, logger: L) -> Self
+    where
+        L: Logger + 'static,
     {
         self.logger = Some(Box::new(logger));
         self
     }
 
     /// Set the card selector dependency
-    pub fn with_card_selector<C>(mut self, card_selector: C) -> Self 
-    where 
-        C: CardSelector + 'static 
+    pub fn with_card_selector<C>(mut self, card_selector: C) -> Self
+    where
+        C: CardSelector + 'static,
     {
         self.card_selector = Some(Box::new(card_selector));
         self
@@ -66,7 +66,7 @@ impl AppBuilder {
         self.board = Some(board);
         self
     }
-    
+
     /// Configure whether to fail on file load errors (default: false - graceful fallback)
     #[allow(dead_code)]
     pub fn fail_on_file_load_error(mut self, fail: bool) -> Self {
@@ -77,8 +77,7 @@ impl AppBuilder {
     /// Build the App instance
     pub fn build(mut self) -> Result<App, AppBuilderError> {
         // Validate required fields
-        let file_name = self.file_name
-            .ok_or(AppBuilderError::MissingFileName)?;
+        let file_name = self.file_name.ok_or(AppBuilderError::MissingFileName)?;
 
         // Create or use provided board
         let board = if let Some(board) = self.board {
@@ -87,10 +86,11 @@ impl AppBuilder {
             // Create board from file
             let board = if !file_name.is_empty() {
                 // Use provided file service or default
-                let file_service = self.file_service.take().unwrap_or_else(|| {
-                    Box::new(crate::engine::file_service::ConcreteFileService::new())
-                });
-                
+                let file_service = self
+                    .file_service
+                    .take()
+                    .unwrap_or_else(|| Box::new(crate::engine::file_service::ConcreteFileService::new()));
+
                 match file_service.load_board(&file_name) {
                     Ok(board) => board,
                     Err(e) => {
@@ -100,7 +100,7 @@ impl AppBuilder {
                                 error: e.to_string(),
                             });
                         }
-                        
+
                         // Log error and create new board (graceful fallback)
                         if let Some(logger) = &mut self.logger {
                             logger.log(&format!(
@@ -118,31 +118,25 @@ impl AppBuilder {
                 }
                 Board::new()
             };
-            
+
             Rc::new(RefCell::new(board))
         };
 
         // Create default dependencies if not provided
-        let file_service = self.file_service.unwrap_or_else(|| {
-            Box::new(crate::engine::file_service::ConcreteFileService::new())
-        });
+        let file_service = self
+            .file_service
+            .unwrap_or_else(|| Box::new(crate::engine::file_service::ConcreteFileService::new()));
 
-        let logger = self.logger.unwrap_or_else(|| {
-            Box::new(crate::engine::concrete_logger::ConcreteLoggerWrapper::new())
-        });
+        let logger = self
+            .logger
+            .unwrap_or_else(|| Box::new(crate::engine::concrete_logger::ConcreteLoggerWrapper::new()));
 
-        let card_selector = self.card_selector.unwrap_or_else(|| {
-            Box::new(crate::engine::card_selector::CardSelector::new(Rc::clone(&board)))
-        });
+        let card_selector = self
+            .card_selector
+            .unwrap_or_else(|| Box::new(crate::engine::card_selector::CardSelector::new(Rc::clone(&board))));
 
         // Create App instance
-        Ok(App::from_builder(
-            file_name,
-            logger,
-            board,
-            card_selector,
-            file_service,
-        ))
+        Ok(App::from_builder(file_name, logger, board, card_selector, file_service))
     }
 }
 
@@ -155,10 +149,10 @@ impl Default for AppBuilder {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::core::Card;
+    use crate::engine::mock_card_selector::MockCardSelector;
     use crate::engine::mock_file_service::MockFileService;
     use crate::engine::mock_logger::MockLogger;
-    use crate::engine::mock_card_selector::MockCardSelector;
-    use crate::core::Card;
 
     #[test]
     fn test_app_builder_with_defaults() {
@@ -166,7 +160,7 @@ mod tests {
             .with_file_name("res/dummy.json")
             .build()
             .expect("Failed to build App with defaults");
-        
+
         assert_eq!(app.file_name(), "res/dummy.json");
     }
 
@@ -185,7 +179,7 @@ mod tests {
             .with_card_selector(mock_card_selector)
             .build()
             .expect("Failed to build App with all dependencies");
-        
+
         assert_eq!(app.file_name(), "res/dummy.json");
         assert_eq!(app.selector().get(), Some((1, 2)));
     }
@@ -201,18 +195,17 @@ mod tests {
             .with_logger(mock_logger)
             .build()
             .expect("Failed to build App with partial dependencies");
-        
+
         assert_eq!(app.file_name(), "res/dummy.json");
     }
 
     #[test]
     fn test_app_builder_missing_file_name() {
-        let result = AppBuilder::new()
-            .build();
-        
+        let result = AppBuilder::new().build();
+
         assert!(result.is_err());
         match result.unwrap_err() {
-            AppBuilderError::MissingFileName => {},
+            AppBuilderError::MissingFileName => {}
             _ => panic!("Expected MissingFileName error"),
         }
     }
@@ -228,7 +221,7 @@ mod tests {
             .with_card_selector(mock_card_selector)
             .build()
             .expect("Failed to build App with board");
-        
+
         assert_eq!(app.file_name(), "res/dummy.json");
         assert_eq!(app.selector().get(), Some((0, 0)));
     }
@@ -243,18 +236,18 @@ mod tests {
             .with_card_selector(MockCardSelector::new())
             .build()
             .expect("Failed to build App with fluent API");
-        
+
         assert_eq!(app.file_name(), "res/dummy.json");
     }
 
     #[test]
     fn test_app_builder_fail_on_file_load_error() {
         use crate::core::RustybanError;
-        
+
         // Test graceful fallback (default behavior)
-        let mock_file_service_graceful = MockFileService::new()
-            .with_load_result(Err(RustybanError::InvalidOperation { 
-                message: "File not found".to_string() 
+        let mock_file_service_graceful =
+            MockFileService::new().with_load_result(Err(RustybanError::InvalidOperation {
+                message: "File not found".to_string(),
             }));
 
         let app = AppBuilder::new()
@@ -262,27 +255,26 @@ mod tests {
             .with_file_service(mock_file_service_graceful)
             .build()
             .expect("Should succeed with graceful fallback");
-        
+
         assert_eq!(app.file_name(), "nonexistent.json");
 
         // Test fail on error
-        let mock_file_service_fail = MockFileService::new()
-            .with_load_result(Err(RustybanError::InvalidOperation { 
-                message: "File not found".to_string() 
-            }));
+        let mock_file_service_fail = MockFileService::new().with_load_result(Err(RustybanError::InvalidOperation {
+            message: "File not found".to_string(),
+        }));
 
         let result = AppBuilder::new()
             .with_file_name("nonexistent.json")
             .with_file_service(mock_file_service_fail)
             .fail_on_file_load_error(true)
             .build();
-        
+
         assert!(result.is_err());
         match result.unwrap_err() {
             AppBuilderError::BoardLoadError { file_name, error } => {
                 assert_eq!(file_name, "nonexistent.json");
                 assert!(error.contains("File not found"));
-            },
+            }
             _ => panic!("Expected BoardLoadError"),
         }
     }

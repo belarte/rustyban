@@ -8,7 +8,6 @@ pub struct ConcreteLoggerWrapper {
     inner: ConcreteLogger,
 }
 
-
 impl ConcreteLoggerWrapper {
     pub fn new() -> Self {
         Self {
@@ -21,7 +20,7 @@ impl Logger for ConcreteLoggerWrapper {
     fn log(&mut self, message: &str) {
         self.inner.log(message);
     }
-    
+
     fn render(&self, area: ratatui::layout::Rect, buf: &mut ratatui::buffer::Buffer) {
         self.inner.render(area, buf);
     }

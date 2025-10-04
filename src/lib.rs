@@ -14,7 +14,7 @@ mod engine;
 pub(crate) mod utils;
 
 // Public API - what users need
-pub use core::{Board, Card, Column, RustybanError, Result};
+pub use core::{Board, Card, Column, Result, RustybanError};
 pub use domain::InsertPosition;
 pub use engine::App;
 pub use ui::AppRunner;

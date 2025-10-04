@@ -116,7 +116,8 @@ impl Widget for &Column {
         let block = Block::bordered().title(title).border_set(border::THICK);
 
         let inner_area = block.inner(area);
-        let areas = Layout::vertical([Constraint::Max(layout::MAX_CARD_HEIGHT); layout::MAX_CARDS_PER_COLUMN]).split(inner_area);
+        let areas = Layout::vertical([Constraint::Max(layout::MAX_CARD_HEIGHT); layout::MAX_CARDS_PER_COLUMN])
+            .split(inner_area);
         self.cards.iter().enumerate().for_each(|(i, card)| {
             card.render(areas[i], buf);
         });
@@ -216,17 +217,20 @@ mod tests {
     #[test]
     fn safe_card_access() -> Result<()> {
         let now = Local::now();
-        let column = Column::new("test", vec![
-            Card::new("card 1", now),
-            Card::new("card 2", now),
-            Card::new("card 3", now),
-        ]);
+        let column = Column::new(
+            "test",
+            vec![
+                Card::new("card 1", now),
+                Card::new("card 2", now),
+                Card::new("card 3", now),
+            ],
+        );
 
         // Test safe access within bounds
         assert!(column.card(0).is_some());
         assert!(column.card(1).is_some());
         assert!(column.card(2).is_some());
-        
+
         // Test safe access out of bounds
         assert!(column.card(3).is_none());
         assert!(column.card(999).is_none());

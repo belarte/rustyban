@@ -1,5 +1,3 @@
-
-
 /// Trait for application operations that event handlers need
 #[allow(dead_code)]
 pub trait AppOperations {

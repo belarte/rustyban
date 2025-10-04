@@ -7,4 +7,4 @@ pub mod error;
 pub use board::Board;
 pub use card::Card;
 pub use column::Column;
-pub use error::{RustybanError, Result};
+pub use error::{Result, RustybanError};

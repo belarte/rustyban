@@ -1,7 +1,7 @@
 use std::{cell::RefCell, rc::Rc};
 
 use crate::core::Board;
-use crate::domain::services::{FileService, Logger, CardSelector};
+use crate::domain::services::{CardSelector, FileService, Logger};
 
 use super::App;
 
@@ -26,8 +26,8 @@ impl App {
     }
 
     /// Create App with FileService dependency (for dependency injection and testing)
-    pub fn with_file_service<F>(file_name: &str, file_service: F) -> Self 
-    where 
+    pub fn with_file_service<F>(file_name: &str, file_service: F) -> Self
+    where
         F: FileService + 'static,
     {
         crate::engine::app_builder::AppBuilder::new()
@@ -38,8 +38,8 @@ impl App {
     }
 
     /// Create App with FileService and Logger dependencies (for dependency injection and testing)
-    pub fn with_dependencies<F, L>(file_name: &str, file_service: F, logger: L) -> Self 
-    where 
+    pub fn with_dependencies<F, L>(file_name: &str, file_service: F, logger: L) -> Self
+    where
         F: FileService + 'static,
         L: Logger + 'static,
     {
@@ -52,12 +52,7 @@ impl App {
     }
 
     /// Create App with FileService, Logger, and CardSelector dependencies
-    pub fn with_all_dependencies<F, L, C>(
-        file_name: &str,
-        file_service: F,
-        logger: L,
-        card_selector: C,
-    ) -> Self 
+    pub fn with_all_dependencies<F, L, C>(file_name: &str, file_service: F, logger: L, card_selector: C) -> Self
     where
         F: FileService + 'static,
         L: Logger + 'static,
@@ -79,7 +74,7 @@ impl App {
         board: Rc<RefCell<Board>>,
         selector: C,
         file_service: F,
-    ) -> Self 
+    ) -> Self
     where
         F: FileService + 'static,
         L: Logger + 'static,

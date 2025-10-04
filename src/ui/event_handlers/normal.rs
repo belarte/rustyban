@@ -3,11 +3,11 @@ use std::{cell::RefCell, rc::Rc};
 use crossterm::event::{KeyCode, KeyEvent};
 
 use crate::{
+    domain::{event_handlers::AppOperations, InsertPosition},
     engine::app::App,
     engine::app_state::State,
-    ui::card_editor::CardEditor,
     engine::save_to_file::Save,
-    domain::{InsertPosition, event_handlers::AppOperations},
+    ui::card_editor::CardEditor,
 };
 
 pub fn handler<'a>(app: &mut App, key_event: KeyEvent) -> State<'a> {
@@ -41,7 +41,9 @@ pub fn handler<'a>(app: &mut App, key_event: KeyEvent) -> State<'a> {
             app.write();
             State::Normal
         }
-        KeyCode::Char('W') => State::Save { save: Rc::new(RefCell::new(Save::new())) },
+        KeyCode::Char('W') => State::Save {
+            save: Rc::new(RefCell::new(Save::new())),
+        },
         KeyCode::Char('q') => State::Quit,
         KeyCode::Char('?') => State::Help,
         _ => State::Normal,
@@ -118,8 +120,8 @@ fn card_edition<'a>(app: &mut App, operation: Edition) -> State<'a> {
 mod tests {
     use std::{char, io::Result};
 
-    use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
     use crate::domain::event_handlers::AppOperations;
+    use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 
     use crate::{engine::app::App, engine::app_state::State, ui::event_handlers::normal::handler};
 
