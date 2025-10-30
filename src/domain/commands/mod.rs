@@ -1,5 +1,6 @@
 pub mod change_priority;
 pub mod insert_card;
+pub mod mark_card;
 pub mod move_card;
 pub mod remove_card;
 pub mod update_card;
@@ -8,6 +9,8 @@ pub mod update_card;
 pub use change_priority::ChangePriorityCommand;
 #[allow(unused_imports)]
 pub use insert_card::InsertCardCommand;
+#[allow(unused_imports)]
+pub use mark_card::MarkCardCommand;
 #[allow(unused_imports)]
 pub use move_card::MoveCardCommand;
 #[allow(unused_imports)]
