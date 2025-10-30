@@ -1,5 +1,6 @@
 use crate::core::{Board, Result};
 use crate::domain::command::{Command, CommandResult};
+use super::{check_already_executed, check_not_executed, validate_card_exists, validate_card_exists_for_undo};
 
 /// Command for changing a card's priority (increase or decrease)
 #[allow(dead_code)]
@@ -39,15 +40,12 @@ impl ChangePriorityCommand {
 
 impl Command for ChangePriorityCommand {
     fn execute(&mut self, board: &mut Board) -> Result<CommandResult> {
-        if self.executed {
-            return Ok(CommandResult::Failure("Command already executed".to_string()));
+        if let Some(result) = check_already_executed(self.executed) {
+            return Ok(result);
         }
 
-        if board.card(self.column_index, self.card_index).is_none() {
-            return Ok(CommandResult::Failure(format!(
-                "Card not found at column {}, index {}",
-                self.column_index, self.card_index
-            )));
+        if let Ok(CommandResult::Failure(msg)) = validate_card_exists(board, self.column_index, self.card_index) {
+            return Ok(CommandResult::Failure(msg));
         }
 
         self.original_card_index = Some(self.card_index);
@@ -64,8 +62,8 @@ impl Command for ChangePriorityCommand {
     }
 
     fn undo(&mut self, board: &mut Board) -> Result<CommandResult> {
-        if !self.executed {
-            return Ok(CommandResult::Failure("Command was not executed".to_string()));
+        if let Some(result) = check_not_executed(self.executed) {
+            return Ok(result);
         }
 
         let original_index = match self.original_card_index {
@@ -75,11 +73,8 @@ impl Command for ChangePriorityCommand {
             }
         };
 
-        if board.card(self.column_index, self.card_index).is_none() {
-            return Ok(CommandResult::Failure(format!(
-                "Card not found at column {}, index {} for undo",
-                self.column_index, self.card_index
-            )));
+        if let Ok(CommandResult::Failure(msg)) = validate_card_exists_for_undo(board, self.column_index, self.card_index) {
+            return Ok(CommandResult::Failure(msg));
         }
 
         if self.increase {

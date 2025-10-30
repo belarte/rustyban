@@ -2,6 +2,7 @@ use std::borrow::Cow;
 
 use crate::core::{Board, Card, Result};
 use crate::domain::command::{Command, CommandResult};
+use super::{check_already_executed, check_not_executed};
 
 /// Command for inserting a card into the board
 #[allow(dead_code)]
@@ -27,14 +28,18 @@ impl InsertCardCommand {
 
 impl Command for InsertCardCommand {
     fn execute(&mut self, board: &mut Board) -> Result<CommandResult> {
+        if let Some(result) = check_already_executed(self.executed) {
+            return Ok(result);
+        }
+
         board.insert_card(self.column_index, self.card_index, Cow::Owned(self.card.clone()))?;
         self.executed = true;
         Ok(CommandResult::Success)
     }
 
     fn undo(&mut self, board: &mut Board) -> Result<CommandResult> {
-        if !self.executed {
-            return Ok(CommandResult::Failure("Command was not executed".to_string()));
+        if let Some(result) = check_not_executed(self.executed) {
+            return Ok(result);
         }
 
         let result = board.remove_card(self.column_index, self.card_index);

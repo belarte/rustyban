@@ -2,6 +2,7 @@ use std::borrow::Cow;
 
 use crate::core::{Board, Card, Result};
 use crate::domain::command::{Command, CommandResult};
+use super::{check_already_executed, check_not_executed, validate_card_exists};
 
 /// Command for moving a card between columns
 #[allow(dead_code)]
@@ -38,19 +39,15 @@ impl MoveCardCommand {
 
 impl Command for MoveCardCommand {
     fn execute(&mut self, board: &mut Board) -> Result<CommandResult> {
-        if self.executed {
-            return Ok(CommandResult::Failure("Command already executed".to_string()));
+        if let Some(result) = check_already_executed(self.executed) {
+            return Ok(result);
         }
 
-        let card = match board.card(self.source_column_index, self.source_card_index) {
-            Some(card) => card.clone(),
-            None => {
-                return Ok(CommandResult::Failure(format!(
-                    "Card not found at column {}, index {}",
-                    self.source_column_index, self.source_card_index
-                )));
-            }
-        };
+        if let Ok(CommandResult::Failure(msg)) = validate_card_exists(board, self.source_column_index, self.source_card_index) {
+            return Ok(CommandResult::Failure(msg));
+        }
+
+        let card = board.card(self.source_column_index, self.source_card_index).unwrap().clone();
 
         self.card = Some(card.clone());
 
@@ -79,8 +76,8 @@ impl Command for MoveCardCommand {
     }
 
     fn undo(&mut self, board: &mut Board) -> Result<CommandResult> {
-        if !self.executed {
-            return Ok(CommandResult::Failure("Command was not executed".to_string()));
+        if let Some(result) = check_not_executed(self.executed) {
+            return Ok(result);
         }
 
         let card = match self.card.as_ref() {

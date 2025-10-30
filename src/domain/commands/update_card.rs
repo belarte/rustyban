@@ -2,6 +2,7 @@ use std::borrow::Cow;
 
 use crate::core::{Board, Card, Result};
 use crate::domain::command::{Command, CommandResult};
+use super::{check_already_executed, validate_card_exists};
 
 /// Command for updating a card in the board
 #[allow(dead_code)]
@@ -29,19 +30,15 @@ impl UpdateCardCommand {
 
 impl Command for UpdateCardCommand {
     fn execute(&mut self, board: &mut Board) -> Result<CommandResult> {
-        if self.executed {
-            return Ok(CommandResult::Failure("Command already executed".to_string()));
+        if let Some(result) = check_already_executed(self.executed) {
+            return Ok(result);
         }
 
-        let old_card = match board.card(self.column_index, self.card_index) {
-            Some(card) => card.clone(),
-            None => {
-                return Ok(CommandResult::Failure(format!(
-                    "Card not found at column {}, index {}",
-                    self.column_index, self.card_index
-                )));
-            }
-        };
+        if let Ok(CommandResult::Failure(msg)) = validate_card_exists(board, self.column_index, self.card_index) {
+            return Ok(CommandResult::Failure(msg));
+        }
+
+        let old_card = board.card(self.column_index, self.card_index).unwrap().clone();
 
         self.old_card = Some(old_card);
 
