@@ -1,5 +1,6 @@
 pub mod command;
 pub mod command_history;
+pub mod commands;
 pub mod constants;
 pub mod event_handlers;
 pub mod services;
