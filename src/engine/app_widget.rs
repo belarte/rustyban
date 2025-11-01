@@ -10,14 +10,16 @@ use super::App;
 
 impl Widget for &App {
     fn render(self, area: Rect, buf: &mut Buffer) {
-        let [title_area, board_area, logger_area, status_area, instructions_area] = Layout::vertical([
+        let [title_area, board_area, logger_area, bottom_area] = Layout::vertical([
             Constraint::Length(1),
             Constraint::Min(0),
             Constraint::Length(3),
             Constraint::Length(1),
-            Constraint::Length(1),
         ])
         .areas(area);
+
+        let [status_area, instructions_area] =
+            Layout::horizontal([Constraint::Percentage(50), Constraint::Percentage(50)]).areas(bottom_area);
 
         let title = Line::from(" Welcome ".bold()).centered();
         title.render(title_area, buf);
