@@ -50,8 +50,7 @@ impl Default for Board {
 /// let res = board.mark_card_done(0, 1);
 /// assert_eq!((1, 0), res);
 ///
-/// let res = board.mark_card_undone(0, 1);
-/// assert_eq!((0, 1), res);
+/// let res = board.mark_card_undone(0, 1, None);
 /// ```
 impl Board {
     pub fn new() -> Self {
@@ -184,16 +183,23 @@ impl Board {
         (column_index + 1, 0)
     }
 
-    pub fn mark_card_undone(&mut self, column_index: usize, card_index: usize) -> (usize, usize) {
+    pub fn mark_card_undone(
+        &mut self,
+        column_index: usize,
+        card_index: usize,
+        original_position: Option<usize>,
+    ) -> (usize, usize) {
         if column_index == 0 {
             return (column_index, card_index);
         }
 
         if let Some(card) = self.columns[column_index].take_card(card_index) {
-            self.columns[column_index - 1].insert_card(card, 0);
+            let target_index = original_position.unwrap_or(0);
+            self.columns[column_index - 1].insert_card(card, target_index);
+            (column_index - 1, target_index)
+        } else {
+            (column_index, card_index)
         }
-
-        (column_index - 1, 0)
     }
 }
 
@@ -376,7 +382,7 @@ mod tests {
 
         for ((column_index, card_index), expected) in cases {
             let mut board = Board::open("res/test_board.json")?;
-            assert_eq!(expected, board.mark_card_undone(column_index, card_index));
+            assert_eq!(expected, board.mark_card_undone(column_index, card_index, None));
         }
 
         Ok(())

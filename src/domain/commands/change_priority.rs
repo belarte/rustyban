@@ -81,10 +81,12 @@ impl Command for ChangePriorityCommand {
             return Ok(CommandResult::Failure(msg));
         }
 
-        if self.increase {
-            board.decrease_priority(self.column_index, self.card_index);
-        } else {
-            board.increase_priority(self.column_index, self.card_index);
+        if self.card_index != original_index {
+            if self.increase {
+                board.decrease_priority(self.column_index, self.card_index);
+            } else {
+                board.increase_priority(self.column_index, self.card_index);
+            }
         }
 
         self.card_index = original_index;

@@ -57,7 +57,7 @@ impl Command for MarkCardCommand {
         let (new_column, new_card_index) = if self.mark_done {
             board.mark_card_done(self.column_index, self.card_index)
         } else {
-            board.mark_card_undone(self.column_index, self.card_index)
+            board.mark_card_undone(self.column_index, self.card_index, None)
         };
 
         if new_column == self.column_index && new_card_index == self.card_index {
@@ -102,7 +102,7 @@ impl Command for MarkCardCommand {
         }
 
         let (new_column, new_card_index) = if self.mark_done {
-            board.mark_card_undone(self.column_index, self.card_index)
+            board.mark_card_undone(self.column_index, self.card_index, Some(original_card))
         } else {
             board.mark_card_done(self.column_index, self.card_index)
         };

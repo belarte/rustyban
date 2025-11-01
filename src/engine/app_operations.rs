@@ -230,7 +230,7 @@ impl AppOperations for App {
             return;
         }
 
-        let result = App::undo(self);
+        let result = App::execute_undo(self);
         match result {
             Ok(CommandResult::Success | CommandResult::SuccessWithMessage(_)) => {
                 self.update_selection_after_undo_redo();
@@ -252,7 +252,7 @@ impl AppOperations for App {
             return;
         }
 
-        let result = App::redo(self);
+        let result = App::execute_redo(self);
         match result {
             Ok(CommandResult::Success | CommandResult::SuccessWithMessage(_)) => {
                 self.update_selection_after_undo_redo();

@@ -117,13 +117,13 @@ impl App {
         self.command_history.execute_command(command, &mut board_mut)
     }
 
-    pub(crate) fn undo(&mut self) -> Result<CommandResult> {
+    pub(crate) fn execute_undo(&mut self) -> Result<CommandResult> {
         let board = Rc::clone(&self.board);
         let mut board_mut = board.borrow_mut();
         self.command_history.undo(&mut board_mut)
     }
 
-    pub(crate) fn redo(&mut self) -> Result<CommandResult> {
+    pub(crate) fn execute_redo(&mut self) -> Result<CommandResult> {
         let board = Rc::clone(&self.board);
         let mut board_mut = board.borrow_mut();
         self.command_history.redo(&mut board_mut)
@@ -185,12 +185,23 @@ impl App {
     }
 
     pub(crate) fn update_selection_after_undo_redo(&mut self) {
-        let board = self.board.as_ref().borrow();
-        for column_index in 0..board.columns_count() {
-            if let Some(card_index) = self.find_selected_card_index(column_index) {
+        if let Some((column_index, card_index)) = self.selector().get() {
+            let board = self.board.as_ref().borrow();
+            if board.column(column_index).is_some() 
+                && board.column(column_index).unwrap().size() > card_index {
                 drop(board);
+                
+                let mut board_mut = self.board.as_ref().borrow_mut();
+                for col_idx in 0..board_mut.columns_count() {
+                    if let Some(col) = board_mut.column(col_idx) {
+                        for card_idx in 0..col.size() {
+                            let _ = board_mut.deselect_card(col_idx, card_idx);
+                        }
+                    }
+                }
+                drop(board_mut);
+                
                 self.update_selection(column_index, card_index);
-                return;
             }
         }
     }
@@ -632,6 +643,7 @@ mod tests {
         let mut app = App::new("res/test_board.json");
 
         app.select_next_card();
+        app.select_next_card();
         let card = app.get_selected_card().unwrap();
         let card_desc = card.short_description();
 
@@ -829,7 +841,7 @@ mod tests {
         app.redo();
         let after_redo = app.selector().get();
 
-        assert_eq!(after_insert, Some((0, 2)));
+        assert_eq!(after_insert, Some((0, 1)));
         assert!(after_undo.is_some());
         assert_eq!(after_redo, after_insert);
 
@@ -850,13 +862,15 @@ mod tests {
         };
 
         app.insert_card(InsertPosition::Current);
+        let inserted_card = app.get_selected_card().unwrap();
+        let inserted_card_desc = inserted_card.short_description();
         app.increase_priority();
         app.mark_card_done();
 
         {
             let board = app.board.as_ref().borrow();
             assert_eq!(board.column(0).unwrap().size(), initial_size_col0);
-            assert_eq!(board.card(1, 0).unwrap().short_description(), card_desc);
+            assert_eq!(board.card(1, 0).unwrap().short_description(), inserted_card_desc);
         }
 
         app.undo();
@@ -876,7 +890,7 @@ mod tests {
 
         {
             let board = app.board.as_ref().borrow();
-            assert_eq!(board.card(1, 0).unwrap().short_description(), card_desc);
+            assert_eq!(board.card(1, 0).unwrap().short_description(), inserted_card_desc);
         }
 
         Ok(())
