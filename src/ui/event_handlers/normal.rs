@@ -131,12 +131,17 @@ mod tests {
     use std::{char, io::Result};
 
     use crate::domain::event_handlers::AppOperations;
+    use crate::domain::InsertPosition;
     use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 
     use crate::{engine::app::App, engine::app_state::State, ui::event_handlers::normal::handler};
 
     fn build_event(c: char) -> KeyEvent {
         KeyEvent::new(KeyCode::Char(c), KeyModifiers::empty())
+    }
+
+    fn build_event_with_modifier(c: char, modifier: KeyModifiers) -> KeyEvent {
+        KeyEvent::new(KeyCode::Char(c), modifier)
     }
 
     #[test]
@@ -196,6 +201,81 @@ mod tests {
         let mut app = App::new("res/test_board.json");
         let state = handler(&mut app, build_event('?'));
         assert!(matches!(state, State::Help));
+
+        Ok(())
+    }
+
+    #[test]
+    fn undo_keybinding() -> Result<()> {
+        let mut app = App::new("res/test_board.json");
+
+        app.select_next_card();
+        let initial_size = {
+            let board = app.board().as_ref().borrow();
+            board.column(0).unwrap().size()
+        };
+
+        app.insert_card(InsertPosition::Current);
+        assert!(app.can_undo());
+
+        let state = handler(&mut app, build_event('u'));
+        assert!(matches!(state, State::Normal));
+        assert!(!app.can_undo());
+
+        {
+            let board = app.board().as_ref().borrow();
+            assert_eq!(board.column(0).unwrap().size(), initial_size);
+        }
+
+        Ok(())
+    }
+
+    #[test]
+    fn redo_keybinding() -> Result<()> {
+        let mut app = App::new("res/test_board.json");
+
+        app.select_next_card();
+        let initial_size = {
+            let board = app.board().as_ref().borrow();
+            board.column(0).unwrap().size()
+        };
+
+        app.insert_card(InsertPosition::Current);
+        app.undo();
+        assert!(app.can_redo());
+
+        let state = handler(&mut app, build_event_with_modifier('r', KeyModifiers::CONTROL));
+        assert!(matches!(state, State::Normal));
+        assert!(!app.can_redo());
+
+        {
+            let board = app.board().as_ref().borrow();
+            assert_eq!(board.column(0).unwrap().size(), initial_size + 1);
+        }
+
+        Ok(())
+    }
+
+    #[test]
+    fn undo_keybinding_when_nothing_to_undo() -> Result<()> {
+        let mut app = App::new("res/test_board.json");
+
+        assert!(!app.can_undo());
+        let state = handler(&mut app, build_event('u'));
+        assert!(matches!(state, State::Normal));
+        assert!(!app.can_undo());
+
+        Ok(())
+    }
+
+    #[test]
+    fn redo_keybinding_when_nothing_to_redo() -> Result<()> {
+        let mut app = App::new("res/test_board.json");
+
+        assert!(!app.can_redo());
+        let state = handler(&mut app, build_event_with_modifier('r', KeyModifiers::CONTROL));
+        assert!(matches!(state, State::Normal));
+        assert!(!app.can_redo());
 
         Ok(())
     }

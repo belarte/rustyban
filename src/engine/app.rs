@@ -206,6 +206,7 @@ impl App {
 
 #[cfg(test)]
 mod tests {
+    use crate::core::Card;
     use crate::domain::event_handlers::AppOperations;
     use crate::domain::InsertPosition;
     use std::io::Result;
@@ -542,6 +543,341 @@ mod tests {
         let board = app.board.as_ref().borrow();
         assert_eq!(1, board.column(1).unwrap().size());
         assert_eq!("TODO", board.card(1, 0).unwrap().short_description());
+
+        Ok(())
+    }
+
+    #[test]
+    fn undo_remove_card() -> Result<()> {
+        let mut app = App::new("res/test_board.json");
+
+        app.select_next_card();
+        let card = app.get_selected_card().unwrap();
+        let card_desc = card.short_description();
+
+        let initial_size = {
+            let board = app.board.as_ref().borrow();
+            board.column(0).unwrap().size()
+        };
+
+        app.remove_card();
+
+        {
+            let board = app.board.as_ref().borrow();
+            assert_eq!(board.column(0).unwrap().size(), initial_size - 1);
+        }
+
+        app.undo();
+        {
+            let board = app.board.as_ref().borrow();
+            let restored_card = board.card(0, 0).unwrap();
+            assert_eq!(restored_card.short_description(), card_desc);
+        }
+
+        Ok(())
+    }
+
+    #[test]
+    fn undo_insert_card() -> Result<()> {
+        let mut app = App::new("res/test_board.json");
+
+        app.select_next_card();
+        let initial_size = {
+            let board = app.board.as_ref().borrow();
+            board.column(0).unwrap().size()
+        };
+
+        app.insert_card(InsertPosition::Current);
+        {
+            let board = app.board.as_ref().borrow();
+            assert_eq!(board.column(0).unwrap().size(), initial_size + 1);
+        }
+
+        app.undo();
+        {
+            let board = app.board.as_ref().borrow();
+            assert_eq!(board.column(0).unwrap().size(), initial_size);
+        }
+
+        Ok(())
+    }
+
+    #[test]
+    fn undo_update_card() -> Result<()> {
+        let mut app = App::new("res/test_board.json");
+
+        app.select_next_card();
+        let original_card = app.get_selected_card().unwrap();
+        let original_desc = original_card.short_description();
+
+        let updated_card = Card::new("Updated description", chrono::Local::now());
+        app.update_card(updated_card);
+
+        {
+            let board = app.board.as_ref().borrow();
+            assert_eq!(board.card(0, 0).unwrap().short_description(), "Updated description");
+        }
+
+        app.undo();
+        {
+            let board = app.board.as_ref().borrow();
+            assert_eq!(board.card(0, 0).unwrap().short_description(), original_desc);
+        }
+
+        Ok(())
+    }
+
+    #[test]
+    fn undo_move_card() -> Result<()> {
+        let mut app = App::new("res/test_board.json");
+
+        app.select_next_card();
+        let card = app.get_selected_card().unwrap();
+        let card_desc = card.short_description();
+
+        app.increase_priority();
+        {
+            let board = app.board.as_ref().borrow();
+            assert_eq!(board.card(0, 0).unwrap().short_description(), card_desc);
+        }
+
+        app.undo();
+        {
+            let board = app.board.as_ref().borrow();
+            assert_eq!(board.card(0, 1).unwrap().short_description(), card_desc);
+        }
+
+        Ok(())
+    }
+
+    #[test]
+    fn undo_mark_card_done() -> Result<()> {
+        let mut app = App::new("res/test_board.json");
+
+        app.select_next_card();
+        let card = app.get_selected_card().unwrap();
+        let card_desc = card.short_description();
+
+        let initial_size_col0 = {
+            let board = app.board.as_ref().borrow();
+            board.column(0).unwrap().size()
+        };
+
+        app.mark_card_done();
+
+        {
+            let board = app.board.as_ref().borrow();
+            assert_eq!(board.column(0).unwrap().size(), initial_size_col0 - 1);
+            assert_eq!(board.card(1, 0).unwrap().short_description(), card_desc);
+        }
+
+        app.undo();
+        {
+            let board = app.board.as_ref().borrow();
+            assert_eq!(board.column(0).unwrap().size(), initial_size_col0);
+            assert_eq!(board.card(0, 0).unwrap().short_description(), card_desc);
+        }
+
+        Ok(())
+    }
+
+    #[test]
+    fn redo_operation() -> Result<()> {
+        let mut app = App::new("res/test_board.json");
+
+        app.select_next_card();
+        let initial_size = {
+            let board = app.board.as_ref().borrow();
+            board.column(0).unwrap().size()
+        };
+
+        app.insert_card(InsertPosition::Current);
+        {
+            let board = app.board.as_ref().borrow();
+            assert_eq!(board.column(0).unwrap().size(), initial_size + 1);
+        }
+
+        app.undo();
+        {
+            let board = app.board.as_ref().borrow();
+            assert_eq!(board.column(0).unwrap().size(), initial_size);
+        }
+
+        app.redo();
+        {
+            let board = app.board.as_ref().borrow();
+            assert_eq!(board.column(0).unwrap().size(), initial_size + 1);
+        }
+
+        Ok(())
+    }
+
+    #[test]
+    fn multiple_undo_redo() -> Result<()> {
+        let mut app = App::new("res/test_board.json");
+
+        app.select_next_card();
+        let initial_size = {
+            let board = app.board.as_ref().borrow();
+            board.column(0).unwrap().size()
+        };
+
+        app.insert_card(InsertPosition::Current);
+        app.insert_card(InsertPosition::Current);
+        app.insert_card(InsertPosition::Current);
+
+        {
+            let board = app.board.as_ref().borrow();
+            assert_eq!(board.column(0).unwrap().size(), initial_size + 3);
+        }
+
+        app.undo();
+        app.undo();
+        {
+            let board = app.board.as_ref().borrow();
+            assert_eq!(board.column(0).unwrap().size(), initial_size + 1);
+        }
+
+        app.redo();
+        {
+            let board = app.board.as_ref().borrow();
+            assert_eq!(board.column(0).unwrap().size(), initial_size + 2);
+        }
+
+        Ok(())
+    }
+
+    #[test]
+    fn undo_when_nothing_to_undo() {
+        let mut app = App::new("res/test_board.json");
+
+        assert!(!app.can_undo());
+        app.undo();
+
+        assert!(!app.can_undo());
+    }
+
+    #[test]
+    fn redo_when_nothing_to_redo() {
+        let mut app = App::new("res/test_board.json");
+
+        assert!(!app.can_redo());
+        app.redo();
+
+        assert!(!app.can_redo());
+    }
+
+    #[test]
+    fn clear_redo_on_new_command() -> Result<()> {
+        let mut app = App::new("res/test_board.json");
+
+        app.select_next_card();
+        app.insert_card(InsertPosition::Current);
+        assert!(app.can_undo());
+        assert!(!app.can_redo());
+
+        app.undo();
+        assert!(!app.can_undo());
+        assert!(app.can_redo());
+
+        app.insert_card(InsertPosition::Current);
+        assert!(app.can_undo());
+        assert!(!app.can_redo());
+
+        Ok(())
+    }
+
+    #[test]
+    fn undo_redo_status_information() -> Result<()> {
+        let mut app = App::new("res/test_board.json");
+
+        assert_eq!(app.last_undo_description(), None);
+        assert_eq!(app.last_redo_description(), None);
+
+        app.select_next_card();
+        app.insert_card(InsertPosition::Current);
+
+        assert_eq!(app.last_undo_description(), Some("Insert card"));
+        assert_eq!(app.last_redo_description(), None);
+
+        app.undo();
+
+        assert_eq!(app.last_undo_description(), None);
+        assert_eq!(app.last_redo_description(), Some("Insert card"));
+
+        app.redo();
+
+        assert_eq!(app.last_undo_description(), Some("Insert card"));
+        assert_eq!(app.last_redo_description(), None);
+
+        Ok(())
+    }
+
+    #[test]
+    fn undo_redo_preserves_selection() -> Result<()> {
+        let mut app = App::new("res/test_board.json");
+
+        app.select_next_card();
+        app.select_next_card();
+
+        app.insert_card(InsertPosition::Current);
+        let after_insert = app.selector().get();
+
+        app.undo();
+        let after_undo = app.selector().get();
+
+        app.redo();
+        let after_redo = app.selector().get();
+
+        assert_eq!(after_insert, Some((0, 2)));
+        assert!(after_undo.is_some());
+        assert_eq!(after_redo, after_insert);
+
+        Ok(())
+    }
+
+    #[test]
+    fn undo_redo_chain_with_different_operations() -> Result<()> {
+        let mut app = App::new("res/test_board.json");
+
+        app.select_next_card();
+        let card = app.get_selected_card().unwrap();
+        let card_desc = card.short_description();
+
+        let initial_size_col0 = {
+            let board = app.board.as_ref().borrow();
+            board.column(0).unwrap().size()
+        };
+
+        app.insert_card(InsertPosition::Current);
+        app.increase_priority();
+        app.mark_card_done();
+
+        {
+            let board = app.board.as_ref().borrow();
+            assert_eq!(board.column(0).unwrap().size(), initial_size_col0);
+            assert_eq!(board.card(1, 0).unwrap().short_description(), card_desc);
+        }
+
+        app.undo();
+        app.undo();
+        app.undo();
+
+        {
+            let board = app.board.as_ref().borrow();
+            assert_eq!(board.column(0).unwrap().size(), initial_size_col0);
+            let card_at_pos = board.card(0, 0).unwrap();
+            assert_eq!(card_at_pos.short_description(), card_desc);
+        }
+
+        app.redo();
+        app.redo();
+        app.redo();
+
+        {
+            let board = app.board.as_ref().borrow();
+            assert_eq!(board.card(1, 0).unwrap().short_description(), card_desc);
+        }
 
         Ok(())
     }
