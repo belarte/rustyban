@@ -221,4 +221,48 @@ impl AppOperations for App {
             Err(e) => self.log(&format!("Failed to save board to '{}': {}", self.file_name(), e)),
         }
     }
+
+    fn undo(&mut self) {
+        use crate::domain::command::CommandResult;
+
+        if !self.can_undo() {
+            self.log("Nothing to undo");
+            return;
+        }
+
+        let result = App::undo(self);
+        match result {
+            Ok(CommandResult::Success | CommandResult::SuccessWithMessage(_)) => {
+                self.update_selection_after_undo_redo();
+            }
+            Ok(CommandResult::Failure(msg)) => {
+                self.log(&format!("Failed to undo: {}", msg));
+            }
+            Err(e) => {
+                self.log(&format!("Failed to undo: {}", e));
+            }
+        }
+    }
+
+    fn redo(&mut self) {
+        use crate::domain::command::CommandResult;
+
+        if !self.can_redo() {
+            self.log("Nothing to redo");
+            return;
+        }
+
+        let result = App::redo(self);
+        match result {
+            Ok(CommandResult::Success | CommandResult::SuccessWithMessage(_)) => {
+                self.update_selection_after_undo_redo();
+            }
+            Ok(CommandResult::Failure(msg)) => {
+                self.log(&format!("Failed to redo: {}", msg));
+            }
+            Err(e) => {
+                self.log(&format!("Failed to redo: {}", e));
+            }
+        }
+    }
 }

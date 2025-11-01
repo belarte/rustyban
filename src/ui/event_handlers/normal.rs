@@ -1,6 +1,6 @@
 use std::{cell::RefCell, rc::Rc};
 
-use crossterm::event::{KeyCode, KeyEvent};
+use crossterm::event::{KeyCode, KeyEvent, KeyModifiers};
 
 use crate::{
     domain::{event_handlers::AppOperations, InsertPosition},
@@ -31,6 +31,16 @@ pub fn handler<'a>(app: &mut App, key_event: KeyEvent) -> State<'a> {
         KeyCode::Char('A') => card_edition(app, Edition::InsertBottom),
         KeyCode::Char('e') | KeyCode::Enter => card_edition(app, Edition::EditCurrent),
         KeyCode::Char('x') | KeyCode::Delete => card_edition(app, Edition::RemoveCurrent),
+
+        // Undo/Redo
+        KeyCode::Char('u') => {
+            <App as AppOperations>::undo(app);
+            State::Normal
+        }
+        KeyCode::Char('r') if key_event.modifiers.contains(KeyModifiers::CONTROL) => {
+            <App as AppOperations>::redo(app);
+            State::Normal
+        }
 
         // Other operations
         KeyCode::Esc => {

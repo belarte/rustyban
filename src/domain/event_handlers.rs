@@ -31,4 +31,8 @@ pub trait AppOperations {
     fn mark_card_undone(&mut self);
     /// Write current state
     fn write(&mut self);
+    /// Undo last operation
+    fn undo(&mut self);
+    /// Redo last undone operation
+    fn redo(&mut self);
 }

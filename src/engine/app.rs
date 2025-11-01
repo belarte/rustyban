@@ -117,14 +117,12 @@ impl App {
         self.command_history.execute_command(command, &mut board_mut)
     }
 
-    #[allow(dead_code)]
     pub(crate) fn undo(&mut self) -> Result<CommandResult> {
         let board = Rc::clone(&self.board);
         let mut board_mut = board.borrow_mut();
         self.command_history.undo(&mut board_mut)
     }
 
-    #[allow(dead_code)]
     pub(crate) fn redo(&mut self) -> Result<CommandResult> {
         let board = Rc::clone(&self.board);
         let mut board_mut = board.borrow_mut();
@@ -184,6 +182,17 @@ impl App {
                 result.as_ref().unwrap(),
                 CommandResult::Success | CommandResult::SuccessWithMessage(_)
             )
+    }
+
+    pub(crate) fn update_selection_after_undo_redo(&mut self) {
+        let board = self.board.as_ref().borrow();
+        for column_index in 0..board.columns_count() {
+            if let Some(card_index) = self.find_selected_card_index(column_index) {
+                drop(board);
+                self.update_selection(column_index, card_index);
+                return;
+            }
+        }
     }
 }
 
