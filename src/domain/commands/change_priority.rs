@@ -1,6 +1,6 @@
+use super::{check_already_executed, check_not_executed, validate_card_exists, validate_card_exists_for_undo};
 use crate::core::{Board, Result};
 use crate::domain::command::{Command, CommandResult};
-use super::{check_already_executed, check_not_executed, validate_card_exists, validate_card_exists_for_undo};
 
 /// Command for changing a card's priority (increase or decrease)
 #[allow(dead_code)]
@@ -69,11 +69,15 @@ impl Command for ChangePriorityCommand {
         let original_index = match self.original_card_index {
             Some(index) => index,
             None => {
-                return Ok(CommandResult::Failure("Original card index not available for undo".to_string()));
+                return Ok(CommandResult::Failure(
+                    "Original card index not available for undo".to_string(),
+                ));
             }
         };
 
-        if let Ok(CommandResult::Failure(msg)) = validate_card_exists_for_undo(board, self.column_index, self.card_index) {
+        if let Ok(CommandResult::Failure(msg)) =
+            validate_card_exists_for_undo(board, self.column_index, self.card_index)
+        {
             return Ok(CommandResult::Failure(msg));
         }
 
@@ -100,9 +104,9 @@ impl Command for ChangePriorityCommand {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::core::Card;
     use chrono::Local;
     use std::borrow::Cow;
-    use crate::core::Card;
 
     #[test]
     fn test_increase_priority_command_execute() {
@@ -178,10 +182,7 @@ mod tests {
         let mut command = ChangePriorityCommand::increase(0, 0);
 
         let result = command.undo(&mut board).unwrap();
-        assert_eq!(
-            result,
-            CommandResult::Failure("Command was not executed".to_string())
-        );
+        assert_eq!(result, CommandResult::Failure("Command was not executed".to_string()));
     }
 
     #[test]
@@ -196,10 +197,7 @@ mod tests {
         command.execute(&mut board).unwrap();
 
         let result = command.execute(&mut board).unwrap();
-        assert_eq!(
-            result,
-            CommandResult::Failure("Command already executed".to_string())
-        );
+        assert_eq!(result, CommandResult::Failure("Command already executed".to_string()));
     }
 
     #[test]
@@ -267,4 +265,3 @@ mod tests {
         assert_eq!(board.card(0, 0).unwrap().short_description(), card1.short_description());
     }
 }
-

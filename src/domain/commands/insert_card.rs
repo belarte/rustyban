@@ -1,8 +1,8 @@
 use std::borrow::Cow;
 
+use super::{check_already_executed, check_not_executed};
 use crate::core::{Board, Card, Result};
 use crate::domain::command::{Command, CommandResult};
-use super::{check_already_executed, check_not_executed};
 
 /// Command for inserting a card into the board
 #[allow(dead_code)]
@@ -98,10 +98,7 @@ mod tests {
         let mut command = InsertCardCommand::new(0, 0, card);
 
         let result = command.undo(&mut board).unwrap();
-        assert_eq!(
-            result,
-            CommandResult::Failure("Command was not executed".to_string())
-        );
+        assert_eq!(result, CommandResult::Failure("Command was not executed".to_string()));
     }
 
     #[test]
@@ -157,4 +154,3 @@ mod tests {
         assert!(board.card(0, 0).is_none());
     }
 }
-

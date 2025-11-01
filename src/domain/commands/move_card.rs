@@ -1,8 +1,8 @@
 use std::borrow::Cow;
 
+use super::{check_already_executed, check_not_executed, validate_card_exists};
 use crate::core::{Board, Card, Result};
 use crate::domain::command::{Command, CommandResult};
-use super::{check_already_executed, check_not_executed, validate_card_exists};
 
 /// Command for moving a card between columns
 #[allow(dead_code)]
@@ -43,11 +43,16 @@ impl Command for MoveCardCommand {
             return Ok(result);
         }
 
-        if let Ok(CommandResult::Failure(msg)) = validate_card_exists(board, self.source_column_index, self.source_card_index) {
+        if let Ok(CommandResult::Failure(msg)) =
+            validate_card_exists(board, self.source_column_index, self.source_card_index)
+        {
             return Ok(CommandResult::Failure(msg));
         }
 
-        let card = board.card(self.source_column_index, self.source_card_index).unwrap().clone();
+        let card = board
+            .card(self.source_column_index, self.source_card_index)
+            .unwrap()
+            .clone();
 
         self.card = Some(card.clone());
 
@@ -56,10 +61,8 @@ impl Command for MoveCardCommand {
             adjusted_target_index = self.target_card_index.saturating_sub(1);
         }
 
-        let column_size = board.column(self.target_column_index)
-            .map(|c| c.size())
-            .unwrap_or(0);
-        
+        let column_size = board.column(self.target_column_index).map(|c| c.size()).unwrap_or(0);
+
         if self.source_column_index == self.target_column_index {
             adjusted_target_index = adjusted_target_index.min(column_size - 1);
         } else {
@@ -90,7 +93,9 @@ impl Command for MoveCardCommand {
         let actual_target = match self.actual_target_index {
             Some(index) => index,
             None => {
-                return Ok(CommandResult::Failure("Actual target index not available for undo".to_string()));
+                return Ok(CommandResult::Failure(
+                    "Actual target index not available for undo".to_string(),
+                ));
             }
         };
 
@@ -150,10 +155,7 @@ mod tests {
         let mut command = MoveCardCommand::new(0, 0, 1, 0);
 
         let result = command.undo(&mut board).unwrap();
-        assert_eq!(
-            result,
-            CommandResult::Failure("Command was not executed".to_string())
-        );
+        assert_eq!(result, CommandResult::Failure("Command was not executed".to_string()));
     }
 
     #[test]
@@ -166,10 +168,7 @@ mod tests {
         command.execute(&mut board).unwrap();
 
         let result = command.execute(&mut board).unwrap();
-        assert_eq!(
-            result,
-            CommandResult::Failure("Command already executed".to_string())
-        );
+        assert_eq!(result, CommandResult::Failure("Command already executed".to_string()));
     }
 
     #[test]
@@ -256,4 +255,3 @@ mod tests {
         assert_eq!(board.card(1, 1).unwrap().short_description(), card3.short_description());
     }
 }
-

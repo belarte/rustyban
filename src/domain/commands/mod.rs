@@ -23,4 +23,3 @@ pub use move_card::MoveCardCommand;
 pub use remove_card::RemoveCardCommand;
 #[allow(unused_imports)]
 pub use update_card::UpdateCardCommand;
-

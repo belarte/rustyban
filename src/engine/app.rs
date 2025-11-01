@@ -1,7 +1,9 @@
 use std::{cell::RefCell, rc::Rc};
 
-use crate::core::Board;
+use crate::core::{Board, Result};
+use crate::domain::command::{Command, CommandResult};
 use crate::domain::services::{CardSelector, FileService, Logger};
+use crate::domain::CommandHistory;
 
 #[derive(Debug)]
 pub struct App {
@@ -10,6 +12,7 @@ pub struct App {
     board: Rc<RefCell<Board>>,
     selector: Box<dyn CardSelector>,
     file_service: Box<dyn FileService>,
+    command_history: CommandHistory,
 }
 
 impl App {
@@ -27,6 +30,7 @@ impl App {
             board,
             selector,
             file_service,
+            command_history: CommandHistory::new(),
         }
     }
 
@@ -105,6 +109,36 @@ impl App {
 
     pub(crate) fn log(&mut self, msg: &str) {
         self.logger.log(msg);
+    }
+
+    pub(crate) fn execute_command(&mut self, command: Box<dyn Command>) -> Result<CommandResult> {
+        let board = Rc::clone(&self.board);
+        let mut board_mut = board.borrow_mut();
+        self.command_history.execute_command(command, &mut board_mut)
+    }
+
+    #[allow(dead_code)]
+    pub(crate) fn undo(&mut self) -> Result<CommandResult> {
+        let board = Rc::clone(&self.board);
+        let mut board_mut = board.borrow_mut();
+        self.command_history.undo(&mut board_mut)
+    }
+
+    #[allow(dead_code)]
+    pub(crate) fn redo(&mut self) -> Result<CommandResult> {
+        let board = Rc::clone(&self.board);
+        let mut board_mut = board.borrow_mut();
+        self.command_history.redo(&mut board_mut)
+    }
+
+    #[allow(dead_code)]
+    pub(crate) fn can_undo(&self) -> bool {
+        self.command_history.can_undo()
+    }
+
+    #[allow(dead_code)]
+    pub(crate) fn can_redo(&self) -> bool {
+        self.command_history.can_redo()
     }
 }
 

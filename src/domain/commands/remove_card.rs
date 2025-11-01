@@ -1,8 +1,8 @@
 use std::borrow::Cow;
 
+use super::{check_already_executed, check_not_executed, validate_card_exists};
 use crate::core::{Board, Card, Result};
 use crate::domain::command::{Command, CommandResult};
-use super::{check_already_executed, check_not_executed, validate_card_exists};
 
 /// Command for removing a card from the board
 #[allow(dead_code)]
@@ -93,7 +93,10 @@ mod tests {
         assert_eq!(result, CommandResult::Success);
         assert!(command.executed);
         assert!(command.card.is_some());
-        assert_eq!(command.card.as_ref().unwrap().short_description(), card.short_description());
+        assert_eq!(
+            command.card.as_ref().unwrap().short_description(),
+            card.short_description()
+        );
         assert!(board.card(0, 0).is_none());
     }
 
@@ -121,10 +124,7 @@ mod tests {
         let mut command = RemoveCardCommand::new(0, 0);
 
         let result = command.undo(&mut board).unwrap();
-        assert_eq!(
-            result,
-            CommandResult::Failure("Command was not executed".to_string())
-        );
+        assert_eq!(result, CommandResult::Failure("Command was not executed".to_string()));
     }
 
     #[test]
@@ -137,10 +137,7 @@ mod tests {
         command.execute(&mut board).unwrap();
 
         let result = command.execute(&mut board).unwrap();
-        assert_eq!(
-            result,
-            CommandResult::Failure("Command already executed".to_string())
-        );
+        assert_eq!(result, CommandResult::Failure("Command already executed".to_string()));
     }
 
     #[test]
@@ -212,4 +209,3 @@ mod tests {
         );
     }
 }
-

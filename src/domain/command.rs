@@ -17,10 +17,10 @@ pub enum CommandResult {
 pub trait Command {
     /// Execute the command
     fn execute(&mut self, board: &mut Board) -> Result<CommandResult>;
-    
+
     /// Undo the command
     fn undo(&mut self, board: &mut Board) -> Result<CommandResult>;
-    
+
     /// Get a description of what this command does
     fn description(&self) -> &str;
 }
@@ -47,12 +47,12 @@ impl Command for TestCommand {
         self.executed = true;
         Ok(CommandResult::Success)
     }
-    
+
     fn undo(&mut self, _board: &mut Board) -> Result<CommandResult> {
         self.executed = false;
         Ok(CommandResult::Success)
     }
-    
+
     fn description(&self) -> &str {
         &self.description
     }
@@ -67,7 +67,7 @@ mod tests {
     fn test_command_should_execute_successfully() {
         let mut board = Board::new();
         let mut command = TestCommand::new("Test operation");
-        
+
         let result = command.execute(&mut board).unwrap();
         assert_eq!(result, CommandResult::Success);
         assert!(command.executed);
@@ -77,11 +77,11 @@ mod tests {
     fn test_command_should_undo_successfully() {
         let mut board = Board::new();
         let mut command = TestCommand::new("Test operation");
-        
+
         // Execute first
         command.execute(&mut board).unwrap();
         assert!(command.executed);
-        
+
         // Then undo
         let result = command.undo(&mut board).unwrap();
         assert_eq!(result, CommandResult::Success);

@@ -17,6 +17,16 @@ pub struct CommandHistory {
     max_history: usize,
 }
 
+impl std::fmt::Debug for CommandHistory {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CommandHistory")
+            .field("undo_count", &self.undo_stack.len())
+            .field("redo_count", &self.redo_stack.len())
+            .field("max_history", &self.max_history)
+            .finish()
+    }
+}
+
 impl CommandHistory {
     /// Create a new command history with default settings
     #[allow(dead_code)]
@@ -38,16 +48,16 @@ impl CommandHistory {
     #[allow(dead_code)]
     pub fn execute_command(&mut self, mut command: Box<dyn Command>, board: &mut Board) -> Result<CommandResult> {
         self.redo_stack.clear();
-        
+
         let result = command.execute(board)?;
-        
+
         if matches!(result, CommandResult::Success | CommandResult::SuccessWithMessage(_)) {
             if self.undo_stack.len() >= self.max_history {
                 self.undo_stack.pop_front();
             }
             self.undo_stack.push_back(command);
         }
-        
+
         Ok(result)
     }
 
@@ -139,8 +149,8 @@ impl Default for CommandHistory {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::domain::command::TestCommand;
     use crate::core::Board;
+    use crate::domain::command::TestCommand;
 
     #[test]
     fn test_command_history_new() {

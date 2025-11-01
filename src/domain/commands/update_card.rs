@@ -1,8 +1,8 @@
 use std::borrow::Cow;
 
+use super::{check_already_executed, validate_card_exists};
 use crate::core::{Board, Card, Result};
 use crate::domain::command::{Command, CommandResult};
-use super::{check_already_executed, validate_card_exists};
 
 /// Command for updating a card in the board
 #[allow(dead_code)]
@@ -60,7 +60,9 @@ impl Command for UpdateCardCommand {
         let old_card = match self.old_card.as_ref() {
             Some(card) => card,
             None => {
-                return Ok(CommandResult::Failure("Old card data not available for undo".to_string()));
+                return Ok(CommandResult::Failure(
+                    "Old card data not available for undo".to_string(),
+                ));
             }
         };
 
@@ -129,10 +131,7 @@ mod tests {
         let mut command = UpdateCardCommand::new(0, 0, new_card);
 
         let result = command.undo(&mut board).unwrap();
-        assert_eq!(
-            result,
-            CommandResult::Failure("Command was not executed".to_string())
-        );
+        assert_eq!(result, CommandResult::Failure("Command was not executed".to_string()));
     }
 
     #[test]
@@ -147,10 +146,7 @@ mod tests {
         command.execute(&mut board).unwrap();
 
         let result = command.execute(&mut board).unwrap();
-        assert_eq!(
-            result,
-            CommandResult::Failure("Command already executed".to_string())
-        );
+        assert_eq!(result, CommandResult::Failure("Command already executed".to_string()));
     }
 
     #[test]
@@ -205,16 +201,33 @@ mod tests {
         command1.execute(&mut board).unwrap();
         command2.execute(&mut board).unwrap();
 
-        assert_eq!(board.card(0, 0).unwrap().short_description(), new_card1.short_description());
-        assert_eq!(board.card(1, 0).unwrap().short_description(), new_card2.short_description());
+        assert_eq!(
+            board.card(0, 0).unwrap().short_description(),
+            new_card1.short_description()
+        );
+        assert_eq!(
+            board.card(1, 0).unwrap().short_description(),
+            new_card2.short_description()
+        );
 
         command2.undo(&mut board).unwrap();
-        assert_eq!(board.card(0, 0).unwrap().short_description(), new_card1.short_description());
-        assert_eq!(board.card(1, 0).unwrap().short_description(), old_card2.short_description());
+        assert_eq!(
+            board.card(0, 0).unwrap().short_description(),
+            new_card1.short_description()
+        );
+        assert_eq!(
+            board.card(1, 0).unwrap().short_description(),
+            old_card2.short_description()
+        );
 
         command1.undo(&mut board).unwrap();
-        assert_eq!(board.card(0, 0).unwrap().short_description(), old_card1.short_description());
-        assert_eq!(board.card(1, 0).unwrap().short_description(), old_card2.short_description());
+        assert_eq!(
+            board.card(0, 0).unwrap().short_description(),
+            old_card1.short_description()
+        );
+        assert_eq!(
+            board.card(1, 0).unwrap().short_description(),
+            old_card2.short_description()
+        );
     }
 }
-
