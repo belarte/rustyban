@@ -140,6 +140,51 @@ impl App {
     pub(crate) fn can_redo(&self) -> bool {
         self.command_history.can_redo()
     }
+
+    pub(crate) fn execute_command_with_error_handling(
+        &mut self,
+        command: Box<dyn Command>,
+        operation_name: &str,
+    ) -> Result<CommandResult> {
+        let result = self.execute_command(command);
+        match &result {
+            Ok(CommandResult::Failure(msg)) => {
+                self.log(&format!("Failed to {}: {}", operation_name, msg));
+            }
+            Err(e) => {
+                self.log(&format!("Failed to {}: {}", operation_name, e));
+            }
+            _ => {}
+        }
+        result
+    }
+
+    pub(crate) fn find_selected_card_index(&self, column_index: usize) -> Option<usize> {
+        let board = self.board.as_ref().borrow();
+        board
+            .column(column_index)
+            .and_then(|col| (0..col.size()).find(|&i| col.card(i).map(|c| c.is_selected()).unwrap_or(false)))
+    }
+
+    pub(crate) fn find_selected_card_in_column(&self, column_index: usize) -> Option<(usize, usize)> {
+        self.find_selected_card_index(column_index)
+            .map(|idx| (column_index, idx))
+    }
+
+    pub(crate) fn update_selection(&mut self, column_index: usize, card_index: usize) {
+        let result = self.board.as_ref().borrow_mut().select_card(column_index, card_index);
+        if let Err(e) = result {
+            self.log(&format!("Failed to select card: {}", e));
+        }
+    }
+
+    pub(crate) fn is_command_success(result: &Result<CommandResult>) -> bool {
+        result.is_ok()
+            && matches!(
+                result.as_ref().unwrap(),
+                CommandResult::Success | CommandResult::SuccessWithMessage(_)
+            )
+    }
 }
 
 #[cfg(test)]
