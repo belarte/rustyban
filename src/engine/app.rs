@@ -194,6 +194,14 @@ impl App {
             }
         }
     }
+
+    pub(crate) fn last_undo_description(&self) -> Option<&str> {
+        self.command_history.last_undo_description()
+    }
+
+    pub(crate) fn last_redo_description(&self) -> Option<&str> {
+        self.command_history.last_redo_description()
+    }
 }
 
 #[cfg(test)]
