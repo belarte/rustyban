@@ -40,6 +40,8 @@ impl Widget for Help {
             Line::from(vec![" <J> ".bold(), "Decrease priotity of selected card".into()]),
             Line::from(vec![" <L> ".bold(), "Mark selected card done".into()]),
             Line::from(vec![" <H> ".bold(), "Mark selected card undone".into()]),
+            Line::from(vec![" <u> ".bold(), "Undo last operation".into()]),
+            Line::from(vec![" <Ctrl-r> ".bold(), "Redo last undone operation".into()]),
             Line::from(vec![" <w> ".bold(), "Write the board to file".into()]),
             Line::from(vec![
                 " <W> ".bold(),

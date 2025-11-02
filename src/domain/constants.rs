@@ -24,7 +24,7 @@ pub mod popup {
     pub const HELP_POPUP_WIDTH: Constraint = Constraint::Length(60);
 
     /// Default height for help popup
-    pub const HELP_POPUP_HEIGHT: Constraint = Constraint::Length(20);
+    pub const HELP_POPUP_HEIGHT: Constraint = Constraint::Length(23);
 
     /// Default width for card editor popup
     pub const CARD_EDITOR_WIDTH: Constraint = Constraint::Length(10);
